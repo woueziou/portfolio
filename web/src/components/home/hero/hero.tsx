@@ -7,7 +7,7 @@ import { a, div } from 'framer-motion/client';
 import { cn } from '@/src/lib/utils';
 import { ThemeModeToggle } from '../../theme-switcher';
 import { Amiko, Audiowide } from 'next/font/google';
-const amiko = Audiowide({ weight: '400' })
+const amiko = Audiowide({ weight: '400',subsets:['latin'] })
 type ContactType = {
   name: string,
   value: string,
