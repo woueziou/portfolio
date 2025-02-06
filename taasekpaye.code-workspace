@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "./web",
+			"name": "web"
+		},
+		{
+			"path": "./supabase",
+			"name": "supabase"
+		}
+	],
+	"settings": {
+		"workbench.colorCustomizations": {
+			"activityBar.background": "#60041F",
+			"titleBar.activeBackground": "#87062B",
+			"titleBar.activeForeground": "#FFFBFC"
+		}
+	}
+}
