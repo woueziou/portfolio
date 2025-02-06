@@ -1,5 +1,5 @@
 
-import { AtSign, Mail,Linkedin } from 'lucide-react'
+import { AtSign, Mail, Linkedin } from 'lucide-react'
 import Image from 'next/image'
 import { SiGithub, SiMedium } from '@icons-pack/react-simple-icons';
 import React from 'react';
@@ -7,7 +7,7 @@ import { a, div } from 'framer-motion/client';
 import { cn } from '@/src/lib/utils';
 import { ThemeModeToggle } from '../../theme-switcher';
 import { Amiko, Audiowide } from 'next/font/google';
-const amiko = Audiowide({ weight:'400' })
+const amiko = Audiowide({ weight: '400' })
 type ContactType = {
   name: string,
   value: string,
@@ -45,6 +45,13 @@ export default function Hero() {
     },
   ]
 
+  function getYearsSince2019(): number {
+    const currentYear = new Date().getFullYear();
+    return currentYear - 2019;
+  }
+
+  const yearsSince2019 = `${getYearsSince2019()}+`;
+
   return <div className=" md:h-[90vh] w-full rounded-md relative flex flex-col items-center justify-center antialiased">
     <div className={cn(
       "md:w-40 md:h-40 bg-background rounded-full md:overflow-hidden",
@@ -63,7 +70,10 @@ export default function Hero() {
     )}>
       <h1 className={cn('text-3xl font-black lg:text-7xl', amiko.className)}>Taas S. Ekpaye</h1>
       <div className='row-span-1 flex flex-col items-center md:gap-5 gap-2'>
-        <h3 className='text-balance text-muted-foreground lg:text-xl font-semibold'>Software Developer</h3>
+        <h3 className='text-balance text-muted-foreground px-8 py-2 rounded-full border  lg:text-xl font-semibold flex items-center space-x-2' >
+          <div className='font-extrabold item flex'>{yearsSince2019}</div>
+          <div>Software Developer
+          </div> </h3>
         <div className={cn('md:flex md:space-x-4',
           "grid gap-y-4"
         )}>

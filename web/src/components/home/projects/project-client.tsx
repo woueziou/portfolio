@@ -80,7 +80,7 @@ export default function ProjectClient({ data }: { data: Database["public"]["Tabl
             <div className="line-clamp-2">{item.description}</div>
             <div className="flex space-x-2">{item.tech_stack.map((tech, ix) => {
                 return (<div key={ix} className={cn(
-                    "flex border  border-secondary/30 text-sm space-x-2 px-2 group hover:bg-secondary",
+                    "flex border  border-secondary/30 text-sm space-x-2 px-2 group hover:bg-primary hover:text-white",
                     " items-center h-10 min-w-10",
                 )}>
                     <span>
