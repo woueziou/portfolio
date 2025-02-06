@@ -1,8 +1,5 @@
-import { Suspense } from "react";
-import { ProjectType } from "./model";
-import ProjectClient from "./project-client";
-import { getBrowserClient } from "@/src/utils/supabase/client";
 import { getServerClient } from "@/src/utils/supabase/server";
+import ProjectClient from "./project-client";
 
 
 export default async function Projects() {

@@ -1,12 +1,11 @@
 
-import { AtSign, Mail, Linkedin } from 'lucide-react'
-import Image from 'next/image'
-import { SiGithub, SiMedium } from '@icons-pack/react-simple-icons';
-import React from 'react';
-import { a, div } from 'framer-motion/client';
 import { cn } from '@/src/lib/utils';
+import { SiGithub, SiMedium } from '@icons-pack/react-simple-icons';
+import { Linkedin, Mail } from 'lucide-react';
+import { Audiowide } from 'next/font/google';
+import Image from 'next/image';
+import React from 'react';
 import { ThemeModeToggle } from '../../theme-switcher';
-import { Amiko, Audiowide } from 'next/font/google';
 const amiko = Audiowide({ weight: '400',subsets:['latin'] })
 type ContactType = {
   name: string,

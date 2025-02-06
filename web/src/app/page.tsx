@@ -1,9 +1,7 @@
-import Image from "next/image";
-import { ThemeModeToggle } from "../components/theme-switcher";
-import Hero from "../components/home/hero/hero";
-import Projects from "../components/home/projects/project-server";
 import { Suspense } from "react";
+import Hero from "../components/home/hero/hero";
 import { ProjectItemSkeleton } from "../components/home/projects/project-item-skeleton";
+import Projects from "../components/home/projects/project-server";
 
 export default function Home() {
   return (

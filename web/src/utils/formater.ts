@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 // dayjs()
-export const useFormatDate = (date: Date|string, format?: string) => {
+export const formatDate = (date: Date|string, format?: string) => {
     return dayjs(date).format(format ?? "YYYY-MM-DD")
 }
 // export default dayj

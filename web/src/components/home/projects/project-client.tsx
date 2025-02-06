@@ -1,10 +1,7 @@
-import { SiAgora, SiDart, SiDotnet, SiFlutter, SiGit, SiGnubash, SiHono, SiMongodb, SiNextdotjs, SiNuxt, SiPayloadcms, SiPostgresql, SiSupabase, SiTelegram, SiTypescript } from "@icons-pack/react-simple-icons";
-import { Card, CardDescription, CardHeader, CardTitle } from "../../ui/card";
-import { ProjectType } from "./model";
 import { cn } from "@/src/lib/utils";
-import { div } from "framer-motion/client";
+import { formatDate } from "@/src/utils/formater";
 import { Database } from "@/src/utils/supabase/supabase";
-import { useFormatDate } from "@/src/utils/formater";
+import { SiAgora, SiDart, SiDotnet, SiFlutter, SiGit, SiGnubash, SiHono, SiMongodb, SiNextdotjs, SiNuxt, SiPayloadcms, SiPostgresql, SiSupabase, SiTelegram, SiTypescript } from "@icons-pack/react-simple-icons";
 
 
 
@@ -50,7 +47,7 @@ function getIcon(arg0: string): import("react").ReactNode {
 }
 
 export default function ProjectClient({ data }: { data: Database["public"]["Tables"]["projects"]["Row"][] }) {
-
+// const format = formatDate()
 
     return <div className={cn("grid md:grid-cols-3 w-full",
         "grid-cols-1",
@@ -74,7 +71,7 @@ export default function ProjectClient({ data }: { data: Database["public"]["Tabl
             <div className="flex flex-col items-start space-y-2 ">
                 {item.url&&<a href={item.url} target="_blank" className={cn("text-xl font-bold","underline underline-offset-4")}>{item.title}</a>}
                {!item.url && <div className={cn("text-xl font-bold")}>{item.title}</div>}
-                <div className={cn("text-xs")}>{useFormatDate(item.project_date,"YYYY")}</div>
+                <div className={cn("text-xs")}>{formatDate(item.project_date,"YYYY")}</div>
             </div>
 
             <div className="line-clamp-2">{item.description}</div>
