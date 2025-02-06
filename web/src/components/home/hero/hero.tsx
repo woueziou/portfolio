@@ -1,12 +1,13 @@
 
-import { AtSign, Mail, } from 'lucide-react'
+import { AtSign, Mail,Linkedin } from 'lucide-react'
 import Image from 'next/image'
 import { SiGithub, SiMedium } from '@icons-pack/react-simple-icons';
 import React from 'react';
 import { a, div } from 'framer-motion/client';
 import { cn } from '@/src/lib/utils';
 import { ThemeModeToggle } from '../../theme-switcher';
-
+import { Amiko, Audiowide } from 'next/font/google';
+const amiko = Audiowide({ weight:'400' })
 type ContactType = {
   name: string,
   value: string,
@@ -36,6 +37,12 @@ export default function Hero() {
       icon: <SiMedium className='h-5 w-5' />,
       type: 'url'
     },
+    {
+      name: 'LinkedIn',
+      value: "https://www.linkedin.com/in/taas-ekpaye/",
+      icon: <Linkedin className='h-5 w-5' />,
+      type: 'url'
+    },
   ]
 
   return <div className=" md:h-[90vh] w-full rounded-md relative flex flex-col items-center justify-center antialiased">
@@ -54,7 +61,7 @@ export default function Hero() {
     <div className={cn('grid place-items-center md:grid-rows-2 md:gap-y-5 pt-4',
       ""
     )}>
-      <h1 className={cn('text-3xl font-black lg:text-7xl')}>Taas S. Ekpaye</h1>
+      <h1 className={cn('text-3xl font-black lg:text-7xl', amiko.className)}>Taas S. Ekpaye</h1>
       <div className='row-span-1 flex flex-col items-center md:gap-5 gap-2'>
         <h3 className='text-balance text-muted-foreground lg:text-xl font-semibold'>Software Developer</h3>
         <div className={cn('md:flex md:space-x-4',
