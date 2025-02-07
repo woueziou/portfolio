@@ -1,7 +1,8 @@
 import { cn } from "@/src/lib/utils";
 import { formatDate } from "@/src/utils/formater";
 import { Database } from "@/src/utils/supabase/supabase";
-import { SiAgora, SiDart, SiDotnet, SiFlutter, SiGit, SiGnubash, SiHono, SiMongodb, SiNextdotjs, SiNuxt, SiPayloadcms, SiPostgresql, SiSupabase, SiTelegram, SiTypescript } from "@icons-pack/react-simple-icons";
+import { SiAgora, SiDart, SiDotnet, SiFlutter, SiGit, SiGnubash, SiHono, SiMongodb, SiNextdotjs, SiNuxt, SiPayloadcms, SiPostgresql, SiSanity, SiSupabase, SiTelegram, SiTypescript } from "@icons-pack/react-simple-icons";
+import { DatabaseZap } from "lucide-react";
 
 
 
@@ -41,6 +42,10 @@ function getIcon(arg0: string): import("react").ReactNode {
             "telegram": return <SiTelegram className={iconClass} />
         case
             "payloadcms": return <SiPayloadcms className={iconClass} />
+        case
+            "sanity": return <SiSanity className={iconClass} />
+        case
+            "sql": return <DatabaseZap className={iconClass} />
         default:
             return <div></div>
     }
