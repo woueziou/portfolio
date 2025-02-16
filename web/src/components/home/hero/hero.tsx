@@ -69,8 +69,8 @@ export default function Hero() {
     )}>
       <h1 className={cn('text-3xl font-black lg:text-7xl', amiko.className)}>Taas S. Ekpaye</h1>
       <div className='row-span-1 flex flex-col items-center md:gap-5 gap-2'>
-        <h3 className='text-balance text-muted-foreground px-8 py-2 rounded-full border  lg:text-xl font-semibold flex items-center space-x-2' >
-          <div className='font-extrabold item flex'>{yearsSince2019}</div>
+        <h3 className='text-balance text-muted-foreground px-8 py-2 rounded-full   lg:text-xl font-semibold flex items-center space-x-2' >
+          <div className='font-extrabold item flex border h-8 w-8 justify-center rounded-sm items-center'>{yearsSince2019}</div>
           <div>Software Developer
           </div> </h3>
         <div className={cn('md:flex md:space-x-4',
@@ -101,7 +101,7 @@ export default function Hero() {
               </a>
             )
           })}</div>
-        <ThemeModeToggle />
+        {/* <ThemeModeToggle /> */}
       </div>
     </div>
 
