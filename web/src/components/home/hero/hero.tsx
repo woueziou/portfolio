@@ -2,11 +2,10 @@
 import { cn } from '@/src/lib/utils';
 import { SiGithub, SiMedium } from '@icons-pack/react-simple-icons';
 import { Linkedin, Mail } from 'lucide-react';
-import GitHubCalendar from 'react-github-calendar';
 import { Audiowide } from 'next/font/google';
 import Image from 'next/image';
 import React from 'react';
-import { ThemeModeToggle } from '../../theme-switcher';
+import GitHubCalendar from 'react-github-calendar';
 const amiko = Audiowide({ weight: '400', subsets: ['latin'] })
 type ContactType = {
   name: string,

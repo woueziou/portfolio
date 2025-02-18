@@ -2,7 +2,6 @@ import { cn } from "@/src/lib/utils";
 import { formatDate } from "@/src/utils/formater";
 import { Database } from "@/src/utils/supabase/supabase";
 import { SiAgora, SiDart, SiDotnet, SiFlutter, SiGit, SiGnubash, SiHono, SiMongodb, SiNextdotjs, SiNuxt, SiPayloadcms, SiPostgresql, SiSanity, SiSupabase, SiTelegram, SiTypescript } from "@icons-pack/react-simple-icons";
-import { div } from "framer-motion/client";
 import { DatabaseZap, ExternalLink } from "lucide-react";
 
 
