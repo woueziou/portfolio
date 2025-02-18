@@ -75,7 +75,7 @@ export default function ProjectClient({ data }: { data: Database["public"]["Tabl
 
                     )}>{item} </div>))}</div>
             <div className="flex flex-col items-start space-y-2 ">
-                {item.url && <div className="flex items-center space-x-1 border-b border-b-2">
+                {item.url && <div className="flex items-center space-x-1 border-b-2">
                     <a href={item.url} target="_blank" className={cn("text-xl font-bold", " underline-offset-4")}>{item.title}</a>
                     <ExternalLink className="w-4 h-4"/>
                     </div>}
