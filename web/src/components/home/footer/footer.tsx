@@ -3,7 +3,7 @@ export default function Footer() {
         <div className="md:col-start-2 col-span-1   items-center justify-end flex flex-col pt-10 pb-4">
             <div></div>
             <div>Made by Taas Ekpaye</div>
-            <div>Powered by Next.JS</div>
+            <div>Made with Next.JS</div>
         </div>
     </footer>
 }

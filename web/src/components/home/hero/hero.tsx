@@ -2,11 +2,12 @@
 import { cn } from '@/src/lib/utils';
 import { SiGithub, SiMedium } from '@icons-pack/react-simple-icons';
 import { Linkedin, Mail } from 'lucide-react';
+import GitHubCalendar from 'react-github-calendar';
 import { Audiowide } from 'next/font/google';
 import Image from 'next/image';
 import React from 'react';
 import { ThemeModeToggle } from '../../theme-switcher';
-const amiko = Audiowide({ weight: '400',subsets:['latin'] })
+const amiko = Audiowide({ weight: '400', subsets: ['latin'] })
 type ContactType = {
   name: string,
   value: string,
@@ -64,16 +65,16 @@ export default function Hero() {
         height={200}
       />
     </div>
-    <div className={cn('grid place-items-center md:grid-rows-2 md:gap-y-5 pt-4',
+    <div className={cn('grid place-items-center  md:gap-y-2 pt-4',
       ""
     )}>
       <h1 className={cn('text-3xl font-black lg:text-7xl', amiko.className)}>Taas S. Ekpaye</h1>
-      <div className='row-span-1 flex flex-col items-center md:gap-5 gap-2'>
-        <h3 className='text-balance text-muted-foreground px-8 py-2 rounded-full border  lg:text-xl font-semibold flex items-center space-x-2' >
-          <div className='font-extrabold item flex'>{yearsSince2019}</div>
+      <div className='row-span-1 flex flex-col items-center md:gap-8 gap-2'>
+        <h3 className='text-balance text-muted-foreground px-8 py-2 rounded-full   lg:text-xl font-semibold flex items-center space-x-2' >
+          <div className='font-extrabold item flex border h-8 w-8 justify-center rounded-sm items-center'>{yearsSince2019}</div>
           <div>Software Developer
           </div> </h3>
-        <div className={cn('md:flex md:space-x-4',
+        <div className={cn('md:flex md:space-x-4 ',
           "grid gap-y-4"
         )}>
           {contacts.map((contact, index) => {
@@ -101,7 +102,12 @@ export default function Hero() {
               </a>
             )
           })}</div>
-        <ThemeModeToggle />
+        <div className={cn('pt-4 md:w-full',
+          'w-screen px-2'
+        )}>
+
+          <GitHubCalendar hideColorLegend username="woueziou" />
+        </div>
       </div>
     </div>
 
