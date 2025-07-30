@@ -11,8 +11,6 @@ import { ProjectItem } from "./project-item";
 
 
 export default function ProjectClient({ data }: { data: Database["public"]["Tables"]["projects"]["Row"][] }) {
-    // const format = formatDate()
-
     return <div className={cn("grid md:grid-cols-3 w-full",
         "grid-cols-1",
         "place-content-center"

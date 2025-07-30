@@ -22,7 +22,6 @@ export default function RootLayout({
         className={cn(
           "antialiased",
           "bg-[url('/noise-bg.png')]",
-          // dm.className
           "font-baufra"
         )}
       >
