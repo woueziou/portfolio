@@ -9,8 +9,6 @@ export default async function Projects() {
         return <div>An error occured</div>
     }
     return <ProjectClient data={data}></ProjectClient>
-
-
 }
 
 
