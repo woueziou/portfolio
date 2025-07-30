@@ -10,10 +10,6 @@
 		}
 	],
 	"settings": {
-		"workbench.colorCustomizations": {
-			"activityBar.background": "#60041F",
-			"titleBar.activeBackground": "#87062B",
-			"titleBar.activeForeground": "#FFFBFC"
-		}
+		"editor.codeActionsOnSave": {}
 	}
 }

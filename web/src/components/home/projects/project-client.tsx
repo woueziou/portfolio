@@ -1,7 +1,7 @@
 import { cn } from "@/src/lib/utils";
 import { formatDate } from "@/src/utils/formater";
 import { Database } from "@/src/utils/supabase/supabase";
-import { SiAgora, SiDart, SiDotnet, SiFlutter, SiGit, SiGnubash, SiHono, SiMongodb, SiNextdotjs, SiNuxt, SiPayloadcms, SiPostgresql, SiSanity, SiSupabase, SiTelegram, SiTypescript } from "@icons-pack/react-simple-icons";
+import { SiAgora, SiCloudcannon, SiDart, SiDotnet, SiFastapi, SiFlutter, SiGit, SiGnubash, SiHono, SiMongodb, SiNextdotjs, SiNuxt, SiPayloadcms, SiPostgresql, SiPython, SiSanity, SiSupabase, SiTelegram, SiTypescript } from "@icons-pack/react-simple-icons";
 import { DatabaseZap, ExternalLink } from "lucide-react";
 
 
@@ -46,6 +46,12 @@ function getIcon(arg0: string): import("react").ReactNode {
             "sanity": return <SiSanity className={iconClass} />
         case
             "sql": return <DatabaseZap className={iconClass} />
+        case
+            "fastapi": return <SiFastapi className={iconClass} />
+        case
+            "aws": return <SiCloudcannon className={iconClass} />
+        case
+            "python": return <SiPython className={iconClass} />
         default:
             return <div></div>
     }
@@ -76,8 +82,8 @@ export default function ProjectClient({ data }: { data: Database["public"]["Tabl
             <div className="flex flex-col items-start space-y-2 ">
                 {item.url && <div className="flex items-center space-x-1 border-b-2">
                     <a href={item.url} target="_blank" className={cn("text-xl font-bold", " underline-offset-4")}>{item.title}</a>
-                    <ExternalLink className="w-4 h-4"/>
-                    </div>}
+                    <ExternalLink className="w-4 h-4" />
+                </div>}
                 {!item.url && <div className={cn("text-xl font-bold")}>{item.title}</div>}
                 <div className={cn("text-xs")}>{formatDate(item.project_date, "YYYY")}</div>
             </div>
