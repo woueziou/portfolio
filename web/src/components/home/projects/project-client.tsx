@@ -1,8 +1,5 @@
 import { cn } from "@/src/lib/utils";
-import { formatDate } from "@/src/utils/formater";
 import { Database } from "@/src/utils/supabase/supabase";
-import { SiAgora, SiCloudcannon, SiDart, SiDotnet, SiFastapi, SiFlutter, SiGit, SiGnubash, SiHono, SiMongodb, SiNextdotjs, SiNuxt, SiPayloadcms, SiPostgresql, SiPython, SiSanity, SiSupabase, SiTelegram, SiTypescript } from "@icons-pack/react-simple-icons";
-import { DatabaseZap, ExternalLink } from "lucide-react";
 import { ProjectItem } from "./project-item";
 
 

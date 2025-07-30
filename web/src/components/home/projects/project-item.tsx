@@ -1,10 +1,9 @@
 import { cn } from "@/src/lib/utils"
 import { formatDate } from "@/src/utils/formater"
 import { Database } from "@/src/utils/supabase/supabase"
-import { SiAgora, SiSupabase, SiFlutter, SiNextdotjs, SiTypescript, SiDart, SiPostgresql, SiGnubash, SiHono, SiNuxt, SiDotnet, SiGit, SiMongodb, SiTelegram, SiPayloadcms, SiSanity, SiFastapi, SiCloudcannon, SiPython } from "@icons-pack/react-simple-icons"
+import { SiAgora, SiCloudcannon, SiDart, SiDotnet, SiFastapi, SiFlutter, SiGit, SiGnubash, SiHono, SiMongodb, SiNextdotjs, SiNuxt, SiPayloadcms, SiPostgresql, SiPython, SiSanity, SiSupabase, SiTelegram, SiTypescript } from "@icons-pack/react-simple-icons"
 import { DatabaseZap, ExternalLink } from "lucide-react"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../../ui/hover-card"
-import { Button } from "../../ui/button"
 function getIcon(arg0: string): import("react").ReactNode {
     const iconClass = "h-5 w-5"
     switch (arg0) {
