@@ -1,12 +1,8 @@
 {
 	"folders": [
 		{
-			"path": "./web",
-			"name": "web"
-		},
-		{
-			"path": "./supabase",
-			"name": "supabase"
+			"path": ".",
+			
 		}
 	],
 	"settings": {
