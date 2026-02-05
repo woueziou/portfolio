@@ -13,7 +13,6 @@ function getIcon(arg0: string): import("react").ReactNode {
             return <SiSupabase className={iconClass} />
         case "flutter":
             return <SiFlutter className={iconClass} />
-
         case "next":
             return < SiNextdotjs className={iconClass} />
         case

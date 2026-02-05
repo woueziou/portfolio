@@ -17,7 +17,6 @@ export default function Hero() {
   const linkClass = "h-10 flex space-x-2 items-center border border-secondary/30 px-4 hover:bg-primary hover:text-white "
   // type contactType=
   const contacts: ContactType[] = [
-
     {
       name: 'Github',
       value: "https://github.com/woueziou",
@@ -55,7 +54,6 @@ export default function Hero() {
     <div className={cn(
       "md:w-40 md:h-40 bg-background rounded-full md:overflow-hidden",
       "w-15 h-15"
-
     )}>
       <Image
         alt="logo"
