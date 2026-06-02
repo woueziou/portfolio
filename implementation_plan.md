@@ -1,86 +1,46 @@
-# Implementation Plan - Next.js to TanStack Start & Bun Monorepo Migration
+# Implementation Plan - Supabase Local Development Setup
 
-We will migrate the portfolio website from Next.js 15 App Router to a Bun-powered monorepo using TanStack Start, Tailwind v4, and Stunk for state management.
+Set up a local-first Supabase environment by installing the Supabase CLI via Homebrew, linking the local configuration inside `apps/supabase` to the remote Supabase project, pulling the remote schema, and establishing a local-to-cloud development workflow.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> - **Workspaces Configuration**: We will create a workspace structure with `apps/ui` (TanStack Start), `apps/supabase` (Supabase functions), and `packages/shared` (shared client/types). The current `web` directory containing Next.js will be kept until final cleanup in Phase 6.
-> - **Tailwind v4 Upgrade**: The Next.js application currently uses Tailwind v3 (`3.4.1`). We will migrate to Tailwind v4 in `apps/ui` and integrate custom styles (colors, fonts, etc.) from `tailwind.config.ts`.
-> - **Font handling**: We will copy the local font files (`Baufra`) from Next.js `public/baufra` to `apps/ui/public/baufra` and reference them correctly using CSS `@import`.
-> - **Supabase Auth & Client**: We will migrate to the shared `@repo/shared` Supabase client using standard `@supabase/supabase-js`, and handle user session tracking using Stunk store.
+> - **Supabase CLI Installation**: Since `npx supabase` fails on `darwin-arm64` (Apple Silicon macOS) with a tarball extraction error, we will install the Supabase CLI globally using Homebrew. This requires tapping the official Supabase tap first: `brew tap supabase/tap && brew install supabase`.
+> - **Remote Credentials Required**: Linking to the remote Supabase database requires the database password for the project `kfbzgkjffmfzjzbxoqvr`. You will need to enter this during the execution stage.
+> - **Working Directory**: All Supabase CLI commands will be run from the `apps/supabase` directory, which contains your local configuration (`apps/supabase/supabase/config.toml`).
 
-## Proposed Changes
+## Open Questions
 
-### Component 1: Monorepo Root & Shared Package
+> [!NOTE]
+> - Do you already have the database password for the remote project `kfbzgkjffmfzjzbxoqvr`? If not, you might need to reset it in the Supabase Dashboard (Project Settings -> Database -> Database password).
 
-Create workspace files at the root and under `packages/shared`.
-
-#### [NEW] [package.json](file:///Users/woueziou/works/personal_projects/portfolio/package.json)
-Configure root workspace package.json with workspace configurations and scripts.
-
-#### [NEW] [packages/shared/package.json](file:///Users/woueziou/works/personal_projects/portfolio/packages/shared/package.json)
-Shared library containing `@supabase/supabase-js`.
-
-#### [NEW] [packages/shared/src/supabase.ts](file:///Users/woueziou/works/personal_projects/portfolio/packages/shared/src/supabase.ts)
-Supabase client using environment variables.
-
-#### [NEW] [packages/shared/src/index.ts](file:///Users/woueziou/works/personal_projects/portfolio/packages/shared/src/index.ts)
-Re-exports the supabase client.
+## Proposed Setup and Workflow
 
 ---
 
-### Component 2: Bootstrap `apps/ui` (TanStack Start)
+### Step 1: Install Supabase CLI
+Install the official Supabase CLI on macOS via Homebrew.
+- Command: `brew tap supabase/tap && brew install supabase`
 
-Initialise and configure the new TanStack Start frontend app.
+### Step 2: Authenticate and Link
+Log in to Supabase CLI and link the project:
+1. Run `supabase login` (will prompt for token or browser login).
+2. Inside `apps/supabase`, run `supabase link --project-ref kfbzgkjffmfzjzbxoqvr` (will prompt for database password).
 
-#### [NEW] [apps/ui/package.json](file:///Users/woueziou/works/personal_projects/portfolio/apps/ui/package.json)
-TanStack Start UI application configuration.
+### Step 3: Pull Remote Schema
+Pull the remote database schema to populate local migrations.
+- Inside `apps/supabase`, run `supabase db pull` to generate the initial migration file representing the cloud database state.
 
-#### [NEW] [apps/ui/vite.config.ts](file:///Users/woueziou/works/personal_projects/portfolio/apps/ui/vite.config.ts)
-Vite configuration with TanStack Router, Tailwind v4, and react plugins.
-
-#### [NEW] [apps/ui/tsconfig.json](file:///Users/woueziou/works/personal_projects/portfolio/apps/ui/tsconfig.json)
-Typescript configuration mapping path aliases.
-
-#### [NEW] [apps/ui/src/__root.tsx](file:///Users/woueziou/works/personal_projects/portfolio/apps/ui/src/__root.tsx)
-Root layout using TanStack Router `<Outlet />` and initializing auth.
-
-#### [NEW] [apps/ui/src/routes/index.tsx](file:///Users/woueziou/works/personal_projects/portfolio/apps/ui/src/routes/index.tsx)
-Index page mapping `/` route with a loader for projects.
-
----
-
-### Component 3: Tailwind v4 and UI Components
-
-Migrate Tailwind and add components.
-
-#### [NEW] [apps/ui/src/index.css](file:///Users/woueziou/works/personal_projects/portfolio/apps/ui/src/index.css)
-Tailwind v4 css file containing theme configurations, variables, and imported Baufra font styles.
-
-#### [NEW] [apps/ui/src/lib/utils.ts](file:///Users/woueziou/works/personal_projects/portfolio/apps/ui/src/lib/utils.ts)
-Copy shadcn helper function.
-
-#### [NEW] [apps/ui/src/components/ui/image.tsx](file:///Users/woueziou/works/personal_projects/portfolio/apps/ui/src/components/ui/image.tsx)
-Create a thin image wrapper for `next/image` replacement.
-
----
-
-### Component 4: State Management & Stores
-
-Setup Stunk store and authentication synchronization.
-
-#### [NEW] [apps/ui/src/stores/auth.store.ts](file:///Users/woueziou/works/personal_projects/portfolio/apps/ui/src/stores/auth.store.ts)
-Authentication store utilizing Stunk atoms.
+### Step 4: Run Local Stack
+Start Docker-based local development:
+- Inside `apps/supabase`, run `supabase start` to launch database, auth, storage, and local Studio dashboard.
 
 ---
 
 ## Verification Plan
 
-### Automated Tests
-- Run `bunx tsc --noEmit` across all workspaces to ensure type safety.
-- Run `bun run build` in the monorepo root to verify successful builds.
-
-### Manual Verification
-- Start the Vite dev server with `bun dev` and inspect the layout, typography, projects loading state, and styling matching the original application.
-- Check Supabase integration and verify project data loads successfully.
+### Automated/Local Checks
+- Check `supabase --version` to verify correct installation.
+- Verify migration file generated in `apps/supabase/supabase/migrations/` matches the remote schema.
+- Run `supabase status` to ensure all local containers are healthy.
+- Open Local Studio dashboard at `http://localhost:54323` to verify tables and public schema structure.
