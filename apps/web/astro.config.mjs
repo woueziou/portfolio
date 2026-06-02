@@ -7,7 +7,7 @@ import path from 'path'
 
 export default defineConfig({
   site: 'https://taas-s-ekpaye.vercel.app',
-  output: 'hybrid',
+  output: 'server',
   adapter: vercel(),
   integrations: [
     react(),

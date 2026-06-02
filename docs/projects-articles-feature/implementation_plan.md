@@ -339,13 +339,15 @@ Set up Supabase Auth with email/password login and create the admin shell with r
  export default defineConfig({
    site: 'https://taas-s-ekpaye.vercel.app',
 -  output: 'static',
-+  output: 'hybrid',
++  output: 'server',
 +  adapter: vercel(),
    integrations: [
      react(),
      sitemap(),
    ],
 ```
+
+**Note:** Astro 5.18+ uses `output: 'server'` instead of `'hybrid'`. Static pages must explicitly set `export const prerender = true`.
 
 ### [NEW] `src/lib/supabase/server.ts`
 

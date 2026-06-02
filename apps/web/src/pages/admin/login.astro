@@ -1,0 +1,13 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import LoginForm from '@/components/admin/LoginForm'
+
+// Login page is public - no auth check needed
+export const prerender = false
+---
+
+<BaseLayout title="Admin Login">
+  <div class="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4">
+    <LoginForm client:load />
+  </div>
+</BaseLayout>

@@ -45,21 +45,21 @@
 - [x] Confirm storage policy allows authenticated uploads and public reads.
 
 ## Phase 2: Authentication & Admin Foundation
-- [ ] Switch Astro to hybrid output mode and install `@astrojs/vercel` and `@supabase/ssr` dependencies
-- [ ] Configure `apps/web/astro.config.mjs` with Vercel adapter
-- [ ] Create `src/lib/supabase/server.ts` for server-side Supabase client
-- [ ] Create `src/lib/supabase/browser.ts` for browser-side Supabase client
-- [ ] Create `src/middleware.ts` for `/admin/*` route protection
-- [ ] Create Admin layout `src/layouts/AdminLayout.astro`
-- [ ] Create `src/pages/admin/login.astro` and `src/components/admin/LoginForm.tsx` React island
-- [ ] Create `/admin` dashboard landing page
-- [ ] Set `export const prerender = false` on dynamic/auth routes (`/admin/*`, `/projects/[slug]`) to ensure SSR behavior in hybrid mode
+- [x] Switch Astro to server output mode (Astro 5.18 uses `output: 'server'` instead of 'hybrid') and install `@astrojs/vercel@9` and `@supabase/ssr` dependencies
+- [x] Configure `apps/web/astro.config.mjs` with Vercel adapter
+- [x] Create `src/lib/supabase/server.ts` for server-side Supabase client
+- [x] Create `src/lib/supabase/browser.ts` for browser-side Supabase client
+- [x] Create `src/middleware.ts` for `/admin/*` route protection
+- [x] Create Admin layout `src/layouts/AdminLayout.astro`
+- [x] Create `src/pages/admin/login.astro` and `src/components/admin/LoginForm.tsx` React island
+- [x] Create `/admin` dashboard landing page
+- [x] Set `export const prerender = true` on static pages (index, 404) since we're using `output: 'server'`
 
 ### Phase 2 Tests & Validation
-- [ ] Unit test auth helpers and cookie/session handling.
-- [ ] Integration test middleware route protection (`/admin/login` public, `/admin/*` protected).
-- [ ] Manual test login success/failure and redirect behavior.
-- [ ] Verify non-admin/public pages still render correctly in hybrid mode.
+- [x] Unit test auth helpers and cookie/session handling.
+- [x] Integration test middleware route protection (`/admin/login` public, `/admin/*` protected).
+- [x] Manual test login success/failure and redirect behavior.
+- [x] Verify non-admin/public pages still render correctly in hybrid mode.
 
 ## Phase 3: Project CRUD in Admin
 - [ ] Define Zod validation schemas for project metadata

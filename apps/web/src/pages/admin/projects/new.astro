@@ -1,0 +1,22 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro'
+
+export const prerender = false
+---
+
+<AdminLayout title="New Project" activeItem="projects">
+  <div class="space-y-6">
+    <div>
+      <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Create New Project</h1>
+      <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        Add a new project to your portfolio
+      </p>
+    </div>
+
+    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+      <p class="text-sm text-zinc-500 dark:text-zinc-400">
+        Project creation form will be implemented in Phase 3.
+      </p>
+    </div>
+  </div>
+</AdminLayout>
