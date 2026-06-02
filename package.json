@@ -1,0 +1,10 @@
+{
+  "name": "monorepo",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev":       "bun run --filter ui dev",
+    "build":     "bun run --filter ui build",
+    "typecheck": "bun run --filter '*' typecheck"
+  }
+}
