@@ -5,6 +5,8 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import Hero from '@/components/home/hero/hero'
 import ProjectClient from '@/components/home/projects/project-client'
 import Footer from '@/components/home/footer/footer'
+import ThemeSwitcher from '@/components/ThemeSwitcher'
+import GitHubCalendar from '@/components/GitHubCalendar'
 
 type Project = Database['public']['Tables']['projects']['Row']
 
@@ -22,12 +24,18 @@ const typedProjects = projects as Project[]
 
 <BaseLayout title="Taas S. Ekpaye — Software Developer">
   <div class="antialiased bg-[url('/noise-bg.png')] font-baufra min-h-screen flex flex-col justify-between">
+    <div class="fixed top-4 right-4 z-50">
+      <ThemeSwitcher client:load />
+    </div>
     <div class="flex-grow">
       <div class="flex flex-col items-center justify-center min-h-screen">
         <Hero client:load />
         <div class="grid w-full grid-cols-1 container mx-auto place-items-center pt-8 gap-y-10">
           <h1 class="text-2xl font-bold uppercase underline underline-offset-8">Projects</h1>
           <ProjectClient data={typedProjects} client:load />
+          <div class="pt-4 md:w-full w-screen px-2">
+            <!-- <GitHubCalendar client:visible /> -->
+          </div>
         </div>
       </div>
     </div>

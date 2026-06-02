@@ -3,7 +3,6 @@ import { SiGithub, SiMedium } from '@icons-pack/react-simple-icons';
 import { Linkedin, Mail } from 'lucide-react';
 import { Image } from '@/components/ui/image';
 import React from 'react';
-//@ts-expect-error
 import  {GitHubCalendar}  from 'react-github-calendar';
 
 type ContactType = {
@@ -61,6 +60,7 @@ export default function Hero() {
           src='https://kfbzgkjffmfzjzbxoqvr.supabase.co/storage/v1/object/public/images//woueziou.png'
           width={200}
           height={200}
+          loading="eager"
         />
       </div>
       <div className={cn('grid place-items-center  md:gap-y-2 pt-4',

@@ -152,12 +152,12 @@ bun run --filter web build > /dev/null 2>&1 && echo "✅ Build OK" || echo "❌ 
 
 | # | Task | Status | Test / Validation |
 |---|---|---|---|
-| 4.1 | Create `components/ThemeSwitcher.tsx` — React island with `client:load` | `[ ]` | Button renders in DOM; clicking toggles theme class on `<html>` |
-| 4.2 | Create `components/GitHubCalendar.tsx` — React island with `client:visible` | `[ ]` | Calendar loads when scrolled into view |
-| 4.3 | Fix `react-github-calendar` type declarations (remove `@ts-expect-error`) | `[ ]` | `! grep -q 'ts-expect-error' apps/web/src/components/GitHubCalendar.tsx` |
-| 4.4 | Create/port `components/ui/HoverCard.tsx` — React island with `client:idle` | `[ ]` | Hover/click on description shows full text |
-| 4.5 | Port `components/ui/button.tsx` from shadcn | `[ ]` | `grep -q 'cva\|Slot' apps/web/src/components/ui/button.tsx` |
-| 4.6 | Port `components/ui/card.tsx` from shadcn | `[ ]` | `grep -q 'CardTitle\|CardContent' apps/web/src/components/ui/card.tsx` |
+| 4.1 | Create `components/ThemeSwitcher.tsx` — React island with `client:load` | `[x]` | Button renders in DOM; clicking toggles theme class on `<html>` |
+| 4.2 | Create `components/GitHubCalendar.tsx` — React island with `client:visible` | `[x]` | Calendar loads when scrolled into view |
+| 4.3 | Fix `react-github-calendar` type declarations (remove `@ts-expect-error`) | `[x]` | `! grep -q 'ts-expect-error' apps/web/src/components/GitHubCalendar.tsx` |
+| 4.4 | Create/port `components/ui/HoverCard.tsx` — React island with `client:idle` | `[x]` | Hover/click on description shows full text |
+| 4.5 | Port `components/ui/button.tsx` from shadcn | `[x]` | `grep -q 'cva\|Slot' apps/web/src/components/ui/button.tsx` |
+| 4.6 | Port `components/ui/card.tsx` from shadcn | `[x]` | `grep -q 'CardTitle\|CardContent' apps/web/src/components/ui/card.tsx` |
 
 ### Regression Tests — Phase 4
 
@@ -191,13 +191,13 @@ echo "Total island JS: $total_js"
 
 | # | Task | Status | Test / Validation |
 |---|---|---|---|
-| 5.1 | Verify OG tags in all page outputs | `[ ]` | `grep -q 'og:title\|og:description\|og:image' apps/web/dist/index.html` |
-| 5.2 | Add `sitemap.xml` generation (via `@astrojs/sitemap`) | `[ ]` | `test -f apps/web/dist/sitemap-index.xml` |
-| 5.3 | Add `robots.txt` in `public/` | `[ ]` | `grep -q 'Allow' apps/web/public/robots.txt` |
-| 5.4 | Add `favicon.ico` / SVG favicon to `public/` | `[ ]` | `test -f apps/web/public/favicon.ico` |
-| 5.5 | Create an OG default image (`public/og-default.png`) | `[ ]` | `test -f apps/web/public/og-default.png` |
-| 5.6 | Add `loading="lazy"` to all `<img>` tags | `[ ]` | `! grep -r '<img[^>]*loading="eager"' apps/web/src/` |
-| 5.7 | Verify Lighthouse audit improvements | `[ ]` | Run Lighthouse — target: Performance ≥ 90, SEO ≥ 90 |
+| 5.1 | Verify OG tags in all page outputs | `[x]` | `grep -q 'og:title\|og:description\|og:image' apps/web/dist/index.html` |
+| 5.2 | Add `sitemap.xml` generation (via `@astrojs/sitemap`) | `[x]` | `test -f apps/web/dist/sitemap-index.xml` |
+| 5.3 | Add `robots.txt` in `public/` | `[x]` | `grep -q 'Allow' apps/web/public/robots.txt` |
+| 5.4 | Add `favicon.ico` / SVG favicon to `public/` | `[x]` | `test -f apps/web/public/favicon.ico` |
+| 5.5 | Create an OG default image (`public/og-default.svg`) | `[x]` | `test -f apps/web/public/og-default.svg` |
+| 5.6 | Add `loading="lazy"` to all `<img>` tags | `[x]` | `! grep -r '<img[^>]*loading="eager"' apps/web/src/` |
+| 5.7 | Verify Lighthouse audit improvements | `[/]` | Run Lighthouse — target: Performance ≥ 90, SEO ≥ 90 |
 
 ### Regression Tests — Phase 5
 

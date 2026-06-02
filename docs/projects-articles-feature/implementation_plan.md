@@ -28,11 +28,11 @@
 | Aspect | Status |
 |---|---|
 | Framework | **Astro 5.10** (SSG, `output: 'static'`) with React islands |
-| Monorepo | Bun workspaces: `apps/web`, `apps/ui` (old, being removed), `apps/supabase`, `packages/shared` |
+| Monorepo | Bun workspaces: `apps/web`, `apps/supabase`, `packages/shared` (`apps/ui` has been completely removed) |
 | Database | **Supabase** — 4 public tables: `profiles`, `projects`, `articles`, `contact_providers` |
 | Existing `projects` table | Has `title`, `description`, `main_image_url`, `url`, `state`, `user_id`, `project_date`, `type[]`, `tech_stack[]` |
 | Existing `articles` table | Minimal — `id`, `title`, `summary`, `image_url`, `user_id`, `url` (no content body, no slug, no status) |
-| Auth | Supabase Auth enabled (email provider), but **no auth code in `apps/web`** (only in old `apps/ui`) |
+| Auth | Supabase Auth enabled (email provider), but **no auth code currently exists** (old `apps/ui` has been removed) |
 | Admin panel | **Does not exist** |
 | Project detail pages | **Do not exist** |
 | Rich text editor | **Does not exist** |
@@ -158,12 +158,12 @@ Backend
 ### Data Flow
 
 ```
-Admin User → POST /api/projects (create) → Supabase DB (INSERT INTO projects)
+Admin User → Actions: projects.create(data) → Supabase DB (INSERT INTO projects)
 
-Admin User → TipTap Editor → Upload images → Supabase Storage
-                            → PUT /api/projects/:id/article → Supabase DB (UPDATE articles SET content = {json})
+Admin User → TipTap Editor → Actions: projects.uploadImage(file) → Supabase Storage (returns URL)
+                            → Actions: projects.updateArticle(content) → Supabase DB (UPDATE articles SET content = {json})
 
-Admin User → PATCH /api/projects/:id/publish → Supabase DB (UPDATE projects SET status = 'published')
+Admin User → Actions: projects.publish({ id, publish: true }) → Supabase DB (UPDATE projects SET status = 'published')
 
 Public Page → GET /projects/:slug → Supabase DB (SELECT project + article) → Render HTML (SSR)
 ```
@@ -371,19 +371,30 @@ Build the admin interface for creating, editing, listing, and deleting projects.
 
 ---
 
-### API Routes
+### Astro Actions (Unified Server Endpoints)
 
-- `src/pages/api/projects/index.ts` — GET (list), POST (create)
-- `src/pages/api/projects/[id].ts` — GET, PUT, DELETE
-- `src/pages/api/projects/[id]/publish.ts` — PATCH publish/unpublish
-- `src/pages/api/upload.ts` — POST image upload
+Instead of traditional REST API routes, we will use **Astro Actions** (fully supported in Astro 5.x) to handle all backend mutations in a type-safe manner. 
+
+All actions will be defined and exported from `src/actions/`:
+- `src/actions/index.ts` — Core Actions export file.
+- `src/actions/auth.ts` — Actions for auth (e.g., `login`, `logout`).
+- `src/actions/projects.ts` — Actions for project lifecycle (e.g., `create`, `update`, `delete`, `publish`, `uploadImage`).
+
+#### Action Definitions & Validation
+We will use Astro's built-in Zod validation schemas (`astro:schema`) to validate action inputs:
+*   `actions.auth.login({ email, password })` — Handles server-side Supabase authentication and sets the session cookie.
+*   `actions.projects.create(projectData)` — Validates project metadata and inserts into Supabase.
+*   `actions.projects.update({ id, ...projectData })` — Updates existing project metadata.
+*   `actions.projects.delete({ id })` — Soft-deletes/archives a project.
+*   `actions.projects.publish({ id, publish })` — Toggles project publication status.
+*   `actions.projects.uploadImage(formData)` — Accepts a file and uploads it to Supabase Storage, returning the public URL.
 
 ### Admin UI Components (React Islands)
 
-- `ProjectList.tsx` — Table with pagination, search, status filters
-- `ProjectForm.tsx` — Full form with Zod validation, auto-save
-- `TechStackInput.tsx` — Tag input for tech stack
-- `TypeSelector.tsx` — Multi-select for project types
+- `ProjectList.tsx` — Table with pagination, search, status filters. Calls Astro Actions on user interactions.
+- `ProjectForm.tsx` — Full form with Zod validation, auto-save. Submits form data via Astro Actions.
+- `TechStackInput.tsx` — Tag input for tech stack.
+- `TypeSelector.tsx` — Multi-select for project types.
 
 ---
 
@@ -449,7 +460,7 @@ bun add @tiptap/react @tiptap/pm @tiptap/starter-kit @tiptap/html \
 
 ```
 Keystroke → Debounce (2s) → editor.getJSON() → 
-  POST /api/articles/:id { content: json } →
+  Actions: projects.updateArticle({ id, content: json }) →
   Server: save json + generateHTML() + compute reading_time →
   UPDATE articles SET content=$1, content_html=$2, reading_time_minutes=$3
 ```
@@ -653,13 +664,15 @@ apps/web/src/
 │   │   └── (existing ProjectCard.astro)
 │   └── ui/
 │       └── (existing shadcn components)
+├── actions/
+│   ├── index.ts
+│   ├── auth.ts
+│   └── projects.ts
 ├── layouts/
 │   ├── BaseLayout.astro (existing)
 │   └── AdminLayout.astro (new)
 ├── lib/
-│   ├── supabase/
-│   │   ├── server.ts
-│   │   └── browser.ts
+│   ├── supabase.ts (new - unified client helper)
 │   ├── editor/
 │   │   ├── extensions.ts
 │   │   └── html-renderer.ts
@@ -672,24 +685,15 @@ apps/web/src/
 │   ├── 404.astro (existing)
 │   ├── projects/
 │   │   └── [slug].astro (new, SSR)
-│   ├── admin/
-│   │   ├── login.astro
-│   │   ├── index.astro
-│   │   └── projects/
-│   │       ├── index.astro
-│   │       ├── new.astro
-│   │       └── [id]/
-│   │           ├── edit.astro
-│   │           └── article.astro
-│   └── api/
-│       ├── projects/
-│       │   ├── index.ts
-│       │   ├── [id].ts
-│       │   └── [id]/
-│       │       └── publish.ts
-│       ├── articles/
-│       │   └── [id].ts
-│       └── upload.ts
+│   └── admin/
+│       ├── login.astro
+│       ├── index.astro
+│       └── projects/
+│           ├── index.astro
+│           ├── new.astro
+│           └── [id]/
+│               ├── edit.astro
+│               └── article.astro
 └── styles/
     └── global.css (existing, extend for editor + admin)
 ```
