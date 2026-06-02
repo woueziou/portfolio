@@ -9,11 +9,14 @@
     "typecheck": "astro check"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.9",
     "@astrojs/react": "^4.3.0",
     "@astrojs/sitemap": "^3.4.0",
+    "@astrojs/vercel": "^10.0.8",
     "@fontsource-variable/geist": "^5.2.9",
     "@icons-pack/react-simple-icons": "^11.2.0",
     "@repo/shared": "workspace:*",
+    "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "latest",
     "@tailwindcss/vite": "^4.1.18",
     "astro": "^5.10.0",
@@ -34,6 +37,6 @@
     "@tailwindcss/typography": "^0.5.16",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.3"
   }
 }

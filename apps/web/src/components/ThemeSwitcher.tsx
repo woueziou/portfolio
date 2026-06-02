@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
 import { Moon, Sun } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 export default function ThemeSwitcher() {
   const [isDark, setIsDark] = useState(false)
@@ -21,6 +21,7 @@ export default function ThemeSwitcher() {
 
   return (
     <button
+      type="button"
       onClick={toggle}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       className="inline-flex items-center justify-center size-9 rounded-md border border-border bg-background text-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"

@@ -1,3 +1,3 @@
-import { Database } from "@repo/shared";
+import type { Database } from '@repo/shared'
 
-export type ProjectType = Database["public"]['Tables']["projects"]['Row']
+export type ProjectType = Database['public']['Tables']['projects']['Row']

@@ -18,6 +18,7 @@ declare module 'react-github-calendar' {
     }
     throwOnError?: boolean
     errorMessage?: string
+    // biome-ignore lint/suspicious/noExplicitAny: third-party type declaration
     transformData?: (contributions: any[]) => any[]
     labels?: {
       totalCount?: string
