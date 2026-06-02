@@ -3,8 +3,8 @@
   "private": true,
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "dev":       "bun run --filter ui dev",
-    "build":     "bun run --filter ui build",
+    "dev":       "bun run --filter web dev",
+    "build":     "bun run --filter web build",
     "typecheck": "bun run --filter '*' typecheck"
   }
 }

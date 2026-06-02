@@ -1,0 +1,36 @@
+---
+import { supabase } from '@repo/shared'
+import type { Database } from '@repo/shared'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Hero from '@/components/home/hero/hero'
+import ProjectClient from '@/components/home/projects/project-client'
+import Footer from '@/components/home/footer/footer'
+
+type Project = Database['public']['Tables']['projects']['Row']
+
+const { data: projects, error } = await supabase
+  .from('projects')
+  .select()
+  .order('project_date', { ascending: false })
+
+if (error || !projects) {
+  throw new Error(error?.message || 'Failed to fetch projects')
+}
+
+const typedProjects = projects as Project[]
+---
+
+<BaseLayout title="Taas S. Ekpaye — Software Developer">
+  <div class="antialiased bg-[url('/noise-bg.png')] font-baufra min-h-screen flex flex-col justify-between">
+    <div class="flex-grow">
+      <div class="flex flex-col items-center justify-center min-h-screen">
+        <Hero client:load />
+        <div class="grid w-full grid-cols-1 container mx-auto place-items-center pt-8 gap-y-10">
+          <h1 class="text-2xl font-bold uppercase underline underline-offset-8">Projects</h1>
+          <ProjectClient data={typedProjects} client:load />
+        </div>
+      </div>
+    </div>
+    <Footer client:load />
+  </div>
+</BaseLayout>
