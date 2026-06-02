@@ -2,7 +2,7 @@
 
 **Project**: Taas S. Ekpaye Portfolio  
 **Date**: 2026-06-02  
-**Status**: Planning — Awaiting User Review  
+**Status**: Planning — Decisions Approved (Ready for Implementation)  
 
 ---
 
@@ -75,15 +75,34 @@ Two options for the admin panel:
 ### Deployment Model Change
 Moving from static to hybrid means Vercel will deploy serverless functions for SSR pages. This is well within the free tier but is a meaningful infrastructure change. Builds may take slightly longer.
 
+### Performance Note for Hybrid Mode
+Switching to `output: 'hybrid'` does not automatically slow down all pages:
+- Static pages (e.g., homepage if kept prerendered) still ship as static assets and keep static performance.
+- SSR pages (e.g., `/admin/*`, `/projects/:slug`) can be slightly slower on first request due to serverless cold starts.
+- Typical impact is small for normal traffic and can be reduced with caching and by keeping only truly dynamic routes SSR.
+
+---
+
+## Decisions Confirmed (2026-06-02)
+
+| Question | Decision |
+|---|---|
+| Q1: Astro output mode | **Approved**: switch to `output: 'hybrid'` |
+| Q2: Admin panel location | **Option A**: `/admin/*` inside `apps/web` |
+| Q3: Rich text editor | **TipTap** |
+| Q4: Publication workflow | **Simple v1**: `draft -> published -> archived` |
+| Q5: Article scope | **Both**: standalone + project-linked articles |
+| Q6: Image strategy | **Supabase Storage** |
+
 ---
 
 ## Open Questions
 
 ### Q1: Astro Hybrid Mode
-Do you approve switching from `output: 'static'` to `output: 'hybrid'`? This is a prerequisite for all dynamic features (auth, admin, project detail pages).
+Resolved: approved.
 
 ### Q2: Admin Panel Location
-Should the admin live at `/admin/*` within `apps/web` (recommended), or as a separate app `apps/admin`?
+Resolved: Option A (`/admin/*` within `apps/web`).
 
 ### Q3: Rich Text Editor Choice
 Based on research, the two strongest candidates for a Medium-like editor are:
@@ -100,7 +119,7 @@ Based on research, the two strongest candidates for a Medium-like editor are:
 
 **Recommendation: TipTap** — maximum control, best Medium-like UX, native JSON output for Supabase `jsonb`, excellent SSR support.
 
-Do you agree with TipTap, or do you prefer BlockNote for faster setup?
+Resolved: TipTap selected.
 
 ### Q4: Publication Workflow Complexity
 Two levels of workflow:
@@ -115,10 +134,10 @@ Two levels of workflow:
 - Version history (rollback)
 - Draft changes on live content
 
-Start simple and evolve?
+Resolved: simple workflow for v1.
 
 ### Q5: Article Scope
-Currently your requirement mentions project articles (write-ups about your projects). Do you also want **standalone articles** (blog posts unrelated to a specific project)? This affects the data model:
+Resolved: support both project-linked and standalone articles. Data model:
 - **Project articles only**: Article is always linked to a project via `project_id`
 - **Both**: Articles can be standalone OR linked to a project (optional `project_id`)
 
@@ -128,7 +147,7 @@ For the editor, images can be:
 - **External URLs** — paste image URLs directly
 - **Both** — upload to Supabase Storage + paste external URLs
 
-Recommendation: Supabase Storage as primary, with external URL paste as fallback.
+Resolved: Supabase Storage selected.
 
 ---
 
