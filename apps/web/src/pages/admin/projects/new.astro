@@ -1,5 +1,6 @@
 ---
 import AdminLayout from '@/layouts/AdminLayout.astro'
+import ProjectForm from '@/components/admin/ProjectForm'
 
 export const prerender = false
 ---
@@ -14,9 +15,15 @@ export const prerender = false
     </div>
 
     <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
-      <p class="text-sm text-zinc-500 dark:text-zinc-400">
-        Project creation form will be implemented in Phase 3.
-      </p>
+      <ProjectForm
+        client:load
+        onSuccess={() => {
+          window.location.href = '/admin/projects'
+        }}
+        onCancel={() => {
+          window.location.href = '/admin/projects'
+        }}
+      />
     </div>
   </div>
 </AdminLayout>

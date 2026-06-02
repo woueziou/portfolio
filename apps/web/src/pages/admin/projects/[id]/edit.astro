@@ -1,0 +1,62 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro'
+import ProjectForm from '@/components/admin/ProjectForm'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+
+export const prerender = false
+
+const { id } = Astro.params
+const supabase = createSupabaseServerClient(Astro.cookies)
+
+// Get current user
+const { data: { user }, error: authError } = await supabase.auth.getUser()
+if (authError || !user) {
+  return Astro.redirect('/admin/login')
+}
+
+// Fetch project
+const { data: project, error } = await supabase
+  .from('projects')
+  .select('*')
+  .eq('id', id)
+  .eq('user_id', user.id)
+  .single()
+
+if (error || !project) {
+  return Astro.redirect('/admin/projects')
+}
+---
+
+<AdminLayout title={`Edit: ${project.title}`} activeItem="projects">
+  <div class="space-y-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+          Edit Project
+        </h1>
+        <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          {project.title}
+        </p>
+      </div>
+      <a
+        href="/admin/projects"
+        class="rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+      >
+        Back to Projects
+      </a>
+    </div>
+
+    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+      <ProjectForm
+        client:load
+        project={project}
+        onSuccess={() => {
+          window.location.href = '/admin/projects'
+        }}
+        onCancel={() => {
+          window.location.href = '/admin/projects'
+        }}
+      />
+    </div>
+  </div>
+</AdminLayout>

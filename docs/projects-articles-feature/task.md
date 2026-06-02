@@ -62,19 +62,19 @@
 - [x] Verify non-admin/public pages still render correctly in hybrid mode.
 
 ## Phase 3: Project CRUD in Admin
-- [ ] Define Zod validation schemas for project metadata
-- [ ] Create Astro Actions entry point `src/actions/index.ts`
-- [ ] Create `src/actions/auth.ts` (actions for `login` and `signOut`)
-- [ ] Create `src/actions/projects.ts` (actions for `create`, `update`, `delete`, `publish`, `uploadImage`)
-- [ ] Create `ProjectList.tsx` dashboard component with pagination and status badges
-- [ ] Create `ProjectForm.tsx` metadata manager with tag inputs
-- [ ] Implement create/edit views under `/admin/projects/`
+- [x] Define Zod validation schemas for project metadata
+- [x] Create Astro Actions entry point `src/actions/index.ts`
+- [x] Create `src/actions/auth.ts` (actions for `login` and `signOut`)
+- [x] Create `src/actions/projects.ts` (actions for `create`, `update`, `delete`, `publish`, `uploadImage`)
+- [x] Create `ProjectList.tsx` dashboard component with pagination and status badges
+- [x] Create `ProjectForm.tsx` metadata manager with tag inputs
+- [x] Implement create/edit views under `/admin/projects/`
 
 ### Phase 3 Tests & Validation
-- [ ] Unit test Zod schemas (valid payloads + expected failures).
-- [ ] Integration test actions: create/update/delete/publish/upload image.
-- [ ] Verify slug generation/uniqueness behavior.
-- [ ] Manual test admin CRUD flow end-to-end with local Supabase.
+- [x] Unit test Zod schemas (valid payloads + expected failures).
+- [x] Integration test actions: create/update/delete/publish/upload image.
+- [x] Verify slug generation/uniqueness behavior.
+- [x] Manual test admin CRUD flow end-to-end with local Supabase.
 
 ## Phase 4: Rich Text Editor (Medium-like)
 - [ ] Install TipTap editor packages
