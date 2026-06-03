@@ -106,7 +106,7 @@ export default function Hero({ profile, socialLinks }: HeroProps) {
     <div className="md:h-[90vh] w-full rounded-md relative flex flex-col items-center justify-center antialiased">
       <div
         className={cn(
-          'w-20 h-20 sm:w-32 sm:h-32 md:w-40 md:h-40 bg-background rounded-full flex items-center justify-center',
+          'w-24 h-24 sm:w-36 sm:h-36 md:w-44 md:h-44 bg-muted rounded-full overflow-hidden flex items-center justify-center ring-2 ring-border',
         )}
       >
         {imgError || !profile.avatarUrl ? (
@@ -120,6 +120,7 @@ export default function Hero({ profile, socialLinks }: HeroProps) {
             width={200}
             height={200}
             loading="eager"
+            className="w-full h-full object-cover"
             onError={() => setImgError(true)}
           />
         )}

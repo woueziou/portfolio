@@ -383,101 +383,51 @@ describe('ProfileService', () => {
   })
 
   // -----------------------------------------------------------------------
-  //  uploadAndSetAvatar  (integration: upload + profile update + cleanup)
+  //  cleanUpOldAvatar
   // -----------------------------------------------------------------------
 
-  describe('uploadAndSetAvatar', () => {
-    const existingUrl =
-      'https://xxx.supabase.co/storage/v1/object/public/content-images/avatars/user-1/old.jpg'
-    const newUrl =
-      'https://xxx.supabase.co/storage/v1/object/public/content-images/avatars/user-1/new.jpg'
-
-    beforeEach(() => {
-      // Upload succeeds
-      mock.mockUpload.mockResolvedValue({
-        data: { path: 'avatars/user-1/new.jpg' },
-        error: null,
-      })
-      mock.mockGetPublicUrl.mockReturnValue({
-        data: { publicUrl: newUrl },
-      })
+  describe('cleanUpOldAvatar', () => {
+    it('deletes the old avatar file from storage', async () => {
       mock.mockRemove.mockResolvedValue({ data: {}, error: null })
-    })
 
-    it('uploads, updates profile, and cleans up old avatar', async () => {
-      // Sequential calls to .single(): first getProfile returns existing,
-      // then updateProfile returns the updated record.
-      mock.mockMaybeSingle
-        .mockResolvedValueOnce({
-          data: fakeProfile({ avatar_url: existingUrl }),
-          error: null,
-        })
-        .mockResolvedValueOnce({
-          data: fakeProfile({ avatar_url: newUrl }),
-          error: null,
-        })
+      await service.cleanUpOldAvatar(
+        'https://xxx.supabase.co/storage/v1/object/public/content-images/avatars/user-1/old.jpg',
+      )
 
-      const profile = await service.uploadAndSetAvatar('user-1', fakeFile())
-
-      expect(profile.avatar_url).toBe(newUrl)
-      // Old file should be removed
       expect(mock.mockRemove).toHaveBeenCalledWith([
         'avatars/user-1/old.jpg',
       ])
     })
 
-    it('works when no previous avatar exists (no cleanup)', async () => {
-      mock.mockMaybeSingle
-        .mockResolvedValueOnce({
-          data: fakeProfile({ avatar_url: null }),
-          error: null,
-        })
-        .mockResolvedValueOnce({
-          data: fakeProfile({ avatar_url: newUrl }),
-          error: null,
-        })
+    it('does nothing when previousAvatarUrl is null', async () => {
+      await service.cleanUpOldAvatar(null)
 
-      const profile = await service.uploadAndSetAvatar('user-1', fakeFile())
-
-      expect(profile.avatar_url).toBe(newUrl)
-      // Should NOT call remove since there was no old avatar
       expect(mock.mockRemove).not.toHaveBeenCalled()
     })
 
-    it('still saves the new avatar even if old cleanup fails', async () => {
-      mock.mockMaybeSingle
-        .mockResolvedValueOnce({
-          data: fakeProfile({ avatar_url: existingUrl }),
-          error: null,
-        })
-        .mockResolvedValueOnce({
-          data: fakeProfile({ avatar_url: newUrl }),
-          error: null,
-        })
-      mock.mockRemove.mockResolvedValue({
-        data: null,
-        error: { message: 'Remove failed' },
-      })
+    it('does nothing when previousAvatarUrl is empty string', async () => {
+      await service.cleanUpOldAvatar('')
 
-      const profile = await service.uploadAndSetAvatar('user-1', fakeFile())
-
-      // Profile update should still succeed
-      expect(profile.avatar_url).toBe(newUrl)
+      expect(mock.mockRemove).not.toHaveBeenCalled()
     })
 
-    it('throws if the upload itself fails', async () => {
-      mock.mockMaybeSingle.mockResolvedValueOnce({
-        data: fakeProfile({ avatar_url: existingUrl }),
-        error: null,
-      })
-      mock.mockUpload.mockResolvedValue({
+    it('does nothing when URL does not match the expected bucket', async () => {
+      await service.cleanUpOldAvatar('https://example.com/other/image.jpg')
+
+      expect(mock.mockRemove).not.toHaveBeenCalled()
+    })
+
+    it('does not throw on removal failure', async () => {
+      mock.mockRemove.mockResolvedValue({
         data: null,
-        error: { message: 'Storage quota exceeded' },
+        error: { message: 'File not found' },
       })
 
       await expect(
-        service.uploadAndSetAvatar('user-1', fakeFile()),
-      ).rejects.toMatchObject({ code: 'INTERNAL_SERVER_ERROR' })
+        service.cleanUpOldAvatar(
+          'https://xxx.supabase.co/storage/v1/object/public/content-images/avatars/user-1/old.jpg',
+        ),
+      ).resolves.toBeUndefined()
     })
   })
 

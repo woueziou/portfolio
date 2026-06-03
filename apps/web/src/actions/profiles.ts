@@ -5,15 +5,20 @@ import type { Database } from '@repo/shared'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { ProfileService, ProfileServiceError } from '@/lib/services/profile'
 
-const updateProfileSchema = z.object({
-  first_name: z.string().min(1, 'First name is required').max(100),
-  last_name: z.string().min(1, 'Last name is required').max(100),
-  title: z.string().max(200).optional(),
-  description: z.string().max(1000).optional(),
-  avatar_url: z.string().optional(),
-  socials: z.record(z.string()).optional(),
-  skills: z.array(z.string()).optional(),
-})
+const updateProfileSchema = z
+  .object({
+    first_name: z.string().min(1, 'First name is required').max(100).optional(),
+    last_name: z.string().min(1, 'Last name is required').max(100).optional(),
+    title: z.string().max(200).optional(),
+    description: z.string().max(1000).optional(),
+    avatar_url: z.string().optional(),
+    socials: z.record(z.string()).optional(),
+    skills: z.array(z.string()).optional(),
+  })
+  .refine(
+    (data) => Object.values(data).some((v) => v !== undefined),
+    { message: 'At least one field must be provided' },
+  )
 
 /**
  * Bootstrap a single Supabase client, authenticate, and return both
@@ -90,8 +95,9 @@ export const profiles = {
   }),
 
   /**
-   * Upload an avatar image and persist the URL to the user's profile in
-   * one call.
+   * Upload an avatar image to Supabase Storage. Returns the public URL.
+   * The caller (ProfileForm) stores the URL in the form field; it gets
+   * persisted to the profile when the user clicks "Save Changes".
    */
   uploadAvatar: defineAction({
     accept: 'form',
@@ -105,8 +111,21 @@ export const profiles = {
       }
 
       try {
-        const profile = await service.uploadAndSetAvatar(userId, file)
-        return { profile, url: profile.avatar_url }
+        // Clean up the old avatar before uploading the new one
+        const current = await service.getProfile(userId)
+        if (current.avatar_url) {
+          await service.cleanUpOldAvatar(current.avatar_url)
+        }
+
+        // Upload new file and persist URL to profile in one step
+        const { url } = await service.uploadAvatar(userId, file)
+        console.log("Profile picture", url)
+        console.log("User id", userId)
+
+        const p = await service.updateProfile(userId, { avatar_url: url })
+        console.log(p)
+
+        return { url }
       } catch (e: unknown) {
         if (e instanceof ProfileServiceError) {
           throw new ActionError({ message: e.message, code: e.code })

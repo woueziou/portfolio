@@ -30,7 +30,6 @@ const profileSchema = z.object({
   last_name: z.string().min(1, 'Last name is required').max(100),
   title: z.string().max(200).optional(),
   description: z.string().max(1000).optional(),
-  avatar_url: z.string().optional(),
 })
 
 type ProfileFormValues = z.infer<typeof profileSchema>
@@ -87,12 +86,17 @@ export default function ProfileForm({
   const [website, setWebsite] = useState(socialLinks.website ?? '')
 
   // --------------- UI state ---------------
+  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [avatarError, setAvatarError] = useState<string | null>(null)
   const [status, setStatus] = useState<
     { type: 'success' | 'error'; message: string } | null
   >(null)
 
-  const avatarDialog = useFileDialog({ accept: 'image/*', multiple: false })
+  const avatarDialog = useFileDialog({
+    accept: 'image/jpeg,image/png,image/gif,image/webp',
+    multiple: false,
+  })
 
   // --------------- TanStack Form ---------------
   const form = useForm({
@@ -101,7 +105,6 @@ export default function ProfileForm({
       last_name: profile.last_name ?? '',
       title: profile.title ?? '',
       description: profile.description ?? '',
-      avatar_url: profile.avatar_url ?? '',
     },
     onSubmit: async ({ value }) => {
       setStatus(null)
@@ -116,14 +119,11 @@ export default function ProfileForm({
         if (website) newSocialLinks.website = website
 
         // Update profile (includes socials to keep both tables in sync)
-        // Only send avatar_url when it has an actual value to avoid
-        // overwriting the stored URL with null.
         const { error: profileError } = await actions.profiles.update({
           first_name: value.first_name,
           last_name: value.last_name,
           title: value.title,
           description: value.description,
-          ...(value.avatar_url ? { avatar_url: value.avatar_url } : {}),
           socials: newSocialLinks,
         })
 
@@ -169,7 +169,7 @@ export default function ProfileForm({
         form.setFieldValue('last_name', p.last_name ?? '')
         form.setFieldValue('title', p.title ?? '')
         form.setFieldValue('description', p.description ?? '')
-        form.setFieldValue('avatar_url', p.avatar_url ?? '')
+        // avatar_url is managed independently — no form field to sync
       }
 
       if (configResult.data?.config?.social_links) {
@@ -192,22 +192,23 @@ export default function ProfileForm({
 
       const file = avatarDialog.files[0]
       setUploadingAvatar(true)
-      setStatus(null)
+      setAvatarError(null)
 
       try {
         const fd = new FormData()
         fd.append('file', file)
 
+        // Uploads, cleans up old avatar, and persists URL to profile in one call
         const { data, error: uploadError } = await actions.profiles.uploadAvatar(fd)
 
         if (uploadError) {
-          setStatus({ type: 'error', message: uploadError.message })
+          setAvatarError(uploadError.message)
         } else if (data?.url) {
-          form.setFieldValue('avatar_url', data.url)
-          setStatus({ type: 'success', message: 'Avatar uploaded — save to confirm' })
+          setAvatarUrl(data.url)
+          // await actions.profiles.update({ avatar_url: data.url }) 
         }
       } catch {
-        setStatus({ type: 'error', message: 'Failed to upload avatar' })
+        setAvatarError('Failed to upload avatar')
       } finally {
         setUploadingAvatar(false)
       }
@@ -220,11 +221,10 @@ export default function ProfileForm({
   // --------------- Reactive subscriptions ---------------
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const formValues = useStore(form.store, (s: any) => s.values) as ProfileFormValues
-  const avatarUrl = formValues.avatar_url ?? ''
   const firstName = formValues.first_name ?? ''
   const lastName = formValues.last_name ?? ''
 
-  const initials = `${(firstName ?? '').charAt(0)}${(lastName ?? '').charAt(0)}`.toUpperCase() || 'U'
+  const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'U'
 
   /* ================================================================ */
   /*  Render                                                          */
@@ -282,6 +282,12 @@ export default function ProfileForm({
             <p className="text-xs text-muted-foreground">
               JPG, PNG or WebP, max 5MB
             </p>
+            {uploadingAvatar && (
+              <p className="text-xs text-muted-foreground mt-1">Uploading…</p>
+            )}
+            {avatarError && (
+              <p className="text-xs text-destructive mt-1">{avatarError}</p>
+            )}
           </div>
         </div>
       </section>

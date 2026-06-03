@@ -1,5 +1,5 @@
-import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@repo/shared'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**
  * Minimal profile shape for updates (matches the profiles table Row,
@@ -84,9 +84,11 @@ export class ProfileService {
 
     // If nothing meaningful to update, just return the current profile.
     if (Object.keys(sanitized).length === 0) {
+      console.log("Nothing to update")
       return this.getProfile(userId)
     }
 
+    console.log(sanitized)
     const { data, error } = await this.supabase
       .from('profiles')
       .update(sanitized as Database['public']['Tables']['profiles']['Update'])
@@ -101,9 +103,11 @@ export class ProfileService {
     // If the update matched 0 rows (e.g. RLS filtered the user out),
     // fall back to a read so the caller gets a meaningful error.
     if (!data) {
+      console.log("No data found")
       return this.getProfile(userId)
     }
 
+    console.log("updated data", data)
     return data
   }
 
@@ -179,26 +183,15 @@ export class ProfileService {
   }
 
   /**
-   * Convenience: upload avatar **and** persist the returned URL to the
-   * profile in a single call.
+   * Delete the old avatar associated with a profile (if any). Called
+   * during the profile update action when `avatar_url` has changed, so
+   * stale storage files don't accumulate.
    */
-  async uploadAndSetAvatar(userId: string, file: File): Promise<ProfileRow> {
-    // If the profile already has an avatar, grab its storage path so we can
-    // clean up the old file.
-    const existing = await this.getProfile(userId)
-    const oldPath = existing.avatar_url ? this.extractStoragePath(existing.avatar_url) : null
-
-    const { url } = await this.uploadAvatar(userId, file)
-    const updated = await this.updateProfile(userId, { avatar_url: url })
-
-    // Fire-and-forget cleanup of the old file.
-    if (oldPath) {
-      this.deleteAvatar(oldPath).catch(() => {
-        /* non-critical */
-      })
-    }
-
-    return updated
+  async cleanUpOldAvatar(previousAvatarUrl: string | null): Promise<void> {
+    if (!previousAvatarUrl) return
+    const storagePath = this.extractStoragePath(previousAvatarUrl)
+    if (!storagePath) return
+    await this.deleteAvatar(storagePath)
   }
 
   // ---------------------------------------------------------------------------
