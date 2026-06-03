@@ -31,12 +31,9 @@ export default function ProjectClient({ data }: { data: Project[] }) {
         return (
           <section key={year} className={cn('relative', yi < years.length - 1 && 'mb-12')}>
             {/* ── Year header with timeline dot ── */}
-            <div className="relative mb-8 flex items-center gap-4">
-              {/* Vertical timeline line (extends behind the dot) */}
-              <div className="absolute left-0 top-1/2 h-px w-full bg-border/60" />
-
+            <div className="mb-8 flex items-center gap-4">
               {/* Dot + label */}
-              <div className="relative z-10 flex items-center gap-3">
+              <div className="flex shrink-0 items-center gap-3">
                 <span className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-primary bg-background">
                   <span className="h-2 w-2 rounded-full bg-primary" />
                 </span>
@@ -44,6 +41,8 @@ export default function ProjectClient({ data }: { data: Project[] }) {
                   {year}
                 </span>
               </div>
+              {/* Horizontal rule extending to the right */}
+              <div className="h-px flex-1 bg-border/60" />
             </div>
 
             {/* ── Project grid ── */}
