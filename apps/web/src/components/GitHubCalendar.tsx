@@ -9,6 +9,12 @@ type ApiResponse = {
 
 const YEAR = 'last'
 
+// Warm palette: beige background → brown/amber intensity
+const theme = {
+  light: ['#ece9e0', '#c4bc9d', '#9b8e62', '#6b5d3a', '#3d3220'],
+  dark: ['#1c1a14', '#2d281a', '#4a3f24', '#7a683a', '#c49a3c'],
+}
+
 export default function GitHubCalendar() {
   const [totalContributions, setTotalContributions] = useState<number | null>(null)
   const [error, setError] = useState(false)
@@ -53,8 +59,15 @@ export default function GitHubCalendar() {
       </div>
 
       {/* Calendar */}
-      <div className={cn('w-full overflow-x-auto')}>
-        <ReactGitHubCalendar showColorLegend={false} username="woueziou" />
+      <div className={cn('w-full overflow-x-auto', 'md:max-w-xl md:mx-auto')}>
+        <ReactGitHubCalendar
+          username="woueziou"
+          theme={theme}
+          showColorLegend
+          labels={{
+            totalCount: '{{count}} contributions in the last year',
+          }}
+        />
       </div>
 
       {/* Disclaimer */}

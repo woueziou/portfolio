@@ -134,15 +134,15 @@ In dark mode, `hsl(50 28% 5%)` is very dark brown (almost black), and borders ar
 ---
 
 
-## 11. GitHub Calendar Styling Clashes
+## 11. GitHub Calendar Styling Clashes ✅
 
 **Issue**: `react-github-calendar` renders with its own default green color scheme. The portfolio uses warm beige/brown tones. The green calendar grid is visually disconnected from the rest of the page. On mobile, `w-screen px-2` forces full-width which may not be desirable.
 
 **Recommendation**:
-- Customize the calendar's color scheme to match the portfolio palette (brown/warm tones).
-- Use `react-github-calendar`'s `theme` prop or `colorScheme` prop.
-- On desktop, constrain the calendar width (e.g., `max-w-xl mx-auto`) rather than full width.
-- Add the `labels` prop with `totalCount` and a legend.
+- ✅ Customize the calendar's color scheme to match the portfolio palette (brown/warm tones).
+- ✅ Use `react-github-calendar`'s `theme` prop or `colorScheme` prop.
+- ✅ On desktop, constrain the calendar width (e.g., `max-w-xl mx-auto`) rather than full width.
+- ✅ Add the `labels` prop with `totalCount` and a legend.
 
 ---
 
