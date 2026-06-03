@@ -1,8 +1,18 @@
 import { Component, lazy, type ReactNode, Suspense } from 'react'
 
 interface ArticleEditorIslandProps {
-  articleId: number
-  initialContent?: any
+  article: {
+    id: number
+    title: string
+    slug: string
+    status: 'draft' | 'published' | 'archived'
+    published_at: string | null
+    updated_at: string
+    content: any
+    summary: string | null
+    image_url: string | null
+    url: string | null
+  }
 }
 
 class EditorErrorBoundary extends Component<
@@ -23,11 +33,10 @@ class EditorErrorBoundary extends Component<
   }
 }
 
-const LazyArticleEditor = lazy(() => import('./ArticleEditor'))
+const LazyEditorShell = lazy(() => import('./EditorShell'))
 
 export default function ArticleEditorIsland({
-  articleId,
-  initialContent,
+  article,
 }: ArticleEditorIslandProps) {
   return (
     <EditorErrorBoundary>
@@ -46,7 +55,7 @@ export default function ArticleEditorIsland({
               <div className="animate-pulse bg-muted rounded-lg h-[500px]" />
             }
           >
-            <LazyArticleEditor articleId={articleId} initialContent={initialContent} />
+            <LazyEditorShell article={article} />
           </Suspense>
         )
       }}

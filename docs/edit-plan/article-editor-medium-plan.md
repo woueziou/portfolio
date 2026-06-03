@@ -94,7 +94,7 @@ Keep page-level data loading on server, but move all interaction into a single e
       - `StatusActionFooter` **[client]**
     - `EditorToastRegion` **[client]** — global toasts for save/publish errors
 
-- `editorState` module **[shared]** — Stunk atoms + typed actions
+- `editorState` module **[shared]** — nanostores  + typed actions
 - `editorApi` module **[shared]** — Supabase/Astro action adapters
 - `editorSchema` module **[shared]** — zod validations for publish payload
 
@@ -105,7 +105,7 @@ Keep page-level data loading on server, but move all interaction into a single e
 ### Reasoning
 State should separate: (1) manuscript content, (2) metadata, (3) UI surfaces, (4) persistence lifecycle. Keep autosave status explicit so every surface can render truthfully.
 
-### Deliverable (Stunk atoms)
+### Deliverable (nanostores )
 
 #### `editorModeAtom`
 - Type: `'create' | 'edit'`
@@ -273,7 +273,7 @@ export function closeSlashMenu(): void
 ## 4) Mode handling (create vs edit)
 
 ### Reasoning
-Mode should be route-derived and immutable during session. Create mode initializes empty atoms and does not require article ownership lookup. Edit mode requires ownership check and full payload hydration from server loader before client mounts.
+Mode should be route-derived and immutable during session. Create mode initializes empty  and does not require article ownership lookup. Edit mode requires ownership check and full payload hydration from server loader before client mounts.
 
 ### Deliverable
 
@@ -557,10 +557,10 @@ The experience should stay editorial across breakpoints, but mobile needs reduce
 
 1. **Define editor data contracts and validation schemas** — Create typed payloads for create/edit loader + publish input validation. **(M)**
 2. **Create route loaders for new/edit modes** — Implement mode-aware server loaders and ownership checks. **(M)**
-3. **Build `editorState` atoms + action layer** — Add Stunk atoms and pure action API for mutations. **(L)**
+3. **Build `editorState`  + action layer** — Add nanostores  and pure action API for mutations. **(L)**
 4. **Refactor page into `EditorShell` composition** — Introduce top bar/canvas/drawer scaffolding with existing article routes. **(M)**
 5. **Implement title/subtitle/cover blocks** — Add manuscript header fields and cover image UX states. **(M)**
-6. **Integrate Tiptap body editor into new shell** — Wire body JSON to atoms and dirty-state tracking. **(L)**
+6. **Integrate Tiptap body editor into new shell** — Wire body JSON to  and dirty-state tracking. **(L)**
 7. **Implement selection bubble toolbar + link popover** — Add selection detection, positioning, and mark actions. **(L)**
 8. **Implement slash command menu polish** — Improve insert menu behavior, keyboard nav, and close conditions. **(M)**
 9. **Build publish drawer and metadata fields** — Add excerpt/tags/canonical/SEO controls and validation rendering. **(M)**

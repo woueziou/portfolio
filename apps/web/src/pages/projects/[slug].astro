@@ -20,6 +20,15 @@ if (!slug) {
   return Astro.redirect('/404')
 }
 
+// Fetch profile for author name
+const { data: profile } = await supabase
+  .from('profiles')
+  .select('first_name, last_name')
+  .limit(1)
+  .single()
+
+const authorName = profile ? `${profile.first_name} ${profile.last_name}` : 'Taas S. Ekpaye'
+
 // Fetch published project by slug (with techstack relation)
 const { data: project, error: projectError } = await supabase
   .from('projects')
@@ -68,7 +77,7 @@ const legacyTechs = (typedProject.tech_stack || []).filter(
 const typedArticles = (articles || []) as Article[]
 
 const projectTitle = typedProject.title ?? 'Untitled Project'
-const pageTitle = `${projectTitle} — Taas S. Ekpaye`
+const pageTitle = `${projectTitle} — ${authorName}`
 const pageDescription = typedProject.description?.slice(0, 160) ?? projectTitle
 const ogImage = typedProject.main_image_url === null ? undefined : typedProject.main_image_url
 
@@ -83,7 +92,7 @@ const jsonLdProject = {
   datePublished: typedProject.published_at || undefined,
   author: {
     '@type': 'Person',
-    name: 'Taas S. Ekpaye',
+    name: authorName,
   },
 }
 ---
@@ -246,7 +255,7 @@ const jsonLdProject = {
           datePublished: article.published_at || article.created_at,
           author: {
             '@type': 'Person',
-            name: 'Taas S. Ekpaye',
+            name: authorName,
           },
           isPartOf: {
             '@type': 'SoftwareApplication',

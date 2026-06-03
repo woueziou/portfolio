@@ -1,11 +1,7 @@
 ---
 import AdminLayout from '@/layouts/AdminLayout.astro'
+import ProfileForm from '@/components/admin/ProfileForm'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Save, User, AtSign, Briefcase, Mail } from 'lucide-react'
 
 export const prerender = false
 
@@ -20,171 +16,39 @@ const { data: profile } = await supabase
   .select('*')
   .eq('id', user?.id || '')
   .single()
+
+// Get social links from site_config
+const { data: config } = await supabase
+  .from('site_config')
+  .select('social_links')
+  .eq('id', 1)
+  .single()
+
+const socialLinks = (config?.social_links || {}) as Record<string, string>
 ---
 
 <AdminLayout title="Profile" activeItem="me">
-  <div class="max-w-2xl mx-auto space-y-8">
+  <div class="max-w-2xl mx-auto space-y-6">
     <div>
       <h1 class="text-xl font-semibold text-foreground">Profile</h1>
       <p class="mt-0.5 text-sm text-muted-foreground">
-        Manage your personal information and public profile
+        Manage your personal information displayed on the home page
       </p>
     </div>
 
-    {/* Avatar Section */}
-    <section class="space-y-4">
-      <div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-        <User className="h-4 w-4" />
-        Avatar
-      </div>
-      <div class="flex items-center gap-4">
-        <div class="h-16 w-16 bg-muted flex items-center justify-center text-xl font-bold text-muted-foreground">
-          {profile?.first_name?.charAt(0)?.toUpperCase() || 'A'}
-        </div>
-        <div>
-          <p class="text-sm font-medium text-foreground">Profile Photo</p>
-          <p class="text-xs text-muted-foreground">Upload a photo via the avatar URL field below</p>
-        </div>
-      </div>
-    </section>
-
-    {/* Profile Form */}
-    <form id="profile-form" class="space-y-8">
-      <input type="hidden" name="action" value="updateProfile" />
-
-      {/* Personal Info */}
-      <section class="space-y-4">
-        <div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-          <User className="h-4 w-4" />
-          Personal Information
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <Label htmlFor="first_name">First Name</Label>
-            <Input
-              id="first_name"
-              name="first_name"
-              type="text"
-              value={profile?.first_name || ''}
-              required
-              className="border-0 bg-muted/50"
-            />
-          </div>
-          <div class="space-y-2">
-            <Label htmlFor="last_name">Last Name</Label>
-            <Input
-              id="last_name"
-              name="last_name"
-              type="text"
-              value={profile?.last_name || ''}
-              required
-              className="border-0 bg-muted/50"
-            />
-          </div>
-        </div>
-
-        <div class="space-y-2">
-          <Label htmlFor="title" className="flex items-center gap-1.5">
-            <Briefcase className="h-3.5 w-3.5" />
-            Professional Title
-          </Label>
-          <Input
-            id="title"
-            name="title"
-            type="text"
-            value={profile?.title || ''}
-            placeholder="e.g., Full-stack Developer"
-            className="border-0 bg-muted/50"
-          />
-        </div>
-
-        <div class="space-y-2">
-          <Label htmlFor="description">Bio</Label>
-          <Textarea
-            id="description"
-            name="description"
-            rows={4}
-            placeholder="Tell visitors about yourself..."
-            className="border-0 bg-muted/50 resize-none"
-          >{profile?.description || ''}</Textarea>
-        </div>
-      </section>
-
-      {/* Account Info (read-only) */}
-      <section class="space-y-4">
-        <div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-          <AtSign className="h-4 w-4" />
-          Account
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <Label htmlFor="username">Username</Label>
-            <Input
-              id="username"
-              type="text"
-              value={profile?.username || ''}
-              disabled
-              className="border-0 bg-muted/30 text-muted-foreground"
-            />
-          </div>
-          <div class="space-y-2">
-            <Label htmlFor="email" className="flex items-center gap-1.5">
-              <Mail className="h-3.5 w-3.5" />
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={user?.email || ''}
-              disabled
-              className="border-0 bg-muted/30 text-muted-foreground"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Actions */}
-      <div class="flex items-center gap-3">
-        <Button type="submit" size="sm">
-          <Save className="h-4 w-4 mr-1.5" />
-          Save Changes
-        </Button>
-        <span id="profile-status" class="text-sm text-muted-foreground"></span>
-      </div>
-    </form>
+    <ProfileForm
+      client:load
+      profile={profile || {
+        id: user?.id || '',
+        first_name: '',
+        last_name: '',
+        title: '',
+        description: '',
+        avatar_url: '',
+        username: '',
+        socials: {},
+      }}
+      socialLinks={socialLinks}
+    />
   </div>
 </AdminLayout>
-
-<script>
-  const form = document.getElementById('profile-form') as HTMLFormElement
-  const status = document.getElementById('profile-status')!
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault()
-    const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement
-    btn.disabled = true
-    status.textContent = 'Saving...'
-
-    const formData = new FormData(form)
-    const data = Object.fromEntries(formData.entries())
-
-    try {
-      const { error } = await (window as any).Astro.actions.profiles.update(data)
-      if (error) {
-        status.textContent = `Error: ${error.message}`
-        status.className = 'text-sm text-red-500'
-      } else {
-        status.textContent = 'Saved successfully!'
-        status.className = 'text-sm text-green-500'
-      }
-    } catch (err: any) {
-      status.textContent = `Error: ${err.message || 'Unknown error'}`
-      status.className = 'text-sm text-red-500'
-    } finally {
-      btn.disabled = false
-      setTimeout(() => { status.textContent = '' }, 3000)
-    }
-  })
-</script>

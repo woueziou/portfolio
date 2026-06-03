@@ -8,10 +8,9 @@ import { ToastContainer } from '@/components/ui/toast'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
 import BaseLayout from '../layouts/BaseLayout.astro'
 
-export const prerender = true
-
 type Project = Database['public']['Tables']['projects']['Row']
 
+// Fetch projects
 const { data: projects, error } = await supabase
   .from('projects')
   .select()
@@ -19,9 +18,37 @@ const { data: projects, error } = await supabase
 
 const typedProjects: Project[] = !error && projects ? (projects as Project[]) : []
 const fetchError = error?.message ?? null
+
+// Fetch profile data
+const { data: profiles } = await supabase
+  .from('profiles')
+  .select('first_name, last_name, title, description, avatar_url, username')
+  .limit(1)
+
+const profile = profiles?.[0]
+
+// Fetch social links from site_config
+const { data: configs } = await supabase
+  .from('site_config')
+  .select('social_links')
+  .limit(1)
+
+const socialLinks = (configs?.[0]?.social_links || {}) as Record<string, string>
+
+// Prepare profile data for Hero component
+const profileData = {
+  firstName: profile?.first_name || 'Taas',
+  lastName: profile?.last_name || 'Ekpaye',
+  title: profile?.title || 'Full Stack Engineer',
+  bio: profile?.description || 'From building my first Flutter app in 2019 to deploying AI-powered tools in 2026 — each project marks a step forward.',
+  avatarUrl: profile?.avatar_url || null,
+  initials: `${(profile?.first_name || 'T').charAt(0)}${(profile?.last_name || 'E').charAt(0)}`.toUpperCase(),
+}
+
+const fullName = `${profileData.firstName} ${profileData.lastName}`
 ---
 
-<BaseLayout title="Taas S. Ekpaye — Full Stack Engineer">
+<BaseLayout title={`${fullName} — ${profileData.title}`} profile={{ name: fullName, title: profileData.title, socialLinks }}>
   <div class="antialiased bg-noise font-baufra min-h-screen flex flex-col justify-between">
     <!-- Top bar: nav links + theme switcher -->
     <div id="topbar" class="fixed top-0 left-0 right-0 z-50 flex items-center justify-center px-4 py-3 transition-all duration-200">
@@ -63,7 +90,7 @@ const fetchError = error?.message ?? null
     <div class="flex-grow">
       <div class="flex flex-col items-center justify-center min-h-screen">
         <section id="hero">
-          <Hero client:load />
+          <Hero client:load profile={profileData} socialLinks={socialLinks} />
         </section>
 
         <section

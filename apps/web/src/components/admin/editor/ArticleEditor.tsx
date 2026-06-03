@@ -21,6 +21,7 @@ interface ArticleEditorProps {
   initialContent?: any
   onContentChange?: (content: any) => void
   onSave?: (article: any) => void
+  onSaveStateChange?: (status: SaveStatus) => void
 }
 
 type SaveStatus = 'saved' | 'saving' | 'unsaved' | 'error'
@@ -30,6 +31,7 @@ export default function ArticleEditor({
   initialContent,
   onContentChange,
   onSave,
+  onSaveStateChange,
 }: ArticleEditorProps) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved')
   const [showSlashMenu, setShowSlashMenu] = useState(false)
@@ -48,6 +50,7 @@ export default function ArticleEditor({
       }
 
       setSaveStatus('saving')
+      onSaveStateChange?.('saving')
 
       try {
         const result = await actions.articles.saveContent({
@@ -57,24 +60,28 @@ export default function ArticleEditor({
 
         if (result.error) {
           setSaveStatus('error')
+          onSaveStateChange?.('error')
           console.error('Auto-save failed:', result.error)
         } else {
           setSaveStatus('saved')
+          onSaveStateChange?.('saved')
           lastSavedContentRef.current = contentString
           onSave?.(result.data.article)
         }
       } catch (err) {
         setSaveStatus('error')
+        onSaveStateChange?.('error')
         console.error('Auto-save error:', err)
       }
     },
-    [articleId, onSave],
+    [articleId, onSave, onSaveStateChange],
   )
 
   // Debounced auto-save
   const debouncedSave = useCallback(
     (content: any) => {
       setSaveStatus('unsaved')
+      onSaveStateChange?.('unsaved')
 
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current)
@@ -84,7 +91,7 @@ export default function ArticleEditor({
         autoSave(content)
       }, 1500) // 1.5 second debounce
     },
-    [autoSave],
+    [autoSave, onSaveStateChange],
   )
 
   const editor = useEditor({
@@ -166,6 +173,13 @@ export default function ArticleEditor({
         // Close slash menu on escape
         if (event.key === 'Escape' && showSlashMenu) {
           setShowSlashMenu(false)
+          return true
+        }
+
+        const isMeta = event.metaKey || event.ctrlKey
+        if (isMeta && event.key.toLowerCase() === 's') {
+          event.preventDefault()
+          void autoSave(view.state.doc.toJSON())
           return true
         }
 

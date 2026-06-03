@@ -14,45 +14,69 @@ type ContactType = {
   type: 'email' | 'url'
 }
 
+interface HeroProps {
+  profile: {
+    firstName: string
+    lastName: string
+    title: string
+    bio: string
+    avatarUrl: string | null
+    initials: string
+  }
+  socialLinks: Record<string, string>
+}
+
 /** Track an outbound link click (analytics placeholder). */
 function trackOutbound(label: string, url: string) {
-  // Placeholder — swap in real analytics later (e.g. Plausible, Umami)
   if (typeof window !== 'undefined') {
-    // biome-ignore lint/suspicious/noConsole: intentional analytics event
     console.info('[track] outbound', { label, url })
   }
 }
 
-export default function Hero() {
+export default function Hero({ profile, socialLinks }: HeroProps) {
   const linkClass =
     'h-10 flex space-x-2 items-center border border-secondary/30 px-4 hover:bg-accent hover:text-accent-foreground active:scale-95 transition-all duration-150'
 
-  const contacts: ContactType[] = [
-    {
+  const fullName = `${profile.firstName} ${profile.lastName}`
+
+  // Build contacts from social links
+  const contacts: ContactType[] = []
+
+  if (socialLinks.github) {
+    contacts.push({
       name: 'Github',
-      value: 'https://github.com/woueziou',
+      value: socialLinks.github,
       icon: <SiGithub className="h-5 w-5" />,
       type: 'url',
-    },
-    {
+    })
+  }
+
+  if (socialLinks.email) {
+    contacts.push({
       name: 'Email',
-      value: 'taasekpaye@outlook.fr',
+      value: socialLinks.email,
       icon: <Mail className="h-5 w-5" />,
       type: 'email',
-    },
-    {
+    })
+  }
+
+  if (socialLinks.medium) {
+    contacts.push({
       name: 'Medium',
-      value: 'https://medium.com/@taasekpaye',
+      value: socialLinks.medium,
       icon: <SiMedium className="h-5 w-5" />,
       type: 'url',
-    },
-    {
+    })
+  }
+
+  if (socialLinks.linkedin) {
+    contacts.push({
       name: 'LinkedIn',
-      value: 'https://www.linkedin.com/in/taas-ekpaye/',
+      value: socialLinks.linkedin,
       icon: <Linkedin className="h-5 w-5" />,
       type: 'url',
-    },
-  ]
+    })
+  }
 
   function getYearsSince2019(): number {
     const currentYear = new Date().getFullYear()
@@ -65,9 +89,7 @@ export default function Hero() {
     trackOutbound('email', email)
     navigator.clipboard.writeText(email).then(
       () => showToast('Email copied to clipboard!'),
-      () => {
-        // Clipboard API unavailable
-      },
+      () => { },
     )
   }, [])
 
@@ -87,14 +109,14 @@ export default function Hero() {
           'w-20 h-20 sm:w-32 sm:h-32 md:w-40 md:h-40 bg-background rounded-full flex items-center justify-center',
         )}
       >
-        {imgError ? (
+        {imgError || !profile.avatarUrl ? (
           <span className="select-none text-2xl font-bold text-muted-foreground md:text-4xl">
-            TE
+            {profile.initials}
           </span>
         ) : (
           <Image
-            alt="Taas S. Ekpaye portrait"
-            src="/woueziou.png"
+            alt={`${fullName} portrait`}
+            src={profile.avatarUrl}
             width={200}
             height={200}
             loading="eager"
@@ -103,17 +125,18 @@ export default function Hero() {
         )}
       </div>
       <div className={cn('grid place-items-center md:gap-y-2 pt-4', '')}>
-        <h1 className={cn('text-3xl font-black lg:text-7xl font-audiowide')}>Taas S. Ekpaye</h1>
+        <h1 className={cn('text-3xl font-black lg:text-7xl font-audiowide')}>
+          {fullName}
+        </h1>
         <div className="row-span-1 flex flex-col items-center md:gap-8 gap-2">
           <h3 className="text-balance text-muted-foreground px-8 py-2 rounded-full lg:text-xl font-semibold flex items-center space-x-2">
             <div className="font-extrabold item flex h-8 w-8 justify-center rounded-sm items-center">
               {yearsSince2019}
             </div>
-            <div>Full Stack Engineer</div>
+            <div>{profile.title}</div>
           </h3>
           <p className="max-w-md text-center text-sm text-muted-foreground/70 italic">
-            From building my first Flutter app in 2019 to deploying AI-powered tools in{' '}
-            {new Date().getFullYear()} — each project marks a step forward.
+            {profile.bio}
           </p>
           <div className={cn('md:flex md:space-x-4', 'grid gap-y-4')}>
             {contacts.map((contact, index) => {

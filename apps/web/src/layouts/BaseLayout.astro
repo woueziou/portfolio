@@ -6,13 +6,23 @@ interface Props {
   title: string
   description?: string
   ogImage?: string
+  profile?: {
+    name: string
+    title: string
+    socialLinks?: Record<string, string>
+  }
 }
 
 const {
   title,
   description = 'Full Stack Engineer — 6+ years building web & mobile applications for airline enterprise.',
   ogImage = '/og-default.svg',
+  profile,
 } = Astro.props
+
+const authorName = profile?.name || 'Taas S. Ekpaye'
+const authorTitle = profile?.title || 'Full Stack Engineer'
+const socialLinks = profile?.socialLinks || {}
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site)
 ---
@@ -64,14 +74,10 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site)
       set:html={JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'Person',
-        name: 'Taas S. Ekpaye',
+        name: authorName,
         url: 'https://taas-s-ekpaye.vercel.app',
-        sameAs: [
-          'https://github.com/woueziou',
-          'https://www.linkedin.com/in/taas-ekpaye/',
-          'https://medium.com/@taasekpaye',
-        ],
-        jobTitle: 'Full Stack Engineer',
+        sameAs: Object.values(socialLinks).filter(Boolean),
+        jobTitle: authorTitle,
       })}
     />
 

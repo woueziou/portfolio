@@ -11,6 +11,9 @@ export const createArticleSchema = z.object({
     .optional(),
   content: z.any().optional(), // TipTap JSON content
   project_id: z.number().int().positive().nullable().optional(),
+  summary: z.string().max(280, 'Excerpt must be 280 characters or less').nullable().optional(),
+  image_url: z.string().url('Cover image URL must be valid').nullable().optional(),
+  url: z.string().url('Canonical URL must be valid').nullable().optional(),
   status: z.enum(['draft', 'published', 'archived']).default('draft'),
 })
 
@@ -30,6 +33,9 @@ export const updateArticleSchema = z.object({
     .optional(),
   content: z.any().optional(), // TipTap JSON content
   project_id: z.number().int().positive().nullable().optional(),
+  summary: z.string().max(280, 'Excerpt must be 280 characters or less').nullable().optional(),
+  image_url: z.string().url('Cover image URL must be valid').nullable().optional(),
+  url: z.string().url('Canonical URL must be valid').nullable().optional(),
   status: z.enum(['draft', 'published', 'archived']).optional(),
 })
 
