@@ -1,7 +1,7 @@
 import { SiGithub, SiMedium } from '@icons-pack/react-simple-icons'
 import { Linkedin, Mail } from 'lucide-react'
 import type React from 'react'
-import { GitHubCalendar } from 'react-github-calendar'
+import GitHubCalendar from '@/components/GitHubCalendar'
 import { Image } from '@/components/ui/image'
 import { cn } from '@/lib/utils'
 
@@ -101,7 +101,7 @@ export default function Hero() {
             })}
           </div>
           <div className={cn('pt-4 md:w-full', 'w-screen px-2')}>
-            <GitHubCalendar showColorLegend={false} username="woueziou" />
+            <GitHubCalendar />
           </div>
         </div>
       </div>
