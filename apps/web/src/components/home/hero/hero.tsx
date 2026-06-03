@@ -1,6 +1,6 @@
 import { SiGithub, SiMedium } from '@icons-pack/react-simple-icons'
 import { Linkedin, Mail } from 'lucide-react'
-import { useCallback, useRef } from 'react'
+import { useCallback } from 'react'
 import type React from 'react'
 import GitHubCalendar from '@/components/GitHubCalendar'
 import { showToast } from '@/components/ui/toast'
@@ -61,14 +61,12 @@ export default function Hero() {
 
   const yearsSince2019 = `${getYearsSince2019()}+`
 
-  const handleEmailClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, email: string) => {
+  const handleEmailClick = useCallback((email: string) => {
     trackOutbound('email', email)
-
-    // Copy to clipboard as fallback
     navigator.clipboard.writeText(email).then(
       () => showToast('Email copied to clipboard!'),
       () => {
-        // Clipboard API unavailable — do nothing, mailto: will still open
+        // Clipboard API unavailable
       },
     )
   }, [])
@@ -104,10 +102,10 @@ export default function Hero() {
             {contacts.map((contact, index) => {
               if (contact.type === 'email') {
                 return (
-                  <a
+                  <button
                     key={index}
-                    href={`mailto:${contact.value}`}
-                    onClick={(e) => handleEmailClick(e, contact.value)}
+                    type="button"
+                    onClick={() => handleEmailClick(contact.value)}
                     className={cn(
                       linkClass,
                       'relative overflow-hidden',
@@ -116,7 +114,7 @@ export default function Hero() {
                   >
                     <span>{contact.icon}</span>
                     <span>{contact.value}</span>
-                  </a>
+                  </button>
                 )
               }
               return (
