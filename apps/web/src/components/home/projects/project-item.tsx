@@ -143,10 +143,7 @@ export const ProjectItem = ({
       {/* ── Type badges ── */}
       <div className="flex space-x-2">
         {item.type.map((t, index) => (
-          <div
-            key={index}
-            className={cn('border-r pr-2 last:border-none font-semibold text-sm')}
-          >
+          <div key={index} className={cn('border-r pr-2 last:border-none font-semibold text-sm')}>
             {t}
           </div>
         ))}

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
 import type { Database } from '@repo/shared'
+import { useEffect, useMemo, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { formatDate } from '@/utils/formater'
 import { ProjectItem } from './project-item'
@@ -55,7 +55,9 @@ export default function ProjectClient({ data }: { data: Project[] }) {
   // Filter projects by selected type
   const filtered = useMemo(() => {
     if (!activeType) return data
-    return data.filter((p) => p.type.includes(activeType as Database['public']['Enums']['project_type']))
+    return data.filter((p) =>
+      p.type.includes(activeType as Database['public']['Enums']['project_type']),
+    )
   }, [data, activeType])
 
   const grouped = groupByYear(filtered)
@@ -119,11 +121,7 @@ export default function ProjectClient({ data }: { data: Project[] }) {
 
               {/* ── Project grid ── */}
               <div
-                className={cn(
-                  'grid md:grid-cols-3 w-full',
-                  'grid-cols-1',
-                  'place-content-center',
-                )}
+                className={cn('grid md:grid-cols-3 w-full', 'grid-cols-1', 'place-content-center')}
               >
                 {projects.map((item) => (
                   <ProjectItem item={item} key={item.id} />

@@ -55,13 +55,7 @@ export default function Hero() {
       <div
         className={cn('md:w-40 md:h-40 bg-background rounded-full md:overflow-hidden', 'w-15 h-15')}
       >
-        <Image
-          alt="logo"
-          src="/woueziou.png"
-          width={200}
-          height={200}
-          loading="eager"
-        />
+        <Image alt="logo" src="/woueziou.png" width={200} height={200} loading="eager" />
       </div>
       <div className={cn('grid place-items-center  md:gap-y-2 pt-4', '')}>
         <h1 className={cn('text-3xl font-black lg:text-7xl font-audiowide')}>Taas S. Ekpaye</h1>

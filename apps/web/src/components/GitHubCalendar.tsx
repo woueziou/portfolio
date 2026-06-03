@@ -37,12 +37,12 @@ export default function GitHubCalendar() {
       {/* Total contributions — prominent */}
       <div className="text-center">
         {error ? (
-          <p className="text-sm text-muted-foreground">
-            Could not load contribution data.
-          </p>
+          <p className="text-sm text-muted-foreground">Could not load contribution data.</p>
         ) : totalContributions !== null ? (
           <>
-            <span className="text-3xl font-bold tabular-nums">{totalContributions.toLocaleString()}</span>
+            <span className="text-3xl font-bold tabular-nums">
+              {totalContributions.toLocaleString()}
+            </span>
             <span className="ml-1.5 text-base text-muted-foreground">
               public contributions this year
             </span>

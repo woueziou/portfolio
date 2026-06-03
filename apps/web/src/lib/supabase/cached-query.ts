@@ -3,9 +3,10 @@
  * Implements stale-while-revalidate: returns cached data immediately
  * while refreshing in the background.
  */
-import { getCached, setCache } from './cache'
-import { createSupabaseBrowserClient } from './browser'
+
 import type { Database } from '@repo/shared'
+import { createSupabaseBrowserClient } from './browser'
+import { getCached, setCache } from './cache'
 
 type TableName = keyof Database['public']['Tables']
 
@@ -40,7 +41,10 @@ export async function cachedSelect<T extends TableName>(
   if (error) {
     // If we have stale data, return it instead of the error
     if (cached) {
-      console.warn(`Supabase fetch for ${table as string} failed, serving stale cache.`, error.message)
+      console.warn(
+        `Supabase fetch for ${table as string} failed, serving stale cache.`,
+        error.message,
+      )
       return { data: cached.data, error: null }
     }
     return { data: [], error: error.message }
