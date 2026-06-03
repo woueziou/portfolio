@@ -1,0 +1,229 @@
+---
+import type { Database } from '@repo/shared'
+import { supabase } from '@repo/shared'
+import { ArrowLeft, Calendar, Clock, ExternalLink } from 'lucide-react'
+import ArticleRenderer from '@/components/projects/ArticleRenderer.astro'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { formatDate } from '@/utils/formater'
+
+type Project = Database['public']['Tables']['projects']['Row']
+type Article = Database['public']['Tables']['articles']['Row']
+
+const { slug } = Astro.params
+
+if (!slug) {
+  return Astro.redirect('/404')
+}
+
+// Fetch published project by slug
+const { data: project, error: projectError } = await supabase
+  .from('projects')
+  .select('*')
+  .eq('slug', slug)
+  .eq('publication_status', 'published')
+  .single()
+
+if (projectError || !project) {
+  return Astro.redirect('/404')
+}
+
+// Fetch published articles linked to this project
+const { data: articles } = await supabase
+  .from('articles')
+  .select('*')
+  .eq('project_id', project.id)
+  .eq('status', 'published')
+  .order('published_at', { ascending: false })
+
+const typedProject = project as Project
+const typedArticles = (articles || []) as Article[]
+
+const projectTitle = typedProject.title ?? 'Untitled Project'
+const pageTitle = `${projectTitle} — Taas S. Ekpaye`
+const pageDescription = typedProject.description?.slice(0, 160) ?? projectTitle
+const ogImage = typedProject.main_image_url === null ? undefined : typedProject.main_image_url
+
+// Build JSON-LD schema
+const jsonLdProject = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: projectTitle,
+  description: typedProject.description ?? '',
+  url: typedProject.url || undefined,
+  applicationCategory: 'WebApplication',
+  datePublished: typedProject.published_at || undefined,
+  author: {
+    '@type': 'Person',
+    name: 'Taas S. Ekpaye',
+  },
+}
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} ogImage={ogImage}>
+  <div class="antialiased bg-[url('/noise-bg.png')] font-baufra min-h-screen">
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
+      <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+        <a
+          href="/"
+          class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Portfolio
+        </a>
+        {typedProject.url && (
+          <a
+            href={typedProject.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline underline-offset-4"
+          >
+            View Live
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        )}
+      </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-12 max-w-4xl">
+      <!-- Project Header -->
+      <header class="mb-12">
+        <!-- Project Image -->
+        {typedProject.main_image_url && (
+          <div class="mb-8 rounded-xl overflow-hidden shadow-lg">
+            <img
+              src={typedProject.main_image_url}
+              alt={typedProject.title}
+              class="w-full h-auto object-cover"
+              loading="eager"
+            />
+          </div>
+        )}
+
+        <!-- Meta Info -->
+        <div class="flex flex-wrap items-center gap-3 mb-4 text-sm text-muted-foreground">
+          {typedProject.project_date && (
+            <span class="flex items-center gap-1.5">
+              <Calendar className="h-4 w-4" />
+              {formatDate(typedProject.project_date, 'MMMM YYYY')}
+            </span>
+          )}
+          <span class="flex items-center gap-1.5 capitalize">
+            {typedProject.state}
+          </span>
+          {typedProject.type.map((t) => (
+            <span class="px-2 py-0.5 bg-secondary/30 rounded text-xs font-medium capitalize">
+              {t}
+            </span>
+          ))}
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+          {projectTitle}
+        </h1>
+
+        <!-- Description -->
+        <p class="text-lg text-muted-foreground leading-relaxed mb-6">
+          {typedProject.description}
+        </p>
+
+        <!-- Tech Stack -->
+        <div class="flex flex-wrap gap-2">
+          {typedProject.tech_stack.map((tech) => (
+            <span class="flex items-center gap-1.5 px-3 py-1.5 border border-secondary/30 text-sm hover:bg-primary hover:text-white transition-colors">
+              {tech}
+            </span>
+          ))}
+        </div>
+
+        <!-- Access Link -->
+        {typedProject.access_link && (
+          <div class="mt-6">
+            <a
+              href={typedProject.access_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium"
+            >
+              Access Project
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          </div>
+        )}
+      </header>
+
+      <!-- Articles Section -->
+      {typedArticles.length > 0 && (
+        <section class="mt-16">
+          <h2 class="text-2xl font-bold mb-8 border-b border-border pb-4">
+            Articles
+          </h2>
+
+          <div class="space-y-16">
+            {typedArticles.map((article) => (
+              <article class="group">
+                <!-- Article Header -->
+                <div class="mb-6">
+                  <h3 class="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">
+                    {article.title}
+                  </h3>
+                  <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                    {article.published_at && (
+                      <span class="flex items-center gap-1.5">
+                        <Calendar className="h-3.5 w-3.5" />
+                        {formatDate(article.published_at, 'MMMM D, YYYY')}
+                      </span>
+                    )}
+                    {article.reading_time_minutes && (
+                      <span class="flex items-center gap-1.5">
+                        <Clock className="h-3.5 w-3.5" />
+                        {article.reading_time_minutes} min read
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <!-- Article Content -->
+                {article.content_html && (
+                  <ArticleRenderer contentHtml={article.content_html} />
+                )}
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+    </main>
+
+    <!-- JSON-LD Structured Data -->
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(jsonLdProject)}
+    />
+
+    <!-- Article JSON-LD -->
+    {typedArticles.map((article) => (
+      <script
+        type="application/ld+json"
+        set:html={JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'TechArticle',
+          headline: article.title,
+          datePublished: article.published_at || article.created_at,
+          author: {
+            '@type': 'Person',
+            name: 'Taas S. Ekpaye',
+          },
+          isPartOf: {
+            '@type': 'SoftwareApplication',
+            name: projectTitle,
+          },
+          wordCount: article.content_html ? article.content_html.split(/\s+/).length : undefined,
+          timeRequired: article.reading_time_minutes
+            ? `PT${article.reading_time_minutes}M`
+            : undefined,
+        })}
+      />
+    ))}
+  </div>
+</BaseLayout>

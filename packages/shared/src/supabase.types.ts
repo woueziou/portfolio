@@ -30,29 +30,53 @@ export type Database = {
     Tables: {
       articles: {
         Row: {
+          content: Json | null
+          content_html: string | null
           created_at: string
           id: number
           image_url: string | null
+          project_id: number | null
+          published_at: string | null
+          reading_time_minutes: number | null
+          slug: string
+          status: Database['public']['Enums']['publication_status']
           summary: string | null
           title: string
+          updated_at: string
           url: string | null
           user_id: string
         }
         Insert: {
+          content?: Json | null
+          content_html?: string | null
           created_at?: string
           id?: number
           image_url?: string | null
+          project_id?: number | null
+          published_at?: string | null
+          reading_time_minutes?: number | null
+          slug: string
+          status?: Database['public']['Enums']['publication_status']
           summary?: string | null
           title: string
+          updated_at?: string
           url?: string | null
           user_id: string
         }
         Update: {
+          content?: Json | null
+          content_html?: string | null
           created_at?: string
           id?: number
           image_url?: string | null
+          project_id?: number | null
+          published_at?: string | null
+          reading_time_minutes?: number | null
+          slug?: string
+          status?: Database['public']['Enums']['publication_status']
           summary?: string | null
           title?: string
+          updated_at?: string
           url?: string | null
           user_id?: string
         }
@@ -62,6 +86,13 @@ export type Database = {
             columns: ['user_id']
             isOneToOne: false
             referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'articles_project_id_fkey'
+            columns: ['project_id']
+            isOneToOne: false
+            referencedRelation: 'projects'
             referencedColumns: ['id']
           },
         ]
@@ -131,41 +162,56 @@ export type Database = {
       }
       projects: {
         Row: {
+          access_link: string | null
           created_at: string
           description: string | null
           id: number
           main_image_url: string | null
           project_date: string
+          publication_status: Database['public']['Enums']['publication_status']
+          published_at: string | null
+          slug: string
           state: Database['public']['Enums']['project_status'] | null
           tech_stack: string[]
           title: string | null
           type: Database['public']['Enums']['project_type'][]
+          updated_at: string
           url: string | null
           user_id: string
         }
         Insert: {
+          access_link?: string | null
           created_at?: string
           description?: string | null
           id?: number
           main_image_url?: string | null
           project_date: string
+          publication_status?: Database['public']['Enums']['publication_status']
+          published_at?: string | null
+          slug: string
           state?: Database['public']['Enums']['project_status'] | null
           tech_stack?: string[]
           title?: string | null
           type?: Database['public']['Enums']['project_type'][]
+          updated_at?: string
           url?: string | null
           user_id: string
         }
         Update: {
+          access_link?: string | null
           created_at?: string
           description?: string | null
           id?: number
           main_image_url?: string | null
           project_date?: string
+          publication_status?: Database['public']['Enums']['publication_status']
+          published_at?: string | null
+          slug?: string
           state?: Database['public']['Enums']['project_status'] | null
           tech_stack?: string[]
           title?: string | null
           type?: Database['public']['Enums']['project_type'][]
+          updated_at?: string
           url?: string | null
           user_id?: string
         }
@@ -189,6 +235,7 @@ export type Database = {
     Enums: {
       project_status: 'ongoing' | 'finished' | 'production'
       project_type: 'web' | 'mobile' | 'script' | 'backend' | 'infra'
+      publication_status: 'draft' | 'published' | 'archived'
     }
     CompositeTypes: {
       [_ in never]: never

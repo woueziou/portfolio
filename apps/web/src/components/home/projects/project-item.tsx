@@ -78,6 +78,13 @@ export const ProjectItem = ({
 }: {
   item: Database['public']['Tables']['projects']['Row']
 }) => {
+  const projectUrl =
+    item.publication_status === 'published' && item.slug
+      ? `/projects/${item.slug}`
+      : item.url || null
+
+  const isInternalLink = projectUrl?.startsWith('/')
+
   return (
     <div
       className={cn(
@@ -97,20 +104,20 @@ export const ProjectItem = ({
         ))}
       </div>
       <div className="flex flex-col items-start space-y-2 ">
-        {item.url && (
+        {projectUrl ? (
           <div className="flex items-center space-x-1 border-b-2">
             <a
-              href={item.url}
-              target="_blank"
+              href={projectUrl}
+              {...(isInternalLink ? {} : { target: '_blank', rel: 'noopener' })}
               className={cn('text-xl font-bold', ' underline-offset-4')}
-              rel="noopener"
             >
               {item.title}
             </a>
-            <ExternalLink className="w-4 h-4" />
+            {!isInternalLink && <ExternalLink className="w-4 h-4" />}
           </div>
+        ) : (
+          <div className={cn('text-xl font-bold')}>{item.title}</div>
         )}
-        {!item.url && <div className={cn('text-xl font-bold')}>{item.title}</div>}
         <div className={cn('text-xs')}>{formatDate(item.project_date, 'YYYY')}</div>
       </div>
 
