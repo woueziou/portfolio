@@ -7,6 +7,11 @@ import BaseLayout from '@/layouts/BaseLayout.astro'
 import { formatDate } from '@/utils/formater'
 
 type Project = Database['public']['Tables']['projects']['Row']
+interface TechstackInfo {
+  id: string
+  name: string
+  icon: string
+}
 type Article = Database['public']['Tables']['articles']['Row']
 
 const { slug } = Astro.params
@@ -15,10 +20,16 @@ if (!slug) {
   return Astro.redirect('/404')
 }
 
-// Fetch published project by slug
+// Fetch published project by slug (with techstack relation)
 const { data: project, error: projectError } = await supabase
   .from('projects')
-  .select('*')
+  .select(
+    `*,
+    project_techstacks(
+      techstack_id,
+      techstacks(id, name, icon)
+    )`,
+  )
   .eq('slug', slug)
   .eq('publication_status', 'published')
   .single()
@@ -27,15 +38,33 @@ if (projectError || !project) {
   return Astro.redirect('/404')
 }
 
+const projectId = typedProject.id
+
 // Fetch published articles linked to this project
 const { data: articles } = await supabase
   .from('articles')
   .select('*')
-  .eq('project_id', project.id)
+  .eq('project_id', projectId)
   .eq('status', 'published')
   .order('published_at', { ascending: false })
 
-const typedProject = project as Project
+const typedProject = project as Project & {
+  project_techstacks?: Array<{
+    techstack_id: string
+    techstacks: TechstackInfo | null
+  }>
+}
+
+// Extract techstacks from relation (fall back to legacy tech_stack)
+const techstacksFromRelation: TechstackInfo[] =
+  typedProject.project_techstacks
+    ?.filter((pt: any) => pt.techstacks)
+    .map((pt: any) => pt.techstacks as TechstackInfo) || []
+
+// Combine relation techs with any legacy tech_stack values not yet in the relation
+const legacyTechs = (typedProject.tech_stack || []).filter(
+  (t: string) => !techstacksFromRelation.some((r) => r.name.toLowerCase() === t.toLowerCase()),
+)
 const typedArticles = (articles || []) as Article[]
 
 const projectTitle = typedProject.title ?? 'Untitled Project'
@@ -128,9 +157,14 @@ const jsonLdProject = {
           {typedProject.description}
         </p>
 
-        <!-- Tech Stack -->
+        <!-- Tech Stack (from relation + legacy fallback) -->
         <div class="flex flex-wrap gap-2">
-          {typedProject.tech_stack.map((tech) => (
+          {techstacksFromRelation.map((ts) => (
+            <span class="flex items-center gap-1.5 px-3 py-1.5 border border-secondary/30 text-sm hover:bg-primary hover:text-white transition-colors">
+              {ts.name}
+            </span>
+          ))}
+          {legacyTechs.map((tech) => (
             <span class="flex items-center gap-1.5 px-3 py-1.5 border border-secondary/30 text-sm hover:bg-primary hover:text-white transition-colors">
               {tech}
             </span>
