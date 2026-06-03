@@ -26,6 +26,11 @@ interface ProjectFormProps {
 const PROJECT_TYPES = [
   { value: 'web', label: 'Web' },
   { value: 'mobile', label: 'Mobile' },
+  { value: 'script', label: 'Script' },
+  { value: 'backend', label: 'Backend' },
+  { value: 'infra', label: 'Infrastructure' },
+  { value: 'llm', label: 'LLM' },
+  { value: 'ai', label: 'AI' },
   { value: 'desktop', label: 'Desktop' },
   { value: 'api', label: 'API' },
   { value: 'library', label: 'Library' },

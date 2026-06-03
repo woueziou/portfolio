@@ -1,7 +1,19 @@
 import { z } from 'zod'
 
-// Project type enum matching the database
-export const projectTypeEnum = z.enum(['web', 'mobile', 'desktop', 'api', 'library', 'other'])
+// Project type enum matching the database (all DB values)
+export const projectTypeEnum = z.enum([
+  'web',
+  'mobile',
+  'script',
+  'backend',
+  'infra',
+  'llm',
+  'ai',
+  'desktop',
+  'api',
+  'library',
+  'other',
+])
 
 // Publication status enum
 export const publicationStatusEnum = z.enum(['draft', 'published', 'archived'])
