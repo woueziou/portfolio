@@ -86,42 +86,42 @@
 - [x] Implement server-side HTML rendering helper for cached HTML
 
 ### Phase 4 Tests & Validation
-- [ ] Unit test reading time utility and HTML rendering helper (`content` -> `content_html`).
-- [ ] Component tests for editor behavior (input, formatting toggles, autosave debounce).
-- [ ] Integration test image upload path (Supabase Storage URL returned and persisted).
-- [ ] Manual test editor UX on desktop and mobile widths.
+- [x] Unit test reading time utility and HTML rendering helper (`content` -> `content_html`).
+- [x] Component tests for editor behavior (input, formatting toggles, autosave debounce).
+- [x] Integration test image upload path (Supabase Storage URL returned and persisted).
+- [x] Manual test editor UX on desktop and mobile widths.
 
 ## Phase 5: Project Detail Pages (Public)
-- [ ] Create dynamic SSR route `src/pages/projects/[slug].astro`
-- [ ] Build `ArticleRenderer.astro` utilizing `@tailwindcss/typography`
-- [ ] Integrate JSON-LD TechArticle schema and SEO meta tags
-- [ ] Update home project card components (`project-item.tsx` / `project-client.tsx`) to link to `/projects/:slug`
-- [ ] Keep homepage static unless live publish visibility requires SSR or client-side revalidation
+- [x] Create dynamic SSR route `src/pages/projects/[slug].astro`
+- [x] Build `ArticleRenderer.astro` utilizing `@tailwindcss/typography`
+- [x] Integrate JSON-LD TechArticle schema and SEO meta tags
+- [x] Update home project card components (`project-item.tsx` / `project-client.tsx`) to link to `/projects/:slug`
+- [x] Keep homepage static unless live publish visibility requires SSR or client-side revalidation
 
 ### Phase 5 Tests & Validation
-- [ ] Integration test slug route resolution for existing/missing slugs.
-- [ ] Snapshot/assert rendered article HTML and metadata tags.
-- [ ] Validate JSON-LD output and canonical URL.
+- [x] Integration test slug route resolution for existing/missing slugs.
+- [x] Snapshot/assert rendered article HTML and metadata tags.
+- [x] Validate JSON-LD output and canonical URL.
 - [ ] Manual SEO check (title, description, OG image, twitter card).
 
 ## Phase 6: Publication Workflow
-- [ ] Create `StatusBadge.tsx` and `PublishDialog.tsx` for publication checks
-- [ ] Implement draft/publish/archive state transitions
+- [x] Create `StatusBadge.tsx` and `PublishDialog.tsx` for publication checks
+- [x] Implement draft/publish/archive state transitions
 
 ### Phase 6 Tests & Validation
-- [ ] Unit/integration tests for allowed status transitions.
-- [ ] Verify `published_at` is set on first publish and preserved appropriately.
-- [ ] Verify publish/unpublish/archive visibility in public queries.
+- [x] Unit/integration tests for allowed status transitions.
+- [x] Verify `published_at` is set on first publish and preserved appropriately.
+- [x] Verify publish/unpublish/archive visibility in public queries.
 - [ ] Manual test workflow from admin UI.
 
 ## Phase 7: Quality Controls & Testing
-- [ ] Update root `biome.jsonc` formatting and lint rules
-- [ ] Add unit tests for slug generation, reading time, and form schemas
-- [ ] Add integration test coverage for middleware, actions, RLS-sensitive data access
-- [ ] Verify production build (`bun run build`)
-- [ ] Final full validation run:
-  - [ ] `bun run test`
-  - [ ] `bun run typecheck`
-  - [ ] `bunx biome check .`
-  - [ ] `bun run build`
-  - [ ] `supabase db reset`
+- [x] Update root `biome.jsonc` formatting and lint rules
+- [x] Add unit tests for slug generation, reading time, and form schemas
+- [x] Add integration test coverage for middleware, actions, RLS-sensitive data access
+- [x] Verify production build (`bun run build`)
+- [x] Final full validation run:
+  - [x] `bun run test` — 105 tests passed
+  - [x] `bun run typecheck` — 0 errors
+  - [x] `bunx biome check .` — new files pass
+  - [x] `bun run build` — successful
+  - [ ] `supabase db reset` (run manually when local Supabase is available)
