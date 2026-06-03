@@ -1,0 +1,215 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+
+export const prerender = false
+
+const supabase = createSupabaseServerClient(Astro.cookies)
+
+const { data: config } = await supabase
+  .from('site_config')
+  .select('*')
+  .eq('id', 1)
+  .single()
+
+const socialLinks = (config?.social_links || {}) as Record<string, string>
+---
+
+<AdminLayout title="Settings" activeItem="settings">
+  <div class="max-w-2xl mx-auto space-y-6">
+    <div>
+      <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Settings</h1>
+      <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        Configure your site metadata and social links
+      </p>
+    </div>
+
+    <!-- Site Info -->
+    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+      <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Site Information</h2>
+      <form id="settings-form" class="space-y-5">
+        <!-- Site Title -->
+        <div>
+          <label for="site_title" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+            Site Title
+          </label>
+          <input
+            id="site_title"
+            name="site_title"
+            type="text"
+            value={config?.site_title || 'Portfolio'}
+            required
+            class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400"
+          />
+        </div>
+
+        <!-- Site Tagline -->
+        <div>
+          <label for="site_tagline" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+            Tagline
+          </label>
+          <input
+            id="site_tagline"
+            name="site_tagline"
+            type="text"
+            value={config?.site_tagline || ''}
+            placeholder="A short description of your site"
+            class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400"
+          />
+        </div>
+
+        <!-- SEO Description -->
+        <div>
+          <label for="seo_description" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+            SEO Description
+          </label>
+          <textarea
+            id="seo_description"
+            name="seo_description"
+            rows={3}
+            placeholder="Meta description for search engines"
+            class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400"
+          >{config?.seo_description || ''}</textarea>
+        </div>
+
+        <!-- OG Image -->
+        <div>
+          <label for="seo_og_image" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+            Open Graph Image URL
+          </label>
+          <input
+            id="seo_og_image"
+            name="seo_og_image"
+            type="url"
+            value={config?.seo_og_image || ''}
+            placeholder="https://example.com/og-image.png"
+            class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400"
+          />
+        </div>
+
+        <div class="flex items-center gap-3 pt-2">
+          <button
+            type="submit"
+            class="inline-flex items-center gap-2 rounded-lg bg-zinc-900 dark:bg-zinc-100 px-4 py-2.5 text-sm font-medium text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50"
+          >
+            Save Site Info
+          </button>
+          <span id="settings-status" class="text-sm text-zinc-500"></span>
+        </div>
+      </form>
+    </div>
+
+    <!-- Social Links -->
+    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+      <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Social Links</h2>
+      <form id="social-form" class="space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="social_github" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">GitHub</label>
+            <input id="social_github" type="url" value={socialLinks.github || ''} placeholder="https://github.com/username"
+              class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400" />
+          </div>
+          <div>
+            <label for="social_twitter" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Twitter / X</label>
+            <input id="social_twitter" type="url" value={socialLinks.twitter || ''} placeholder="https://twitter.com/username"
+              class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400" />
+          </div>
+          <div>
+            <label for="social_linkedin" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">LinkedIn</label>
+            <input id="social_linkedin" type="url" value={socialLinks.linkedin || ''} placeholder="https://linkedin.com/in/username"
+              class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400" />
+          </div>
+          <div>
+            <label for="social_website" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Website</label>
+            <input id="social_website" type="url" value={socialLinks.website || ''} placeholder="https://example.com"
+              class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400" />
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 pt-2">
+          <button
+            type="submit"
+            class="inline-flex items-center gap-2 rounded-lg bg-zinc-900 dark:bg-zinc-100 px-4 py-2.5 text-sm font-medium text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50"
+          >
+            Save Social Links
+          </button>
+          <span id="social-status" class="text-sm text-zinc-500"></span>
+        </div>
+      </form>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  // Site Info form
+  const settingsForm = document.getElementById('settings-form') as HTMLFormElement
+  const settingsStatus = document.getElementById('settings-status')!
+
+  settingsForm.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const btn = settingsForm.querySelector('button[type="submit"]') as HTMLButtonElement
+    btn.disabled = true
+    settingsStatus.textContent = 'Saving...'
+
+    const formData = new FormData(settingsForm)
+    const data: Record<string, any> = {}
+    formData.forEach((val, key) => { data[key] = val })
+
+    // Strip empty strings to null
+    for (const key of ['site_tagline', 'seo_description', 'seo_og_image']) {
+      if (!data[key]) data[key] = null
+    }
+
+    try {
+      const { error } = await (window as any).Astro.actions.siteConfig.update(data)
+      if (error) {
+        settingsStatus.textContent = `Error: ${error.message}`
+        settingsStatus.className = 'text-sm text-red-500'
+      } else {
+        settingsStatus.textContent = 'Saved successfully!'
+        settingsStatus.className = 'text-sm text-green-500'
+      }
+    } catch (err: any) {
+      settingsStatus.textContent = `Error: ${err.message || 'Unknown error'}`
+      settingsStatus.className = 'text-sm text-red-500'
+    } finally {
+      btn.disabled = false
+      setTimeout(() => { settingsStatus.textContent = '' }, 3000)
+    }
+  })
+
+  // Social Links form
+  const socialForm = document.getElementById('social-form') as HTMLFormElement
+  const socialStatus = document.getElementById('social-status')!
+
+  socialForm.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const btn = socialForm.querySelector('button[type="submit"]') as HTMLButtonElement
+    btn.disabled = true
+    socialStatus.textContent = 'Saving...'
+
+    const socials: Record<string, string> = {}
+    const fields = ['github', 'twitter', 'linkedin', 'website']
+    for (const field of fields) {
+      const val = (document.getElementById(`social_${field}`) as HTMLInputElement).value.trim()
+      if (val) socials[field] = val
+    }
+
+    try {
+      const { error } = await (window as any).Astro.actions.siteConfig.update({ social_links: socials })
+      if (error) {
+        socialStatus.textContent = `Error: ${error.message}`
+        socialStatus.className = 'text-sm text-red-500'
+      } else {
+        socialStatus.textContent = 'Saved successfully!'
+        socialStatus.className = 'text-sm text-green-500'
+      }
+    } catch (err: any) {
+      socialStatus.textContent = `Error: ${err.message || 'Unknown error'}`
+      socialStatus.className = 'text-sm text-red-500'
+    } finally {
+      btn.disabled = false
+      setTimeout(() => { socialStatus.textContent = '' }, 3000)
+    }
+  })
+</script>
