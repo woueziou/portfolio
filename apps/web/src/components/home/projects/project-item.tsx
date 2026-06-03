@@ -185,7 +185,7 @@ export const ProjectItem = ({
             key={ix}
             className={cn(
               'flex items-center gap-1.5 border border-secondary/30 px-2.5 py-1.5 text-sm',
-              'hover:bg-primary hover:text-white transition-colors',
+              'hover:bg-accent hover:text-accent-foreground transition-colors',
             )}
           >
             <span className="shrink-0">{getIcon(tech.toLowerCase())}</span>

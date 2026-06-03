@@ -25,7 +25,7 @@ function trackOutbound(label: string, url: string) {
 
 export default function Hero() {
   const linkClass =
-    'h-10 flex space-x-2 items-center border border-secondary/30 px-4 hover:bg-primary hover:text-white active:scale-95 transition-all duration-150'
+    'h-10 flex space-x-2 items-center border border-secondary/30 px-4 hover:bg-accent hover:text-accent-foreground active:scale-95 transition-all duration-150'
 
   const contacts: ContactType[] = [
     {

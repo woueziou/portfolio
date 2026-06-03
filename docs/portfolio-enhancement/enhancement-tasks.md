@@ -117,7 +117,7 @@ If any of these are slow or unreachable, the page degrades poorly.
 - ✅ Use `gap-6` or `gap-8` for better spacing between cards.
 
 
-## 10. Color Palette Is Monochromatic and Low Contrast
+## 10. Color Palette Is Monochromatic and Low Contrast ✅
 
 **Issue**: The entire site uses a single hue — `hsl(50, ...)` (a warm yellow/beige) — for all semantic colors:
 - Background: `hsl(50 28% 95%)` — light cream
@@ -127,9 +127,9 @@ If any of these are slow or unreachable, the page degrades poorly.
 In dark mode, `hsl(50 28% 5%)` is very dark brown (almost black), and borders are `hsl(50 28% 18%)` — borderline invisible.
 
 **Recommendation**:
-- Lighten dark mode borders to at least `30%` lightness.
-- Introduce an accent color (blue, teal, or purple) for interactive elements — currently EVERYTHING is warm beige/brown. The `BackgroundBeams` component uses cyan/purple gradients that would contrast beautifully.
-- The hover effect `hover:bg-primary hover:text-white` works but the `primary` color is the same brown — for project cards, consider a subtle blue or purple accent on hover instead.
+- ✅ Lighten dark mode borders to at least `30%` lightness.
+- ✅ Introduce an accent color (blue, teal, or purple) for interactive elements — currently EVERYTHING is warm beige/brown. The `BackgroundBeams` component uses cyan/purple gradients that would contrast beautifully.
+- ✅ The hover effect `hover:bg-primary hover:text-white` works but the `primary` color is the same brown — for project cards, consider a subtle blue or purple accent on hover instead.
 
 ---
 
