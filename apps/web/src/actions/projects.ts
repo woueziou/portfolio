@@ -9,6 +9,43 @@ import {
 import { generateSlug, makeUniqueSlug } from '@/lib/slug'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
+/**
+ * Helper: sync project_techstacks from legacy tech_stack string array.
+ * Inserts rows for matching techstacks, ignoring unmatched names.
+ */
+async function syncProjectTechstacks(
+  supabase: ReturnType<typeof createSupabaseServerClient>,
+  projectId: number,
+  techStack: string[],
+): Promise<void> {
+  if (!techStack.length) return
+
+  // Get matching techstack IDs (lowercased comparison)
+  const { data: matchingStacks } = await supabase
+    .from('techstacks')
+    .select('id')
+    .in(
+      'id',
+      techStack.map((t) => t.toLowerCase()),
+    )
+
+  if (!matchingStacks?.length) return
+
+  // Delete existing relations, insert new ones
+  await supabase.from('project_techstacks').delete().eq('project_id', projectId)
+
+  const { error: insertError } = await supabase.from('project_techstacks').insert(
+    matchingStacks.map((ts) => ({
+      project_id: projectId,
+      techstack_id: ts.id,
+    })),
+  )
+
+  if (insertError) {
+    console.error('Failed to sync project_techstacks:', insertError)
+  }
+}
+
 export const projects = {
   create: defineAction({
     accept: 'json',
@@ -47,7 +84,7 @@ export const projects = {
         slug = makeUniqueSlug(slug, existingSlugs?.map((p) => p.slug) || [])
       }
 
-      // Insert project
+      // Insert project (keep legacy tech_stack for compatibility)
       const { data: project, error: insertError } = await supabase
         .from('projects')
         .insert({
@@ -73,6 +110,9 @@ export const projects = {
           code: 'INTERNAL_SERVER_ERROR',
         })
       }
+
+      // Sync project_techstacks relation
+      await syncProjectTechstacks(supabase, project.id, input.tech_stack)
 
       return { project }
     },
@@ -136,11 +176,14 @@ export const projects = {
         }
       }
 
+      const { tech_stack, ...projectUpdates } = updates
+
       // Update project
       const { data: project, error: updateError } = await supabase
         .from('projects')
         .update({
-          ...updates,
+          ...projectUpdates,
+          ...(tech_stack ? { tech_stack } : {}),
           slug: slug || existingProject.slug,
         })
         .eq('id', id)
@@ -153,6 +196,11 @@ export const projects = {
           message: updateError.message,
           code: 'INTERNAL_SERVER_ERROR',
         })
+      }
+
+      // Sync project_techstacks relation if tech_stack was updated
+      if (tech_stack) {
+        await syncProjectTechstacks(supabase, id, tech_stack)
       }
 
       return { project }
@@ -198,7 +246,7 @@ export const projects = {
         })
       }
 
-      // Delete project
+      // Delete project (cascades to project_techstacks)
       const { error: deleteError } = await supabase
         .from('projects')
         .delete()
@@ -378,7 +426,13 @@ export const projects = {
 
       const { data: project, error } = await supabase
         .from('projects')
-        .select('*')
+        .select(
+          `*,
+          project_techstacks(
+            techstack_id,
+            techstacks(id, name, icon)
+          )`,
+        )
         .eq('id', id)
         .eq('user_id', user.id)
         .single()
@@ -400,8 +454,9 @@ export const projects = {
       page: z.number().int().positive().default(1),
       perPage: z.number().int().positive().max(100).default(10),
       status: z.enum(['draft', 'published', 'archived']).optional(),
+      techstack_id: z.string().optional(),
     }),
-    handler: async ({ page, perPage, status }, context) => {
+    handler: async ({ page, perPage, status, techstack_id }, context) => {
       const supabase = createSupabaseServerClient(context.cookies)
 
       const {
@@ -419,13 +474,42 @@ export const projects = {
 
       let query = supabase
         .from('projects')
-        .select('*', { count: 'exact' })
+        .select(
+          `*,
+          project_techstacks(
+            techstack_id,
+            techstacks(id, name, icon)
+          )`,
+          { count: 'exact' },
+        )
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .range(offset, offset + perPage - 1)
 
       if (status) {
         query = query.eq('publication_status', status)
+      }
+
+      if (techstack_id) {
+        // Filter projects by techstack via the join table
+        const { data: filteredIds } = await supabase
+          .from('project_techstacks')
+          .select('project_id')
+          .eq('techstack_id', techstack_id)
+
+        const projectIds = filteredIds?.map((pt) => pt.project_id) || []
+        if (projectIds.length > 0) {
+          query = query.in('id', projectIds)
+        } else {
+          // No projects match this techstack, return empty
+          return {
+            projects: [],
+            total: 0,
+            page,
+            perPage,
+            totalPages: 0,
+          }
+        }
       }
 
       const { data: projects, error, count } = await query
