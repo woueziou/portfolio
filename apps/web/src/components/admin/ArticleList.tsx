@@ -1,6 +1,25 @@
 import { actions } from 'astro:actions'
 import { useCallback, useEffect, useState } from 'react'
-import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  FileText,
+  Search,
+  Plus,
+  Calendar,
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+} from 'lucide-react'
 
 interface Article {
   id: number
@@ -23,16 +42,16 @@ interface PaginatedResult {
 }
 
 const STATUS_OPTIONS = [
-  { value: '', label: 'All statuses' },
+  { value: 'all', label: 'All statuses' },
   { value: 'draft', label: 'Draft' },
   { value: 'published', label: 'Published' },
   { value: 'archived', label: 'Archived' },
 ]
 
-const STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-  published: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-  archived: 'bg-muted text-muted-foreground',
+const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'outline'> = {
+  draft: 'secondary',
+  published: 'default',
+  archived: 'outline',
 }
 
 function formatDate(date: string | null): string {
@@ -47,7 +66,7 @@ function formatDate(date: string | null): string {
 export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
   const [data, setData] = useState<PaginatedResult>(initialData)
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
   const [page, setPage] = useState(initialData.page)
   const [loading, setLoading] = useState(false)
   const perPage = initialData.perPage
@@ -55,11 +74,10 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
   const fetchArticles = useCallback(async () => {
     setLoading(true)
     try {
-      // Use the server action — falls back to client search for simplicity
       const { error, data: result } = await actions.articles.list({
         page,
         perPage,
-        status: statusFilter || undefined,
+        status: statusFilter !== 'all' ? (statusFilter as 'draft' | 'published' | 'archived') : undefined,
       })
       if (!error && result) {
         setData(result as PaginatedResult)
@@ -85,87 +103,126 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
   })
 
   return (
-    <div class="space-y-6">
+    <div className="space-y-6">
       {/* Search + Filters */}
-      <div class="flex flex-col sm:flex-row gap-3">
-        <div class="flex-1">
-          <input
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
             type="search"
-            placeholder="Search articles by title or slug..."
+            placeholder="Search articles..."
             aria-label="Search articles"
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-            class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setPage(1)
+            }}
+            className="pl-9 border-0 bg-muted/50 focus-visible:ring-0 focus-visible:ring-offset-0"
           />
         </div>
-        <select
+        <Select
           value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
-          aria-label="Filter by status"
-          class="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          onValueChange={(value) => {
+            setStatusFilter(value)
+            setPage(1)
+          }}
         >
-          {STATUS_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
+          <SelectTrigger className="w-full sm:w-[160px] border-0 bg-muted/50">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUS_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Loading */}
       {loading && (
-        <div role="status" aria-label="Loading" class="text-center text-sm text-muted-foreground py-4">Loading...</div>
+        <div
+          role="status"
+          aria-label="Loading"
+          className="text-center text-sm text-muted-foreground py-8"
+        >
+          Loading...
+        </div>
       )}
 
-      {/* Cards */}
+      {/* Article List */}
       {!loading && filtered.length === 0 ? (
-        <div class="rounded-xl border border-border bg-card p-12 text-center">
-          <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <h3 class="mt-4 text-lg font-medium text-foreground">No articles found</h3>
-          <p class="mt-2 text-sm text-muted-foreground">
-            {search || statusFilter ? 'Try adjusting your filters.' : 'Create your first article to get started.'}
+        <div className="text-center py-16">
+          <FileText className="mx-auto h-12 w-12 text-muted-foreground/40" />
+          <h3 className="mt-4 text-lg font-medium text-foreground">
+            No articles found
+          </h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {search || statusFilter !== 'all'
+              ? 'Try adjusting your filters.'
+              : 'Create your first article to get started.'}
           </p>
+          {!search && statusFilter === 'all' && (
+            <Button variant="ghost" className="mt-4" asChild>
+              <a href="/admin/articles/new">
+                <Plus className="h-4 w-4 mr-1.5" />
+                New Article
+              </a>
+            </Button>
+          )}
         </div>
       ) : (
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="space-y-1">
           {filtered.map((article) => (
             <a
               key={article.id}
               href={`/admin/articles/${article.id}/edit`}
-              class="block rounded-xl border border-border bg-card p-5 hover:shadow-md hover:border-border/80 transition-all group"
+              className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors group -mx-4"
             >
-              {/* Card header */}
-              <div class="flex items-start justify-between mb-3">
-                <div class="flex-1 min-w-0">
-                  <h3 class="text-base font-semibold text-foreground truncate group-hover:text-foreground/70 transition-colors">
+              {/* Icon */}
+              <div className="h-10 w-10 shrink-0 bg-muted flex items-center justify-center">
+                <FileText className="h-4 w-4 text-muted-foreground/60" />
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-medium text-foreground truncate group-hover:text-foreground/80 transition-colors">
                     {article.title}
                   </h3>
-                  <p class="text-xs text-muted-foreground mt-0.5 truncate">{article.slug}</p>
+                  <Badge
+                    variant={
+                      STATUS_VARIANT[article.status || 'draft'] || 'outline'
+                    }
+                    className="text-[10px] px-1.5 py-0 h-4 font-normal shrink-0"
+                  >
+                    {article.status || 'draft'}
+                  </Badge>
                 </div>
-                <span class={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium shrink-0 ml-2', STATUS_COLORS[article.status || 'draft'] || '')}>
-                  {article.status}
+                {article.summary && (
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                    {article.summary}
+                  </p>
+                )}
+              </div>
+
+              {/* Meta */}
+              <div className="hidden sm:flex items-center gap-4 text-xs text-muted-foreground shrink-0">
+                {article.reading_time_minutes && (
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {article.reading_time_minutes}m
+                  </span>
+                )}
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {formatDate(article.created_at)}
                 </span>
               </div>
 
-              {/* Summary */}
-              {article.summary && (
-                <p class="text-sm text-muted-foreground line-clamp-2 mb-3">
-                  {article.summary}
-                </p>
-              )}
-
-              {/* Meta footer */}
-              <div class="flex items-center justify-between text-xs text-muted-foreground mt-auto pt-2 border-t border-border/50">
-                <div class="flex items-center gap-3">
-                  <span>Created: {formatDate(article.created_at)}</span>
-                  {article.reading_time_minutes && (
-                    <span>{article.reading_time_minutes} min read</span>
-                  )}
-                </div>
-                {article.published_at && (
-                  <span>Published: {formatDate(article.published_at)}</span>
-                )}
-              </div>
+              {/* Arrow */}
+              <ExternalLink className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors shrink-0" />
             </a>
           ))}
         </div>
@@ -173,37 +230,36 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
 
       {/* Pagination */}
       {data.totalPages > 1 && (
-        <div class="flex items-center justify-between">
-          <p class="text-sm text-muted-foreground">
-            Page {data.page} of {data.totalPages} ({data.total} total)
+        <div className="flex items-center justify-between pt-4">
+          <p className="text-sm text-muted-foreground">
+            {data.total} articles
           </p>
-          <div class="flex gap-2">
-            <button
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
               aria-label="Previous page"
-              class={cn(
-                'rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
-                page <= 1
-                  ? 'border-border/50 text-muted-foreground cursor-not-allowed'
-                  : 'border-border text-foreground hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              )}
+              className="h-8 w-8"
             >
-              Previous
-            </button>
-            <button
-              onClick={() => setPage((p) => Math.min(data.totalPages, p + 1))}
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm text-muted-foreground px-2">
+              {data.page} / {data.totalPages}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                setPage((p) => Math.min(data.totalPages, p + 1))
+              }
               disabled={page >= data.totalPages}
               aria-label="Next page"
-              class={cn(
-                'rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
-                page >= data.totalPages
-                  ? 'border-border/50 text-muted-foreground cursor-not-allowed'
-                  : 'border-border text-foreground hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              )}
+              className="h-8 w-8"
             >
-              Next
-            </button>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       )}

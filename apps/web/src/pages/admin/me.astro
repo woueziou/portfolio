@@ -1,6 +1,11 @@
 ---
 import AdminLayout from '@/layouts/AdminLayout.astro'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Save, User, AtSign, Briefcase, Mail } from 'lucide-react'
 
 export const prerender = false
 
@@ -18,129 +23,137 @@ const { data: profile } = await supabase
 ---
 
 <AdminLayout title="Profile" activeItem="me">
-  <div class="max-w-2xl mx-auto space-y-6">
+  <div class="max-w-2xl mx-auto space-y-8">
     <div>
-      <h1 class="text-2xl font-bold text-foreground">Profile</h1>
-      <p class="mt-1 text-sm text-muted-foreground">
+      <h1 class="text-xl font-semibold text-foreground">Profile</h1>
+      <p class="mt-0.5 text-sm text-muted-foreground">
         Manage your personal information and public profile
       </p>
     </div>
 
-    <div class="rounded-xl border border-border bg-card p-6">
-      <form id="profile-form" class="space-y-5">
-        <input type="hidden" name="action" value="updateProfile" />
+    {/* Avatar Section */}
+    <section class="space-y-4">
+      <div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+        <User className="h-4 w-4" />
+        Avatar
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="h-16 w-16 bg-muted flex items-center justify-center text-xl font-bold text-muted-foreground">
+          {profile?.first_name?.charAt(0)?.toUpperCase() || 'A'}
+        </div>
+        <div>
+          <p class="text-sm font-medium text-foreground">Profile Photo</p>
+          <p class="text-xs text-muted-foreground">Upload a photo via the avatar URL field below</p>
+        </div>
+      </div>
+    </section>
 
-        <!-- Avatar -->
-        <div class="flex items-center gap-4">
-          <div class="h-16 w-16 rounded-full bg-muted flex items-center justify-center text-xl font-bold text-muted-foreground">
-            {profile?.first_name?.charAt(0)?.toUpperCase() || 'A'}
-          </div>
-          <div>
-            <p class="text-sm font-medium text-foreground">Avatar</p>
-            <p class="text-xs text-muted-foreground">Upload a photo via the avatar URL field</p>
-          </div>
+    {/* Profile Form */}
+    <form id="profile-form" class="space-y-8">
+      <input type="hidden" name="action" value="updateProfile" />
+
+      {/* Personal Info */}
+      <section class="space-y-4">
+        <div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <User className="h-4 w-4" />
+          Personal Information
         </div>
 
-        <!-- Name fields -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label for="first_name" class="block text-sm font-medium text-foreground mb-1">
-              First Name
-            </label>
-            <input
+          <div class="space-y-2">
+            <Label htmlFor="first_name">First Name</Label>
+            <Input
               id="first_name"
               name="first_name"
               type="text"
               value={profile?.first_name || ''}
               required
-              class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="border-0 bg-muted/50"
             />
           </div>
-          <div>
-            <label for="last_name" class="block text-sm font-medium text-foreground mb-1">
-              Last Name
-            </label>
-            <input
+          <div class="space-y-2">
+            <Label htmlFor="last_name">Last Name</Label>
+            <Input
               id="last_name"
               name="last_name"
               type="text"
               value={profile?.last_name || ''}
               required
-              class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="border-0 bg-muted/50"
             />
           </div>
         </div>
 
-        <!-- Title -->
-        <div>
-          <label for="title" class="block text-sm font-medium text-foreground mb-1">
+        <div class="space-y-2">
+          <Label htmlFor="title" className="flex items-center gap-1.5">
+            <Briefcase className="h-3.5 w-3.5" />
             Professional Title
-          </label>
-          <input
+          </Label>
+          <Input
             id="title"
             name="title"
             type="text"
             value={profile?.title || ''}
             placeholder="e.g., Full-stack Developer"
-            class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="border-0 bg-muted/50"
           />
         </div>
 
-        <!-- Description -->
-        <div>
-          <label for="description" class="block text-sm font-medium text-foreground mb-1">
-            Bio / Description
-          </label>
-          <textarea
+        <div class="space-y-2">
+          <Label htmlFor="description">Bio</Label>
+          <Textarea
             id="description"
             name="description"
             rows={4}
             placeholder="Tell visitors about yourself..."
-            class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-          >{profile?.description || ''}</textarea>
+            className="border-0 bg-muted/50 resize-none"
+          >{profile?.description || ''}</Textarea>
+        </div>
+      </section>
+
+      {/* Account Info (read-only) */}
+      <section class="space-y-4">
+        <div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <AtSign className="h-4 w-4" />
+          Account
         </div>
 
-        <!-- Username (read-only) -->
-        <div>
-          <label for="username" class="block text-sm font-medium text-foreground mb-1">
-            Username
-          </label>
-          <input
-            id="username"
-            type="text"
-            value={profile?.username || ''}
-            disabled
-            class="w-full rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground cursor-not-allowed"
-          />
-          <p class="mt-1 text-xs text-muted-foreground">Username cannot be changed</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <Label htmlFor="username">Username</Label>
+            <Input
+              id="username"
+              type="text"
+              value={profile?.username || ''}
+              disabled
+              className="border-0 bg-muted/30 text-muted-foreground"
+            />
+          </div>
+          <div class="space-y-2">
+            <Label htmlFor="email" className="flex items-center gap-1.5">
+              <Mail className="h-3.5 w-3.5" />
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              value={user?.email || ''}
+              disabled
+              className="border-0 bg-muted/30 text-muted-foreground"
+            />
+          </div>
         </div>
+      </section>
 
-        <!-- Email (read-only) -->
-        <div>
-          <label for="email" class="block text-sm font-medium text-foreground mb-1">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={user?.email || ''}
-            disabled
-            class="w-full rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground cursor-not-allowed"
-          />
-        </div>
-
-        <!-- Actions -->
-        <div class="flex items-center gap-3 pt-2">
-          <button
-            type="submit"
-            class="inline-flex items-center gap-2 rounded-lg bg-foreground text-background px-4 py-2.5 text-sm font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50"
-          >
-            Save Changes
-          </button>
-          <span id="profile-status" class="text-sm text-muted-foreground"></span>
-        </div>
-      </form>
-    </div>
+      {/* Actions */}
+      <div class="flex items-center gap-3">
+        <Button type="submit" size="sm">
+          <Save className="h-4 w-4 mr-1.5" />
+          Save Changes
+        </Button>
+        <span id="profile-status" class="text-sm text-muted-foreground"></span>
+      </div>
+    </form>
   </div>
 </AdminLayout>
 

@@ -2,6 +2,55 @@ import { actions } from 'astro:actions'
 import { navigate } from 'astro:transitions/client'
 import { useCallback, useEffect, useState } from 'react'
 import { generateSlug } from '@/lib/slug'
+import { cn } from '@/lib/utils'
+import { useDisclosure, useFileDialog } from '@mantine/hooks'
+import { format } from 'date-fns'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import { Calendar } from '@/components/ui/calendar'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import {
+  Save,
+  Send,
+  ArrowLeft,
+  ImageIcon,
+  Globe,
+  Calendar as CalendarIcon,
+  Layers,
+  Tag,
+  Type,
+  FileText,
+  Plus,
+  X,
+  Upload,
+  PenLine,
+  Code2,
+  ChevronDown,
+  Check,
+  FileCode,
+} from 'lucide-react'
 
 interface ProjectFormProps {
   project?: {
@@ -17,6 +66,12 @@ interface ProjectFormProps {
     tech_stack: string[]
     slug: string
   }
+  articles?: Array<{
+    id: number
+    title: string
+    slug: string
+    status: string
+  }>
   onSuccess?: (project: any) => void
   onCancel?: () => void
   onSuccessPath?: string
@@ -56,8 +111,14 @@ interface ProjectFormData {
   slug: string
 }
 
+// Word count helper
+function countWords(text: string): number {
+  return text.trim().split(/\s+/).filter(Boolean).length
+}
+
 export default function ProjectForm({
   project,
+  articles = [],
   onSuccess,
   onCancel,
   onSuccessPath,
@@ -78,10 +139,18 @@ export default function ProjectForm({
     slug: project?.slug || '',
   })
 
-  const [techInput, setTechInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(!!project?.slug)
+  const [typeSearch, setTypeSearch] = useState('')
+  const [typePopoverOpen, setTypePopoverOpen] = useState(false)
+  const [newTechName, setNewTechName] = useState('')
+  const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false)
+  const fileDialog = useFileDialog({ accept: 'image/*', multiple: false })
+  const [datePickerOpen, setDatePickerOpen] = useState(false)
+
+  const wordCount = countWords(formData.description)
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -93,23 +162,66 @@ export default function ProjectForm({
     }
   }, [formData.title, slugManuallyEdited])
 
+  // Handle file selection for image - upload to Supabase
+  useEffect(() => {
+    const uploadFile = async () => {
+      if (fileDialog.files && fileDialog.files.length > 0) {
+        const file = fileDialog.files[0]
+        setUploadingImage(true)
+        setError(null)
+
+        try {
+          const formData = new FormData()
+          formData.append('file', file)
+
+          const { data, error: uploadError } = await actions.projects.uploadImage(formData)
+
+          if (uploadError) {
+            setError(uploadError.message)
+          } else if (data?.url) {
+            setFormData((prev) => ({ ...prev, main_image_url: data.url }))
+          }
+        } catch (err) {
+          setError('Failed to upload image')
+        } finally {
+          setUploadingImage(false)
+        }
+      }
+    }
+
+    uploadFile()
+  }, [fileDialog.files])
+
   const handleTypeToggle = useCallback((type: string) => {
     setFormData((prev) => ({
       ...prev,
-      type: prev.type.includes(type) ? prev.type.filter((t) => t !== type) : [...prev.type, type],
+      type: prev.type.includes(type)
+        ? prev.type.filter((t) => t !== type)
+        : [...prev.type, type],
+    }))
+    setTypeSearch('')
+    setTypePopoverOpen(false)
+  }, [])
+
+  const handleRemoveType = useCallback((type: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      type: prev.type.filter((t) => t !== type),
     }))
   }, [])
 
-  const handleAddTech = useCallback(() => {
-    const tech = techInput.trim()
-    if (tech && !formData.tech_stack.includes(tech)) {
-      setFormData((prev) => ({
-        ...prev,
-        tech_stack: [...prev.tech_stack, tech],
-      }))
-      setTechInput('')
-    }
-  }, [techInput, formData.tech_stack])
+  const handleAddTech = useCallback(
+    (tech: string) => {
+      const trimmed = tech.trim()
+      if (trimmed && !formData.tech_stack.includes(trimmed)) {
+        setFormData((prev) => ({
+          ...prev,
+          tech_stack: [...prev.tech_stack, trimmed],
+        }))
+      }
+    },
+    [formData.tech_stack]
+  )
 
   const handleRemoveTech = useCallback((tech: string) => {
     setFormData((prev) => ({
@@ -118,9 +230,36 @@ export default function ProjectForm({
     }))
   }, [])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleCreateTech = useCallback(() => {
+    if (newTechName.trim()) {
+      handleAddTech(newTechName.trim())
+      setNewTechName('')
+      closeDrawer()
+    }
+  }, [newTechName, handleAddTech, closeDrawer])
+
+  const filteredTypes = PROJECT_TYPES.filter(
+    (t) =>
+      !formData.type.includes(t.value) &&
+      t.label.toLowerCase().includes(typeSearch.toLowerCase())
+  )
+
+  const handleSubmit = async (e: React.FormEvent, asDraft = false) => {
     e.preventDefault()
     setError(null)
+
+    // Validate tech_stack has at least one item
+    if (formData.tech_stack.length === 0) {
+      setError('Please add at least one technology to the tech stack')
+      return
+    }
+
+    // Validate type has at least one item
+    if (formData.type.length === 0) {
+      setError('Please select at least one project type')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -133,7 +272,14 @@ export default function ProjectForm({
         access_link: formData.access_link || undefined,
         project_date: formData.project_date || undefined,
         state: formData.state as 'ongoing' | 'finished' | 'production',
-        type: formData.type as ('web' | 'mobile' | 'desktop' | 'api' | 'library' | 'other')[],
+        type: formData.type as (
+          | 'web'
+          | 'mobile'
+          | 'desktop'
+          | 'api'
+          | 'library'
+          | 'other'
+        )[],
       }
 
       if (isEditing && project) {
@@ -148,7 +294,21 @@ export default function ProjectForm({
       if (result.error) {
         setError(result.error.message)
       } else {
-        onSuccess?.(result.data.project)
+        const savedProject = result.data.project
+
+        // Handle publish/draft status separately
+        if (!asDraft) {
+          const publishResult = await actions.projects.publish({
+            id: savedProject.id,
+            publish: true,
+          })
+          if (publishResult.error) {
+            setError(publishResult.error.message)
+            return
+          }
+        }
+
+        onSuccess?.(savedProject)
         if (!onSuccess && onSuccessPath) {
           await navigate(onSuccessPath)
         }
@@ -165,272 +325,600 @@ export default function ProjectForm({
       onCancel()
       return
     }
-
     if (onCancelPath) {
       await navigate(onCancelPath)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-6">
+      {/* Top Actions */}
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="sm" onClick={() => void handleCancel()}>
+          <ArrowLeft className="h-4 w-4 mr-1.5" />
+          Back
+        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={loading}
+            onClick={(e) => void handleSubmit(e, true)}
+          >
+            <Save className="h-4 w-4 mr-1.5" />
+            Save as Draft
+          </Button>
+          <Button
+            size="sm"
+            disabled={loading}
+            onClick={(e) => void handleSubmit(e, false)}
+          >
+            <Send className="h-4 w-4 mr-1.5" />
+            Publish
+          </Button>
+        </div>
+      </div>
+
       {error && (
-        <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4">
+        <div className="bg-destructive/10 p-4">
           <p className="text-sm text-destructive">{error}</p>
         </div>
       )}
 
-      {/* Title */}
-      <div>
-        <label
-          htmlFor="title"
-          className="block text-sm font-medium text-foreground mb-2"
-        >
-          Title *
-        </label>
-        <input
-          id="title"
-          type="text"
-          value={formData.title}
-          onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
-          required
-          maxLength={200}
-          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
-          placeholder="My Awesome Project"
-        />
-      </div>
+      <form onSubmit={(e) => void handleSubmit(e)} className="space-y-8">
+        {/* Status & Date Section */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <FileText className="h-4 w-4" />
+            Status & Schedule
+          </div>
 
-      {/* Slug */}
-      <div>
-        <label
-          htmlFor="slug"
-          className="block text-sm font-medium text-foreground mb-2"
-        >
-          Slug *
-        </label>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">/projects/</span>
-          <input
-            id="slug"
-            type="text"
-            value={formData.slug}
-            onChange={(e) => {
-              setSlugManuallyEdited(true)
-              setFormData((prev) => ({ ...prev, slug: e.target.value }))
-            }}
-            required
-            pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-            className="flex-1 rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
-            placeholder="my-awesome-project"
-          />
-        </div>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Lowercase letters, numbers, and hyphens only
-        </p>
-      </div>
-
-      {/* Description */}
-      <div>
-        <label
-          htmlFor="description"
-          className="block text-sm font-medium text-foreground mb-2"
-        >
-          Description *
-        </label>
-        <textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-          required
-          maxLength={2000}
-          rows={4}
-          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors resize-none"
-          placeholder="A brief description of your project..."
-        />
-      </div>
-
-      {/* Project Type */}
-      <div>
-        <label className="block text-sm font-medium text-foreground mb-2">
-          Project Type *
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {PROJECT_TYPES.map((type) => (
-            <button
-              key={type.value}
-              type="button"
-              onClick={() => handleTypeToggle(type.value)}
-              className={`inline-flex items-center rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
-                formData.type.includes(type.value)
-                  ? 'bg-foreground text-background'
-                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
-              }`}
-            >
-              {type.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Tech Stack */}
-      <div>
-        <label className="block text-sm font-medium text-foreground mb-2">
-          Tech Stack *
-        </label>
-        <div className="flex gap-2 mb-2">
-          <input
-            type="text"
-            value={techInput}
-            onChange={(e) => setTechInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault()
-                handleAddTech()
-              }
-            }}
-            className="flex-1 rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
-            placeholder="Add technology..."
-          />
-          <button
-            type="button"
-            onClick={handleAddTech}
-            className="rounded-lg bg-muted px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted/80 transition-colors"
-          >
-            Add
-          </button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {formData.tech_stack.map((tech) => (
-            <span
-              key={tech}
-              className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-sm text-foreground"
-            >
-              {tech}
-              <button
-                type="button"
-                onClick={() => handleRemoveTech(tech)}
-                className="ml-1 text-muted-foreground hover:text-foreground"
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* State */}
+            <div className="space-y-2">
+              <Label htmlFor="state">Project State</Label>
+              <Select
+                value={formData.state}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, state: value }))
+                }
               >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-      </div>
+                <SelectTrigger className="border-0 bg-muted/50">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PROJECT_STATES.map((state) => (
+                    <SelectItem key={state.value} value={state.value}>
+                      {state.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-      {/* State */}
-      <div>
-        <label
-          htmlFor="state"
-          className="block text-sm font-medium text-foreground mb-2"
-        >
-          Project State
-        </label>
-        <select
-          id="state"
-          value={formData.state}
-          onChange={(e) => setFormData((prev) => ({ ...prev, state: e.target.value }))}
-          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
-        >
-          {PROJECT_STATES.map((state) => (
-            <option key={state.value} value={state.value}>
-              {state.label}
-            </option>
-          ))}
-        </select>
-      </div>
+            {/* Date Picker */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <CalendarIcon className="h-3.5 w-3.5" />
+                Project Date
+              </Label>
+              <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      'w-full justify-start text-left font-normal border-0 bg-muted/50',
+                      !formData.project_date && 'text-muted-foreground'
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.project_date ? (
+                      format(new Date(formData.project_date), 'PPP')
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={
+                      formData.project_date
+                        ? new Date(formData.project_date)
+                        : undefined
+                    }
+                    onSelect={(date) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        project_date: date
+                          ? format(date, 'yyyy-MM-dd')
+                          : '',
+                      }))
+                      setDatePickerOpen(false)
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+        </section>
 
-      {/* Date */}
-      <div>
-        <label
-          htmlFor="project_date"
-          className="block text-sm font-medium text-foreground mb-2"
-        >
-          Project Date
-        </label>
-        <input
-          id="project_date"
-          type="date"
-          value={formData.project_date}
-          onChange={(e) => setFormData((prev) => ({ ...prev, project_date: e.target.value }))}
-          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
-        />
-      </div>
+        {/* Basic Info Section */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Type className="h-4 w-4" />
+            Basic Information
+          </div>
 
-      {/* URLs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label
-            htmlFor="url"
-            className="block text-sm font-medium text-foreground mb-2"
-          >
-            Repository URL
-          </label>
-          <input
-            id="url"
-            type="url"
-            value={formData.url}
-            onChange={(e) => setFormData((prev) => ({ ...prev, url: e.target.value }))}
-            className="w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
-            placeholder="https://github.com/..."
-          />
-        </div>
-        <div>
-          <label
-            htmlFor="access_link"
-            className="block text-sm font-medium text-foreground mb-2"
-          >
-            Live Demo URL
-          </label>
-          <input
-            id="access_link"
-            type="url"
-            value={formData.access_link}
-            onChange={(e) => setFormData((prev) => ({ ...prev, access_link: e.target.value }))}
-            className="w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
-            placeholder="https://..."
-          />
-        </div>
-      </div>
+          {/* Title */}
+          <div className="space-y-2">
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              type="text"
+              value={formData.title}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, title: e.target.value }))
+              }
+              required
+              maxLength={200}
+              placeholder="My Awesome Project"
+              className="border-0 bg-muted/50 text-lg font-medium"
+            />
+          </div>
 
-      {/* Image URL */}
-      <div>
-        <label
-          htmlFor="main_image_url"
-          className="block text-sm font-medium text-foreground mb-2"
-        >
-          Cover Image URL
-        </label>
-        <input
-          id="main_image_url"
-          type="url"
-          value={formData.main_image_url}
-          onChange={(e) => setFormData((prev) => ({ ...prev, main_image_url: e.target.value }))}
-          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
-          placeholder="https://..."
-        />
-      </div>
+          {/* Slug */}
+          <div className="space-y-2">
+            <Label htmlFor="slug">Slug</Label>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground shrink-0">
+                /projects/
+              </span>
+              <Input
+                id="slug"
+                type="text"
+                value={formData.slug}
+                onChange={(e) => {
+                  setSlugManuallyEdited(true)
+                  setFormData((prev) => ({ ...prev, slug: e.target.value }))
+                }}
+                required
+                pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+                placeholder="my-awesome-project"
+                className="border-0 bg-muted/50"
+              />
+            </div>
+          </div>
 
-      {/* Actions */}
-      <div className="flex items-center justify-end gap-4 pt-4 border-t border-border">
-        {(onCancel || onCancelPath) && (
-          <button
+          {/* Description */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="description">Description</Label>
+              <span
+                className={cn(
+                  'text-xs',
+                  wordCount > 150
+                    ? 'text-destructive'
+                    : wordCount > 130
+                      ? 'text-yellow-600'
+                      : 'text-muted-foreground'
+                )}
+              >
+                {wordCount}/150 words
+              </span>
+            </div>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => {
+                const newText = e.target.value
+                if (countWords(newText) <= 150) {
+                  setFormData((prev) => ({ ...prev, description: newText }))
+                }
+              }}
+              required
+              rows={4}
+              placeholder="A brief description of your project..."
+              className="border-0 bg-muted/50 resize-none"
+            />
+          </div>
+        </section>
+
+        {/* Media Section */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <ImageIcon className="h-4 w-4" />
+            Media
+          </div>
+
+          {/* Image Picker */}
+          <div className="space-y-2">
+            <Label>Cover Image</Label>
+            <div
+              onClick={() => !uploadingImage && fileDialog.open()}
+              className={cn(
+                'relative cursor-pointer bg-muted/50 hover:bg-muted/70 transition-colors overflow-hidden',
+                formData.main_image_url ? 'h-48' : 'h-32',
+                uploadingImage && 'pointer-events-none opacity-70'
+              )}
+            >
+              {uploadingImage ? (
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                  <div className="h-8 w-8 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin mb-2" />
+                  <span className="text-sm">Uploading...</span>
+                </div>
+              ) : formData.main_image_url ? (
+                <>
+                  <img
+                    src={formData.main_image_url}
+                    alt="Cover preview"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                    <div className="bg-background/90 px-3 py-1.5 text-sm font-medium flex items-center gap-1.5">
+                      <Upload className="h-4 w-4" />
+                      Change Image
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                  <ImageIcon className="h-8 w-8 mb-2 opacity-40" />
+                  <span className="text-sm">Click to upload cover image</span>
+                  <span className="text-xs mt-1 opacity-60">
+                    PNG, JPG, WebP up to 5MB
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* URLs */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="url" className="flex items-center gap-1.5">
+                <Code2 className="h-3.5 w-3.5" />
+                Repository URL
+              </Label>
+              <Input
+                id="url"
+                type="url"
+                value={formData.url}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, url: e.target.value }))
+                }
+                placeholder="https://github.com/..."
+                className="border-0 bg-muted/50"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label
+                htmlFor="access_link"
+                className="flex items-center gap-1.5"
+              >
+                <Globe className="h-3.5 w-3.5" />
+                Live Demo URL
+              </Label>
+              <Input
+                id="access_link"
+                type="url"
+                value={formData.access_link}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    access_link: e.target.value,
+                  }))
+                }
+                placeholder="https://..."
+                className="border-0 bg-muted/50"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Classification Section */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Tag className="h-4 w-4" />
+            Classification
+          </div>
+
+          {/* Project Type - Autocomplete Input */}
+          <div className="space-y-2">
+            <Label>Project Types</Label>
+            {/* Selected types */}
+            {formData.type.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {formData.type.map((t) => {
+                  const type = PROJECT_TYPES.find((pt) => pt.value === t)
+                  return (
+                    <Badge
+                      key={t}
+                      variant="secondary"
+                      className="gap-1 pr-1 font-normal"
+                    >
+                      {type?.label || t}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveType(t)}
+                        className="ml-0.5 hover:text-destructive transition-colors"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  )
+                })}
+              </div>
+            )}
+            {/* Autocomplete input */}
+            <Popover
+              open={typePopoverOpen}
+              onOpenChange={setTypePopoverOpen}
+            >
+              <PopoverTrigger asChild>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    value={typeSearch}
+                    onChange={(e) => {
+                      setTypeSearch(e.target.value)
+                      if (!typePopoverOpen) setTypePopoverOpen(true)
+                    }}
+                    onFocus={() => setTypePopoverOpen(true)}
+                    placeholder="Type to search project types..."
+                    className="border-0 bg-muted/50 pr-8"
+                  />
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                </div>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-[var(--radix-popover-trigger-width)] p-0"
+                align="start"
+                onOpenAutoFocus={(e) => e.preventDefault()}
+              >
+                <div className="max-h-60 overflow-auto">
+                  {filteredTypes.length === 0 ? (
+                    <div className="px-3 py-2 text-sm text-muted-foreground">
+                      No types found
+                    </div>
+                  ) : (
+                    filteredTypes.map((type) => (
+                      <button
+                        key={type.value}
+                        type="button"
+                        onClick={() => handleTypeToggle(type.value)}
+                        className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors"
+                      >
+                        <Check
+                          className={cn(
+                            'mr-2 h-4 w-4',
+                            formData.type.includes(type.value)
+                              ? 'opacity-100'
+                              : 'opacity-0'
+                          )}
+                        />
+                        {type.label}
+                      </button>
+                    ))
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Tech Stack - Select Component */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="flex items-center gap-1.5">
+                <Layers className="h-3.5 w-3.5" />
+                Tech Stack
+              </Label>
+              <Sheet open={drawerOpened} onOpenChange={openDrawer}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-7 text-xs">
+                    <Plus className="h-3 w-3 mr-1" />
+                    Create New
+                  </Button>
+                </SheetTrigger>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>Create Tech Stack</SheetTitle>
+                    <SheetDescription>
+                      Add a new technology to your tech stack list.
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-6 space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="new-tech">Technology Name</Label>
+                      <Input
+                        id="new-tech"
+                        value={newTechName}
+                        onChange={(e) => setNewTechName(e.target.value)}
+                        placeholder="e.g., React, Node.js..."
+                        className="border-0 bg-muted/50"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault()
+                            handleCreateTech()
+                          }
+                        }}
+                      />
+                    </div>
+                    <Button onClick={handleCreateTech} className="w-full">
+                      Create & Add
+                    </Button>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+
+            {/* Selected techs */}
+            {formData.tech_stack.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {formData.tech_stack.map((tech) => (
+                  <Badge
+                    key={tech}
+                    variant="outline"
+                    className="gap-1 pr-1 font-normal"
+                  >
+                    {tech}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTech(tech)}
+                      className="ml-0.5 hover:text-destructive transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            {/* Tech select */}
+            <Select onValueChange={handleAddTech}>
+              <SelectTrigger className="border-0 bg-muted/50">
+                <SelectValue placeholder="Select technologies..." />
+              </SelectTrigger>
+              <SelectContent>
+                {/* Show common tech options - in real app, fetch from server */}
+                {[
+                  'React',
+                  'Vue',
+                  'Angular',
+                  'Next.js',
+                  'Nuxt.js',
+                  'Svelte',
+                  'Node.js',
+                  'Express',
+                  'NestJS',
+                  'Python',
+                  'Django',
+                  'Flask',
+                  'TypeScript',
+                  'JavaScript',
+                  'Go',
+                  'Rust',
+                  'Java',
+                  'Spring',
+                  'PostgreSQL',
+                  'MongoDB',
+                  'Redis',
+                  'Docker',
+                  'Kubernetes',
+                  'AWS',
+                  'Tailwind CSS',
+                  'GraphQL',
+                  'REST API',
+                ]
+                  .filter((tech) => !formData.tech_stack.includes(tech))
+                  .map((tech) => (
+                    <SelectItem key={tech} value={tech}>
+                      {tech}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </section>
+
+        {/* Bottom Actions */}
+        <div className="flex items-center justify-end gap-3 pt-4">
+          <Button
             type="button"
-            onClick={() => {
-              void handleCancel()
-            }}
-            className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
+            variant="ghost"
+            disabled={loading}
+            onClick={(e) => void handleSubmit(e, true)}
           >
-            Cancel
-          </button>
-        )}
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-lg bg-foreground text-background px-6 py-2.5 text-sm font-medium hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {loading ? 'Saving...' : isEditing ? 'Update Project' : 'Create Project'}
-        </button>
-      </div>
-    </form>
+            <Save className="h-4 w-4 mr-1.5" />
+            Save as Draft
+          </Button>
+          <Button type="submit" disabled={loading}>
+            <Send className="h-4 w-4 mr-1.5" />
+            {loading ? 'Publishing...' : 'Publish'}
+          </Button>
+        </div>
+      </form>
+
+      {/* Linked Articles Section */}
+      {isEditing && project && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <FileCode className="h-4 w-4" />
+              Linked Articles
+            </div>
+            <Button variant="ghost" size="sm" asChild>
+              <a href={`/admin/articles/new?project=${project.id}`}>
+                <Plus className="h-3 w-3 mr-1" />
+                New Article
+              </a>
+            </Button>
+          </div>
+
+          {articles.length > 0 ? (
+            <div className="space-y-1">
+              {articles.map((article) => (
+                <a
+                  key={article.id}
+                  href={`/admin/articles/${article.id}/edit`}
+                  className="flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors group -mx-3"
+                >
+                  <FileCode className="h-4 w-4 text-muted-foreground/60 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-sm font-medium text-foreground truncate group-hover:text-foreground/80">
+                      {article.title}
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      /{article.slug}
+                    </p>
+                  </div>
+                  <Badge
+                    variant={
+                      article.status === 'published' ? 'default' : 'secondary'
+                    }
+                    className="text-[10px] px-1.5 py-0 h-4 font-normal"
+                  >
+                    {article.status || 'draft'}
+                  </Badge>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 bg-muted/30">
+              <FileCode className="mx-auto h-8 w-8 text-muted-foreground/40" />
+              <p className="mt-2 text-sm text-muted-foreground">
+                No articles linked to this project yet
+              </p>
+              <Button variant="ghost" size="sm" className="mt-2" asChild>
+                <a href={`/admin/articles/new?project=${project.id}`}>
+                  <PenLine className="h-4 w-4 mr-1.5" />
+                  Write an article
+                </a>
+              </Button>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* Invite to write article card for new projects */}
+      {!isEditing && (
+        <div className="bg-muted/50 p-6">
+          <div className="flex items-start gap-4">
+            <div className="h-10 w-10 bg-background flex items-center justify-center shrink-0">
+              <PenLine className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-foreground">
+                Write an article about this project
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                After creating the project, you can write articles to share the
+                story behind it, technical decisions, and lessons learned.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }

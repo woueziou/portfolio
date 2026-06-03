@@ -1,21 +1,48 @@
 import { Moon, Sun } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+function getTheme(): 'dark' | 'light' {
+  if (typeof window === 'undefined') return 'light'
+  const stored = localStorage.getItem('theme')
+  if (stored === 'dark' || stored === 'light') return stored
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light'
+}
+
+function applyTheme(theme: 'dark' | 'light') {
+  document.documentElement.classList.toggle('dark', theme === 'dark')
+}
+
 export default function ThemeSwitcher() {
   const [isDark, setIsDark] = useState(false)
 
+  // Apply theme on mount and listen for Astro navigation events
   useEffect(() => {
-    const stored = localStorage.getItem('theme')
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    const dark = stored ? stored === 'dark' : prefersDark
-    setIsDark(dark)
-    document.documentElement.classList.toggle('dark', dark)
+    const theme = getTheme()
+    setIsDark(theme === 'dark')
+    applyTheme(theme)
+
+    // Re-apply theme after each client-side navigation
+    const handlePageLoad = () => {
+      const currentTheme = getTheme()
+      setIsDark(currentTheme === 'dark')
+      applyTheme(currentTheme)
+    }
+
+    document.addEventListener('astro:page-load', handlePageLoad)
+    document.addEventListener('astro:after-swap', handlePageLoad)
+
+    return () => {
+      document.removeEventListener('astro:page-load', handlePageLoad)
+      document.removeEventListener('astro:after-swap', handlePageLoad)
+    }
   }, [])
 
   function toggle() {
     const next = !isDark
     setIsDark(next)
-    document.documentElement.classList.toggle('dark', next)
+    applyTheme(next ? 'dark' : 'light')
     localStorage.setItem('theme', next ? 'dark' : 'light')
   }
 

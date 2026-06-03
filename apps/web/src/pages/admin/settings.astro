@@ -1,6 +1,11 @@
 ---
 import AdminLayout from '@/layouts/AdminLayout.astro'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Settings, Link2, Save, Globe, Github, Twitter, Linkedin } from 'lucide-react'
 
 export const prerender = false
 
@@ -16,127 +21,155 @@ const socialLinks = (config?.social_links || {}) as Record<string, string>
 ---
 
 <AdminLayout title="Settings" activeItem="settings">
-  <div class="max-w-2xl mx-auto space-y-6">
+  <div class="max-w-2xl mx-auto space-y-8">
     <div>
-      <h1 class="text-2xl font-bold text-foreground">Settings</h1>
-      <p class="mt-1 text-sm text-muted-foreground">
+      <h1 class="text-xl font-semibold text-foreground">Settings</h1>
+      <p class="mt-0.5 text-sm text-muted-foreground">
         Configure your site metadata and social links
       </p>
     </div>
 
     <!-- Site Info -->
-    <div class="rounded-xl border border-border bg-card p-6">
-      <h2 class="text-lg font-semibold text-foreground mb-4">Site Information</h2>
-      <form id="settings-form" class="space-y-5">
+    <section class="space-y-6">
+      <div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+        <Globe className="h-4 w-4" />
+        Site Information
+      </div>
+
+      <form id="settings-form" class="space-y-4">
         <!-- Site Title -->
-        <div>
-          <label for="site_title" class="block text-sm font-medium text-foreground mb-1">
-            Site Title
-          </label>
-          <input
+        <div class="space-y-2">
+          <Label htmlFor="site_title">Site Title</Label>
+          <Input
             id="site_title"
             name="site_title"
             type="text"
             value={config?.site_title || 'Portfolio'}
             required
-            class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="border-0 bg-muted/50"
           />
         </div>
 
         <!-- Site Tagline -->
-        <div>
-          <label for="site_tagline" class="block text-sm font-medium text-foreground mb-1">
-            Tagline
-          </label>
-          <input
+        <div class="space-y-2">
+          <Label htmlFor="site_tagline">Tagline</Label>
+          <Input
             id="site_tagline"
             name="site_tagline"
             type="text"
             value={config?.site_tagline || ''}
             placeholder="A short description of your site"
-            class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="border-0 bg-muted/50"
           />
         </div>
 
         <!-- SEO Description -->
-        <div>
-          <label for="seo_description" class="block text-sm font-medium text-foreground mb-1">
-            SEO Description
-          </label>
-          <textarea
+        <div class="space-y-2">
+          <Label htmlFor="seo_description">SEO Description</Label>
+          <Textarea
             id="seo_description"
             name="seo_description"
             rows={3}
             placeholder="Meta description for search engines"
-            class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-          >{config?.seo_description || ''}</textarea>
+            className="border-0 bg-muted/50 resize-none"
+          >{config?.seo_description || ''}</Textarea>
         </div>
 
         <!-- OG Image -->
-        <div>
-          <label for="seo_og_image" class="block text-sm font-medium text-foreground mb-1">
-            Open Graph Image URL
-          </label>
-          <input
+        <div class="space-y-2">
+          <Label htmlFor="seo_og_image">Open Graph Image URL</Label>
+          <Input
             id="seo_og_image"
             name="seo_og_image"
             type="url"
             value={config?.seo_og_image || ''}
             placeholder="https://example.com/og-image.png"
-            class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="border-0 bg-muted/50"
           />
         </div>
 
         <div class="flex items-center gap-3 pt-2">
-          <button
-            type="submit"
-            class="inline-flex items-center gap-2 rounded-lg bg-foreground text-background px-4 py-2.5 text-sm font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50"
-          >
+          <Button type="submit" size="sm">
+            <Save className="h-4 w-4 mr-1.5" />
             Save Site Info
-          </button>
+          </Button>
           <span id="settings-status" class="text-sm text-muted-foreground"></span>
         </div>
       </form>
-    </div>
+    </section>
 
     <!-- Social Links -->
-    <div class="rounded-xl border border-border bg-card p-6">
-      <h2 class="text-lg font-semibold text-foreground mb-4">Social Links</h2>
+    <section class="space-y-6">
+      <div class="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+        <Link2 className="h-4 w-4" />
+        Social Links
+      </div>
+
       <form id="social-form" class="space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label for="social_github" class="block text-sm font-medium text-foreground mb-1">GitHub</label>
-            <input id="social_github" type="url" value={socialLinks.github || ''} placeholder="https://github.com/username"
-              class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+          <div class="space-y-2">
+            <Label htmlFor="social_github" className="flex items-center gap-1.5">
+              <Github className="h-3.5 w-3.5" />
+              GitHub
+            </Label>
+            <Input
+              id="social_github"
+              type="url"
+              value={socialLinks.github || ''}
+              placeholder="https://github.com/username"
+              className="border-0 bg-muted/50"
+            />
           </div>
-          <div>
-            <label for="social_twitter" class="block text-sm font-medium text-foreground mb-1">Twitter / X</label>
-            <input id="social_twitter" type="url" value={socialLinks.twitter || ''} placeholder="https://twitter.com/username"
-              class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+          <div class="space-y-2">
+            <Label htmlFor="social_twitter" className="flex items-center gap-1.5">
+              <Twitter className="h-3.5 w-3.5" />
+              Twitter / X
+            </Label>
+            <Input
+              id="social_twitter"
+              type="url"
+              value={socialLinks.twitter || ''}
+              placeholder="https://twitter.com/username"
+              className="border-0 bg-muted/50"
+            />
           </div>
-          <div>
-            <label for="social_linkedin" class="block text-sm font-medium text-foreground mb-1">LinkedIn</label>
-            <input id="social_linkedin" type="url" value={socialLinks.linkedin || ''} placeholder="https://linkedin.com/in/username"
-              class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+          <div class="space-y-2">
+            <Label htmlFor="social_linkedin" className="flex items-center gap-1.5">
+              <Linkedin className="h-3.5 w-3.5" />
+              LinkedIn
+            </Label>
+            <Input
+              id="social_linkedin"
+              type="url"
+              value={socialLinks.linkedin || ''}
+              placeholder="https://linkedin.com/in/username"
+              className="border-0 bg-muted/50"
+            />
           </div>
-          <div>
-            <label for="social_website" class="block text-sm font-medium text-foreground mb-1">Website</label>
-            <input id="social_website" type="url" value={socialLinks.website || ''} placeholder="https://example.com"
-              class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+          <div class="space-y-2">
+            <Label htmlFor="social_website" className="flex items-center gap-1.5">
+              <Globe className="h-3.5 w-3.5" />
+              Website
+            </Label>
+            <Input
+              id="social_website"
+              type="url"
+              value={socialLinks.website || ''}
+              placeholder="https://example.com"
+              className="border-0 bg-muted/50"
+            />
           </div>
         </div>
 
         <div class="flex items-center gap-3 pt-2">
-          <button
-            type="submit"
-            class="inline-flex items-center gap-2 rounded-lg bg-foreground text-background px-4 py-2.5 text-sm font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50"
-          >
+          <Button type="submit" size="sm">
+            <Save className="h-4 w-4 mr-1.5" />
             Save Social Links
-          </button>
+          </Button>
           <span id="social-status" class="text-sm text-muted-foreground"></span>
         </div>
       </form>
-    </div>
+    </section>
   </div>
 </AdminLayout>
 

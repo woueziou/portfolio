@@ -38,6 +38,13 @@ if (projectError || !project) {
   return Astro.redirect('/404')
 }
 
+const typedProject = project as Project & {
+  project_techstacks?: Array<{
+    techstack_id: string
+    techstacks: TechstackInfo | null
+  }>
+}
+
 const projectId = typedProject.id
 
 // Fetch published articles linked to this project
@@ -47,13 +54,6 @@ const { data: articles } = await supabase
   .eq('project_id', projectId)
   .eq('status', 'published')
   .order('published_at', { ascending: false })
-
-const typedProject = project as Project & {
-  project_techstacks?: Array<{
-    techstack_id: string
-    techstacks: TechstackInfo | null
-  }>
-}
 
 // Extract techstacks from relation (fall back to legacy tech_stack)
 const techstacksFromRelation: TechstackInfo[] =

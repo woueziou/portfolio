@@ -2,6 +2,8 @@
 import AdminLayout from '@/layouts/AdminLayout.astro'
 import { ArticleList } from '@/components/admin/ArticleList'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
 
 export const prerender = false
 
@@ -30,20 +32,17 @@ const initialData = {
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-foreground">Articles</h1>
-        <p class="mt-1 text-sm text-muted-foreground">
+        <h1 class="text-xl font-semibold text-foreground">Articles</h1>
+        <p class="mt-0.5 text-sm text-muted-foreground">
           Manage your blog articles and project documentation
         </p>
       </div>
-      <a
-        href="/admin/articles/new"
-        class="inline-flex items-center gap-2 rounded-lg bg-foreground text-background px-4 py-2.5 text-sm font-medium hover:bg-foreground/90 transition-colors"
-      >
-        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-        New Article
-      </a>
+      <Button size="sm" className="whitespace-nowrap" asChild>
+        <a href="/admin/articles/new" class="flex items-center">
+          <Plus className="h-4 w-4 mr-1.5 shrink-0" />
+          <span>New Article</span>
+        </a>
+      </Button>
     </div>
 
     <ArticleList client:load initialData={initialData} />

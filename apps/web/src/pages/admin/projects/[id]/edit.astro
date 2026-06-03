@@ -1,6 +1,5 @@
 ---
 import ProjectForm from '@/components/admin/ProjectForm'
-import ProjectPublishControls from '@/components/admin/ProjectPublishControls'
 import AdminLayout from '@/layouts/AdminLayout.astro'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
@@ -29,53 +28,32 @@ const { data: project, error } = await supabase
 if (error || !project) {
   return Astro.redirect('/admin/projects')
 }
+
+// Fetch linked articles
+const { data: articles } = await supabase
+  .from('articles')
+  .select('id, title, slug, status')
+  .eq('project_id', id)
+  .order('created_at', { ascending: false })
 ---
 
 <AdminLayout title={`Edit: ${project.title}`} activeItem="projects">
   <div class="space-y-6">
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-bold text-foreground">
-          Edit Project
-        </h1>
-        <p class="mt-1 text-sm text-muted-foreground">
-          {project.title}
-        </p>
-      </div>
-      <a
-        href="/admin/projects"
-        class="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
-      >
-        Back to Projects
-      </a>
+    <div>
+      <h1 class="text-xl font-semibold text-foreground">
+        Edit Project
+      </h1>
+      <p class="mt-0.5 text-sm text-muted-foreground">
+        {project.title}
+      </p>
     </div>
 
-    {/* Publication Controls */}
-    <div class="rounded-xl border border-border bg-card p-6">
-      <h2 class="text-lg font-semibold text-foreground mb-4">
-        Publication
-      </h2>
-      <ProjectPublishControls
-        client:load
-        projectId={project.id}
-        projectTitle={project.title}
-        currentStatus={project.publication_status}
-        publishedAt={project.published_at}
-        slug={project.slug}
-      />
-    </div>
-
-    {/* Project Metadata */}
-    <div class="rounded-xl border border-border bg-card p-6">
-      <h2 class="text-lg font-semibold text-foreground mb-4">
-        Project Metadata
-      </h2>
-      <ProjectForm
-        client:load
-        project={project}
-        onSuccessPath="/admin/projects"
-        onCancelPath="/admin/projects"
-      />
-    </div>
+    <ProjectForm
+      client:load
+      project={project}
+      articles={articles || []}
+      onSuccessPath="/admin/projects"
+      onCancelPath="/admin/projects"
+    />
   </div>
 </AdminLayout>

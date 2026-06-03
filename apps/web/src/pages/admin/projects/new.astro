@@ -8,18 +8,16 @@ export const prerender = false
 <AdminLayout title="New Project" activeItem="projects">
   <div class="space-y-6">
     <div>
-      <h1 class="text-2xl font-bold text-foreground">Create New Project</h1>
-      <p class="mt-1 text-sm text-muted-foreground">
+      <h1 class="text-xl font-semibold text-foreground">Create New Project</h1>
+      <p class="mt-0.5 text-sm text-muted-foreground">
         Add a new project to your portfolio
       </p>
     </div>
 
-    <div class="rounded-xl border border-border bg-card p-6">
-      <ProjectForm
-        client:load
-        onSuccessPath="/admin/projects"
-        onCancelPath="/admin/projects"
-      />
-    </div>
+    <ProjectForm
+      client:load
+      onSuccessPath="/admin/projects"
+      onCancelPath="/admin/projects"
+    />
   </div>
 </AdminLayout>
