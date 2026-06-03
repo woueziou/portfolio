@@ -316,7 +316,7 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
         {toolbarItems.map((item, index) => {
           if (item.type === 'separator') {
             return (
-              <div key={`sep-${index}`} className="w-px h-6 bg-zinc-200 dark:bg-zinc-700 mx-1" />
+              <div key={`sep-${index}`} className="w-px h-6 bg-border mx-1" />
             )
           }
 
@@ -328,8 +328,8 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
               title={`${item.label}${'shortcut' in item && item.shortcut ? ` (${item.shortcut})` : ''}`}
               className={`p-2 rounded-md transition-colors ${
                 'isActive' in item && item.isActive
-                  ? 'bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                  ? 'bg-muted text-foreground'
+                  : 'text-muted-foreground hover:bg-muted/50'
               } ${'disabled' in item && item.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {item.icon}
@@ -340,14 +340,14 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
 
       {/* Link input overlay */}
       {showLinkInput && (
-        <div className="absolute top-full left-0 mt-2 p-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg z-50">
+        <div className="absolute top-full left-0 mt-2 p-3 bg-card border border-border rounded-lg shadow-lg z-50">
           <div className="flex items-center gap-2">
             <input
               type="url"
               value={linkUrl}
               onChange={(e) => setLinkUrl(e.target.value)}
               placeholder="https://example.com"
-              className="w-64 px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-64 px-3 py-2 border border-border rounded-md bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   handleLinkSubmit()
@@ -369,7 +369,7 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
                 setShowLinkInput(false)
                 setLinkUrl('')
               }}
-              className="p-2 text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+              className="p-2 text-muted-foreground hover:text-foreground"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path

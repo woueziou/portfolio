@@ -278,7 +278,7 @@ export default function ArticleEditor({
   }, [editor, handleImageUpload])
 
   if (!editor) {
-    return <div className="animate-pulse bg-zinc-100 dark:bg-zinc-800 rounded-lg h-[500px]" />
+    return <div className="animate-pulse bg-muted rounded-lg h-[500px]" />
   }
 
   return (
@@ -297,7 +297,7 @@ export default function ArticleEditor({
                     : 'bg-red-500'
             }`}
           />
-          <span className="text-sm text-zinc-500 dark:text-zinc-400">
+          <span className="text-sm text-muted-foreground">
             {saveStatus === 'saved'
               ? 'All changes saved'
               : saveStatus === 'saving'
@@ -310,19 +310,19 @@ export default function ArticleEditor({
         <button
           onClick={() => autoSave(editor.getJSON())}
           disabled={saveStatus === 'saving' || saveStatus === 'saved'}
-          className="text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Save now
         </button>
       </div>
 
       {/* Toolbar */}
-      <div className="sticky top-20 z-30 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg p-2 mb-4">
+      <div className="sticky top-20 z-30 bg-card border border-border rounded-lg p-2 mb-4">
         <FloatingToolbar editor={editor} onImageUpload={handleImageUpload} />
       </div>
 
       {/* Editor content */}
-      <div className="relative border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 min-h-[500px]">
+      <div className="relative border border-border rounded-lg bg-card min-h-[500px]">
         <EditorContent editor={editor} />
 
         {/* Slash command menu */}
@@ -337,14 +337,14 @@ export default function ArticleEditor({
       </div>
 
       {/* Keyboard shortcuts help */}
-      <div className="mt-4 text-xs text-zinc-400 dark:text-zinc-500">
+      <div className="mt-4 text-xs text-muted-foreground">
         <p>
           <strong>Shortcuts:</strong>{' '}
-          <kbd className="px-1 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">Ctrl+B</kbd> Bold ·{' '}
-          <kbd className="px-1 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">Ctrl+I</kbd> Italic ·{' '}
-          <kbd className="px-1 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">Ctrl+U</kbd> Underline ·{' '}
-          <kbd className="px-1 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">Ctrl+K</kbd> Link · Type{' '}
-          <kbd className="px-1 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">/</kbd> for commands
+          <kbd className="px-1 py-0.5 bg-muted rounded">Ctrl+B</kbd> Bold ·{' '}
+          <kbd className="px-1 py-0.5 bg-muted rounded">Ctrl+I</kbd> Italic ·{' '}
+          <kbd className="px-1 py-0.5 bg-muted rounded">Ctrl+U</kbd> Underline ·{' '}
+          <kbd className="px-1 py-0.5 bg-muted rounded">Ctrl+K</kbd> Link · Type{' '}
+          <kbd className="px-1 py-0.5 bg-muted rounded">/</kbd> for commands
         </p>
       </div>
     </div>

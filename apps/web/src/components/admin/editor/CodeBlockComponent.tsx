@@ -45,15 +45,15 @@ export default function CodeBlockComponent({ node, updateAttributes, selected }:
   return (
     <NodeViewWrapper
       className={`relative group rounded-lg overflow-hidden ${
-        selected ? 'ring-2 ring-blue-500' : ''
+        selected ? 'ring-2 ring-ring' : ''
       }`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-zinc-800 dark:bg-zinc-900 border-b border-zinc-700">
+      <div className="flex items-center justify-between px-4 py-2 bg-muted border-b border-border">
         <select
           value={node.attrs.language || ''}
           onChange={handleLanguageChange}
-          className="text-xs bg-zinc-700 dark:bg-zinc-800 text-zinc-300 border border-zinc-600 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="text-xs bg-background text-foreground border border-border rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-ring"
         >
           {LANGUAGES.map((lang) => (
             <option key={lang.value} value={lang.value}>
@@ -64,12 +64,12 @@ export default function CodeBlockComponent({ node, updateAttributes, selected }:
 
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors opacity-0 group-hover:opacity-100"
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors opacity-0 group-hover:opacity-100"
         >
           {copied ? (
             <>
               <svg
-                className="h-3.5 w-3.5 text-green-400"
+                className="h-3.5 w-3.5 text-green-500"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -81,7 +81,7 @@ export default function CodeBlockComponent({ node, updateAttributes, selected }:
                   d="M5 13l4 4L19 7"
                 />
               </svg>
-              <span className="text-green-400">Copied!</span>
+              <span className="text-green-500">Copied!</span>
             </>
           ) : (
             <>
@@ -100,9 +100,9 @@ export default function CodeBlockComponent({ node, updateAttributes, selected }:
       </div>
 
       {/* Code content */}
-      <pre className="bg-zinc-900 dark:bg-zinc-950 p-4 overflow-x-auto">
+      <pre className="bg-foreground/5 p-4 overflow-x-auto">
         <code
-          className={`text-sm text-zinc-100 font-mono ${
+          className={`text-sm text-foreground font-mono ${
             node.attrs.language ? `language-${node.attrs.language}` : ''
           }`}
         >

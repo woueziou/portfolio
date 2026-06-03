@@ -31,7 +31,7 @@ export default function ProjectPublishControls({
         <div className="flex items-center gap-3">
           <StatusBadge status={status} size="md" />
           {publishedAt && (
-            <span className="text-sm text-zinc-500 dark:text-zinc-400">
+            <span className="text-sm text-muted-foreground">
               Published {new Date(publishedAt).toLocaleDateString()}
             </span>
           )}
@@ -39,7 +39,7 @@ export default function ProjectPublishControls({
         <button
           type="button"
           onClick={() => setDialogOpen(true)}
-          className="rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+          className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
         >
           Change Status
         </button>

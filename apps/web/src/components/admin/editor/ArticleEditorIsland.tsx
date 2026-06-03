@@ -34,7 +34,7 @@ export default function ArticleEditorIsland({
       {(hasError) => {
         if (hasError) {
           return (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
+            <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               Failed to load the editor. Refresh the page to retry.
             </div>
           )
@@ -43,7 +43,7 @@ export default function ArticleEditorIsland({
         return (
           <Suspense
             fallback={
-              <div className="animate-pulse bg-zinc-100 dark:bg-zinc-800 rounded-lg h-[500px]" />
+              <div className="animate-pulse bg-muted rounded-lg h-[500px]" />
             }
           >
             <LazyArticleEditor articleId={articleId} initialContent={initialContent} />

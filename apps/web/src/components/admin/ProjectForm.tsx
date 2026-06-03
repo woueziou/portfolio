@@ -174,8 +174,8 @@ export default function ProjectForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4">
+          <p className="text-sm text-destructive">{error}</p>
         </div>
       )}
 
@@ -183,7 +183,7 @@ export default function ProjectForm({
       <div>
         <label
           htmlFor="title"
-          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+          className="block text-sm font-medium text-foreground mb-2"
         >
           Title *
         </label>
@@ -194,7 +194,7 @@ export default function ProjectForm({
           onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
           required
           maxLength={200}
-          className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors"
+          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
           placeholder="My Awesome Project"
         />
       </div>
@@ -203,12 +203,12 @@ export default function ProjectForm({
       <div>
         <label
           htmlFor="slug"
-          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+          className="block text-sm font-medium text-foreground mb-2"
         >
           Slug *
         </label>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-zinc-500 dark:text-zinc-400">/projects/</span>
+          <span className="text-sm text-muted-foreground">/projects/</span>
           <input
             id="slug"
             type="text"
@@ -219,11 +219,11 @@ export default function ProjectForm({
             }}
             required
             pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
-            className="flex-1 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors"
+            className="flex-1 rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
             placeholder="my-awesome-project"
           />
         </div>
-        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+        <p className="mt-1 text-xs text-muted-foreground">
           Lowercase letters, numbers, and hyphens only
         </p>
       </div>
@@ -232,7 +232,7 @@ export default function ProjectForm({
       <div>
         <label
           htmlFor="description"
-          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+          className="block text-sm font-medium text-foreground mb-2"
         >
           Description *
         </label>
@@ -243,14 +243,14 @@ export default function ProjectForm({
           required
           maxLength={2000}
           rows={4}
-          className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors resize-none"
+          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors resize-none"
           placeholder="A brief description of your project..."
         />
       </div>
 
       {/* Project Type */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+        <label className="block text-sm font-medium text-foreground mb-2">
           Project Type *
         </label>
         <div className="flex flex-wrap gap-2">
@@ -261,8 +261,8 @@ export default function ProjectForm({
               onClick={() => handleTypeToggle(type.value)}
               className={`inline-flex items-center rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                 formData.type.includes(type.value)
-                  ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
-                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                  ? 'bg-foreground text-background'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
               }`}
             >
               {type.label}
@@ -273,7 +273,7 @@ export default function ProjectForm({
 
       {/* Tech Stack */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+        <label className="block text-sm font-medium text-foreground mb-2">
           Tech Stack *
         </label>
         <div className="flex gap-2 mb-2">
@@ -287,13 +287,13 @@ export default function ProjectForm({
                 handleAddTech()
               }
             }}
-            className="flex-1 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors"
+            className="flex-1 rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
             placeholder="Add technology..."
           />
           <button
             type="button"
             onClick={handleAddTech}
-            className="rounded-lg bg-zinc-100 dark:bg-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+            className="rounded-lg bg-muted px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted/80 transition-colors"
           >
             Add
           </button>
@@ -302,13 +302,13 @@ export default function ProjectForm({
           {formData.tech_stack.map((tech) => (
             <span
               key={tech}
-              className="inline-flex items-center gap-1 rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-1 text-sm text-zinc-700 dark:text-zinc-300"
+              className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-sm text-foreground"
             >
               {tech}
               <button
                 type="button"
                 onClick={() => handleRemoveTech(tech)}
-                className="ml-1 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                className="ml-1 text-muted-foreground hover:text-foreground"
               >
                 ×
               </button>
@@ -321,7 +321,7 @@ export default function ProjectForm({
       <div>
         <label
           htmlFor="state"
-          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+          className="block text-sm font-medium text-foreground mb-2"
         >
           Project State
         </label>
@@ -329,7 +329,7 @@ export default function ProjectForm({
           id="state"
           value={formData.state}
           onChange={(e) => setFormData((prev) => ({ ...prev, state: e.target.value }))}
-          className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-zinc-900 dark:text-zinc-100 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors"
+          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
         >
           {PROJECT_STATES.map((state) => (
             <option key={state.value} value={state.value}>
@@ -343,7 +343,7 @@ export default function ProjectForm({
       <div>
         <label
           htmlFor="project_date"
-          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+          className="block text-sm font-medium text-foreground mb-2"
         >
           Project Date
         </label>
@@ -352,7 +352,7 @@ export default function ProjectForm({
           type="date"
           value={formData.project_date}
           onChange={(e) => setFormData((prev) => ({ ...prev, project_date: e.target.value }))}
-          className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-zinc-900 dark:text-zinc-100 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors"
+          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
         />
       </div>
 
@@ -361,7 +361,7 @@ export default function ProjectForm({
         <div>
           <label
             htmlFor="url"
-            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+            className="block text-sm font-medium text-foreground mb-2"
           >
             Repository URL
           </label>
@@ -370,14 +370,14 @@ export default function ProjectForm({
             type="url"
             value={formData.url}
             onChange={(e) => setFormData((prev) => ({ ...prev, url: e.target.value }))}
-            className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors"
+            className="w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
             placeholder="https://github.com/..."
           />
         </div>
         <div>
           <label
             htmlFor="access_link"
-            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+            className="block text-sm font-medium text-foreground mb-2"
           >
             Live Demo URL
           </label>
@@ -386,7 +386,7 @@ export default function ProjectForm({
             type="url"
             value={formData.access_link}
             onChange={(e) => setFormData((prev) => ({ ...prev, access_link: e.target.value }))}
-            className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors"
+            className="w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
             placeholder="https://..."
           />
         </div>
@@ -396,7 +396,7 @@ export default function ProjectForm({
       <div>
         <label
           htmlFor="main_image_url"
-          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+          className="block text-sm font-medium text-foreground mb-2"
         >
           Cover Image URL
         </label>
@@ -405,20 +405,20 @@ export default function ProjectForm({
           type="url"
           value={formData.main_image_url}
           onChange={(e) => setFormData((prev) => ({ ...prev, main_image_url: e.target.value }))}
-          className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors"
+          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
           placeholder="https://..."
         />
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-end gap-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+      <div className="flex items-center justify-end gap-4 pt-4 border-t border-border">
         {(onCancel || onCancelPath) && (
           <button
             type="button"
             onClick={() => {
               void handleCancel()
             }}
-            className="rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+            className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
           >
             Cancel
           </button>
@@ -426,7 +426,7 @@ export default function ProjectForm({
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-zinc-900 dark:bg-zinc-100 px-6 py-2.5 text-sm font-medium text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="rounded-lg bg-foreground text-background px-6 py-2.5 text-sm font-medium hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? 'Saving...' : isEditing ? 'Update Project' : 'Create Project'}
         </button>

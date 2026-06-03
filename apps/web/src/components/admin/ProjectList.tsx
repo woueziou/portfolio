@@ -49,7 +49,7 @@ const TYPE_OPTIONS = [
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
   published: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-  archived: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-400',
+  archived: 'bg-muted text-muted-foreground',
 }
 
 function formatDate(date: string | null): string {
@@ -74,7 +74,7 @@ function getTypeBadgeColor(type: string): string {
     llm: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300',
     ai: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300',
   }
-  return colors[type] || 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
+  return colors[type] || 'bg-muted text-muted-foreground'
 }
 
 export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
@@ -131,14 +131,14 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
             aria-label="Search projects"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-            class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400"
+            class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
           aria-label="Filter by status"
-          class="rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+          class="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         >
           {STATUS_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -148,7 +148,7 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
           value={typeFilter}
           onChange={(e) => { setTypeFilter(e.target.value); setPage(1) }}
           aria-label="Filter by type"
-          class="rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+          class="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         >
           {TYPE_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -158,17 +158,17 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
 
       {/* Loading indicator */}
       {loading && (
-        <div role="status" aria-label="Loading" class="text-center text-sm text-zinc-500 py-4">Loading...</div>
+        <div role="status" aria-label="Loading" class="text-center text-sm text-muted-foreground py-4">Loading...</div>
       )}
 
       {/* Cards grid */}
       {!loading && filtered.length === 0 ? (
-        <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-12 text-center">
-          <svg class="mx-auto h-12 w-12 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="rounded-xl border border-border bg-card p-12 text-center">
+          <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
-          <h3 class="mt-4 text-lg font-medium text-zinc-900 dark:text-zinc-100">No projects found</h3>
-          <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+          <h3 class="mt-4 text-lg font-medium text-foreground">No projects found</h3>
+          <p class="mt-2 text-sm text-muted-foreground">
             {search || statusFilter || typeFilter ? 'Try adjusting your filters.' : 'Create your first project to get started.'}
           </p>
         </div>
@@ -178,15 +178,15 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
             <a
               key={project.id}
               href={`/admin/projects/${project.id}/edit`}
-              class="block rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group"
+              class="block rounded-xl border border-border bg-card p-5 hover:shadow-md hover:border-border/80 transition-all group"
             >
               {/* Card header: image or initials */}
               <div class="flex items-start justify-between mb-3">
                 <div class="flex-1 min-w-0">
-                  <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-100 truncate group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">
+                  <h3 class="text-base font-semibold text-foreground truncate group-hover:text-foreground/70 transition-colors">
                     {project.title}
                   </h3>
-                  <p class="text-xs text-zinc-400 mt-0.5 truncate">{project.slug}</p>
+                  <p class="text-xs text-muted-foreground mt-0.5 truncate">{project.slug}</p>
                 </div>
                 <span class={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium shrink-0 ml-2', STATUS_COLORS[project.publication_status] || '')}>
                   {project.publication_status}
@@ -206,7 +206,7 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
 
               {/* Description */}
               {project.description && (
-                <p class="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2 mb-3">
+                <p class="text-sm text-muted-foreground line-clamp-2 mb-3">
                   {project.description}
                 </p>
               )}
@@ -215,12 +215,12 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
               {project.tech_stack && project.tech_stack.length > 0 && (
                 <div class="flex flex-wrap gap-1 mb-3">
                   {project.tech_stack.slice(0, 4).map((tech) => (
-                    <span key={tech} class="inline-flex items-center rounded-md bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 text-xs text-zinc-600 dark:text-zinc-400">
+                    <span key={tech} class="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                       {tech}
                     </span>
                   ))}
                   {project.tech_stack.length > 4 && (
-                    <span class="text-xs text-zinc-400 self-center">
+                    <span class="text-xs text-muted-foreground self-center">
                       +{project.tech_stack.length - 4} more
                     </span>
                   )}
@@ -228,7 +228,7 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
               )}
 
               {/* Date */}
-              <div class="flex items-center gap-3 text-xs text-zinc-400 mt-auto pt-2 border-t border-zinc-100 dark:border-zinc-800">
+              <div class="flex items-center gap-3 text-xs text-muted-foreground mt-auto pt-2 border-t border-border/50">
                 <span>Created: {formatDate(project.created_at)}</span>
                 {project.published_at && <span>Published: {formatDate(project.published_at)}</span>}
               </div>
@@ -240,7 +240,7 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
       {/* Pagination */}
       {data.totalPages > 1 && (
         <div class="flex items-center justify-between">
-          <p class="text-sm text-zinc-500">
+          <p class="text-sm text-muted-foreground">
             Page {data.page} of {data.totalPages} ({data.total} total)
           </p>
           <div class="flex gap-2">
@@ -251,8 +251,8 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
               class={cn(
                 'rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
                 page <= 1
-                  ? 'border-zinc-200 dark:border-zinc-700 text-zinc-400 cursor-not-allowed'
-                  : 'border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500',
+                  ? 'border-border/50 text-muted-foreground cursor-not-allowed'
+                  : 'border-border text-foreground hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               )}
             >
               Previous
@@ -264,8 +264,8 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
               class={cn(
                 'rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
                 page >= data.totalPages
-                  ? 'border-zinc-200 dark:border-zinc-700 text-zinc-400 cursor-not-allowed'
-                  : 'border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500',
+                  ? 'border-border/50 text-muted-foreground cursor-not-allowed'
+                  : 'border-border text-foreground hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               )}
             >
               Next

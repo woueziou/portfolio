@@ -16,7 +16,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   },
   archived: {
     label: 'Archived',
-    className: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-400',
+    className: 'bg-muted text-muted-foreground',
   },
 }
 

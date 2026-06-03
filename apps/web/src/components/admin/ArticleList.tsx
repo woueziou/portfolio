@@ -32,7 +32,7 @@ const STATUS_OPTIONS = [
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
   published: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-  archived: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-400',
+  archived: 'bg-muted text-muted-foreground',
 }
 
 function formatDate(date: string | null): string {
@@ -95,14 +95,14 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
             aria-label="Search articles"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-            class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400"
+            class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
           aria-label="Filter by status"
-          class="rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+          class="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         >
           {STATUS_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>{o.label}</option>
@@ -112,17 +112,17 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
 
       {/* Loading */}
       {loading && (
-        <div role="status" aria-label="Loading" class="text-center text-sm text-zinc-500 py-4">Loading...</div>
+        <div role="status" aria-label="Loading" class="text-center text-sm text-muted-foreground py-4">Loading...</div>
       )}
 
       {/* Cards */}
       {!loading && filtered.length === 0 ? (
-        <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-12 text-center">
-          <svg class="mx-auto h-12 w-12 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="rounded-xl border border-border bg-card p-12 text-center">
+          <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <h3 class="mt-4 text-lg font-medium text-zinc-900 dark:text-zinc-100">No articles found</h3>
-          <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+          <h3 class="mt-4 text-lg font-medium text-foreground">No articles found</h3>
+          <p class="mt-2 text-sm text-muted-foreground">
             {search || statusFilter ? 'Try adjusting your filters.' : 'Create your first article to get started.'}
           </p>
         </div>
@@ -132,15 +132,15 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
             <a
               key={article.id}
               href={`/admin/articles/${article.id}/edit`}
-              class="block rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group"
+              class="block rounded-xl border border-border bg-card p-5 hover:shadow-md hover:border-border/80 transition-all group"
             >
               {/* Card header */}
               <div class="flex items-start justify-between mb-3">
                 <div class="flex-1 min-w-0">
-                  <h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-100 truncate group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">
+                  <h3 class="text-base font-semibold text-foreground truncate group-hover:text-foreground/70 transition-colors">
                     {article.title}
                   </h3>
-                  <p class="text-xs text-zinc-400 mt-0.5 truncate">{article.slug}</p>
+                  <p class="text-xs text-muted-foreground mt-0.5 truncate">{article.slug}</p>
                 </div>
                 <span class={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium shrink-0 ml-2', STATUS_COLORS[article.status || 'draft'] || '')}>
                   {article.status}
@@ -149,13 +149,13 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
 
               {/* Summary */}
               {article.summary && (
-                <p class="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2 mb-3">
+                <p class="text-sm text-muted-foreground line-clamp-2 mb-3">
                   {article.summary}
                 </p>
               )}
 
               {/* Meta footer */}
-              <div class="flex items-center justify-between text-xs text-zinc-400 mt-auto pt-2 border-t border-zinc-100 dark:border-zinc-800">
+              <div class="flex items-center justify-between text-xs text-muted-foreground mt-auto pt-2 border-t border-border/50">
                 <div class="flex items-center gap-3">
                   <span>Created: {formatDate(article.created_at)}</span>
                   {article.reading_time_minutes && (
@@ -174,7 +174,7 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
       {/* Pagination */}
       {data.totalPages > 1 && (
         <div class="flex items-center justify-between">
-          <p class="text-sm text-zinc-500">
+          <p class="text-sm text-muted-foreground">
             Page {data.page} of {data.totalPages} ({data.total} total)
           </p>
           <div class="flex gap-2">
@@ -185,8 +185,8 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
               class={cn(
                 'rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
                 page <= 1
-                  ? 'border-zinc-200 dark:border-zinc-700 text-zinc-400 cursor-not-allowed'
-                  : 'border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500',
+                  ? 'border-border/50 text-muted-foreground cursor-not-allowed'
+                  : 'border-border text-foreground hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               )}
             >
               Previous
@@ -198,8 +198,8 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
               class={cn(
                 'rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
                 page >= data.totalPages
-                  ? 'border-zinc-200 dark:border-zinc-700 text-zinc-400 cursor-not-allowed'
-                  : 'border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500',
+                  ? 'border-border/50 text-muted-foreground cursor-not-allowed'
+                  : 'border-border text-foreground hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               )}
             >
               Next

@@ -175,25 +175,25 @@ export default function PublishDialog({
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Dialog */}
-      <div className="relative w-full max-w-md rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 shadow-xl">
+      <div className="relative w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl">
         {/* Header */}
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+          <h2 className="text-lg font-semibold text-foreground">
             Publication Settings
           </h2>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400 truncate">{title}</p>
+          <p className="mt-1 text-sm text-muted-foreground truncate">{title}</p>
         </div>
 
         {/* Current Status */}
         <div className="mb-6 flex items-center gap-2">
-          <span className="text-sm text-zinc-500 dark:text-zinc-400">Current status:</span>
+          <span className="text-sm text-muted-foreground">Current status:</span>
           <StatusBadge status={currentStatus} size="md" />
         </div>
 
         {/* Error */}
         {error && (
-          <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          <div className="mb-4 rounded-lg bg-destructive/10 border border-destructive/20 p-3">
+            <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
 
@@ -214,11 +214,11 @@ export default function PublishDialog({
                     ? 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30'
                     : config.variant === 'danger'
                       ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30'
-                      : 'border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700'
+                      : 'border-border bg-muted/30 hover:bg-muted/50'
                 }`}
               >
-                <div className="font-medium text-zinc-900 dark:text-zinc-100">{config.label}</div>
-                <div className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                <div className="font-medium text-foreground">{config.label}</div>
+                <div className="mt-1 text-sm text-muted-foreground">
                   {config.description}
                 </div>
               </button>
@@ -231,7 +231,7 @@ export default function PublishDialog({
           type="button"
           onClick={onClose}
           disabled={loading}
-          className="mt-4 w-full rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
+          className="mt-4 w-full rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors disabled:opacity-50"
         >
           Cancel
         </button>

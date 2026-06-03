@@ -302,17 +302,17 @@ export default function SlashCommandMenu({
     <>
       <div
         ref={menuRef}
-        className="absolute z-50 w-72 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-lg overflow-hidden"
+        className="absolute z-50 w-72 bg-card border border-border rounded-lg shadow-lg overflow-hidden"
         style={{ top: position.top, left: position.left }}
       >
-        <div className="px-3 py-2 border-b border-zinc-200 dark:border-zinc-700">
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+        <div className="px-3 py-2 border-b border-border">
+          <p className="text-xs text-muted-foreground">
             {filterText ? `Filtering: ${filterText}` : 'Insert block'}
           </p>
         </div>
         <div className="max-h-80 overflow-y-auto py-1">
           {filteredCommands.length === 0 ? (
-            <div className="px-3 py-4 text-center text-sm text-zinc-500 dark:text-zinc-400">
+            <div className="px-3 py-4 text-center text-sm text-muted-foreground">
               No matching commands
             </div>
           ) : (
@@ -322,23 +322,23 @@ export default function SlashCommandMenu({
                 onClick={cmd.action}
                 className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${
                   index === selectedIndex
-                    ? 'bg-zinc-100 dark:bg-zinc-700'
-                    : 'hover:bg-zinc-50 dark:hover:bg-zinc-800'
+                    ? 'bg-muted'
+                    : 'hover:bg-muted/50'
                 }`}
               >
-                <span className="text-zinc-600 dark:text-zinc-400">{cmd.icon}</span>
+                <span className="text-muted-foreground">{cmd.icon}</span>
                 <div>
-                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                  <p className="text-sm font-medium text-foreground">
                     {cmd.label}
                   </p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">{cmd.description}</p>
+                  <p className="text-xs text-muted-foreground">{cmd.description}</p>
                 </div>
               </button>
             ))
           )}
         </div>
-        <div className="px-3 py-2 border-t border-zinc-200 dark:border-zinc-700">
-          <p className="text-xs text-zinc-400 dark:text-zinc-500">
+        <div className="px-3 py-2 border-t border-border">
+          <p className="text-xs text-muted-foreground">
             ↑↓ Navigate · Enter Select · Esc Cancel
           </p>
         </div>

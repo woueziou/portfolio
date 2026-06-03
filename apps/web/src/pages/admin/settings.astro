@@ -18,19 +18,19 @@ const socialLinks = (config?.social_links || {}) as Record<string, string>
 <AdminLayout title="Settings" activeItem="settings">
   <div class="max-w-2xl mx-auto space-y-6">
     <div>
-      <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Settings</h1>
-      <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+      <h1 class="text-2xl font-bold text-foreground">Settings</h1>
+      <p class="mt-1 text-sm text-muted-foreground">
         Configure your site metadata and social links
       </p>
     </div>
 
     <!-- Site Info -->
-    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
-      <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Site Information</h2>
+    <div class="rounded-xl border border-border bg-card p-6">
+      <h2 class="text-lg font-semibold text-foreground mb-4">Site Information</h2>
       <form id="settings-form" class="space-y-5">
         <!-- Site Title -->
         <div>
-          <label for="site_title" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+          <label for="site_title" class="block text-sm font-medium text-foreground mb-1">
             Site Title
           </label>
           <input
@@ -39,13 +39,13 @@ const socialLinks = (config?.social_links || {}) as Record<string, string>
             type="text"
             value={config?.site_title || 'Portfolio'}
             required
-            class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400"
+            class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
 
         <!-- Site Tagline -->
         <div>
-          <label for="site_tagline" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+          <label for="site_tagline" class="block text-sm font-medium text-foreground mb-1">
             Tagline
           </label>
           <input
@@ -54,13 +54,13 @@ const socialLinks = (config?.social_links || {}) as Record<string, string>
             type="text"
             value={config?.site_tagline || ''}
             placeholder="A short description of your site"
-            class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400"
+            class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
 
         <!-- SEO Description -->
         <div>
-          <label for="seo_description" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+          <label for="seo_description" class="block text-sm font-medium text-foreground mb-1">
             SEO Description
           </label>
           <textarea
@@ -68,13 +68,13 @@ const socialLinks = (config?.social_links || {}) as Record<string, string>
             name="seo_description"
             rows={3}
             placeholder="Meta description for search engines"
-            class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400"
+            class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           >{config?.seo_description || ''}</textarea>
         </div>
 
         <!-- OG Image -->
         <div>
-          <label for="seo_og_image" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+          <label for="seo_og_image" class="block text-sm font-medium text-foreground mb-1">
             Open Graph Image URL
           </label>
           <input
@@ -83,57 +83,57 @@ const socialLinks = (config?.social_links || {}) as Record<string, string>
             type="url"
             value={config?.seo_og_image || ''}
             placeholder="https://example.com/og-image.png"
-            class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400"
+            class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
 
         <div class="flex items-center gap-3 pt-2">
           <button
             type="submit"
-            class="inline-flex items-center gap-2 rounded-lg bg-zinc-900 dark:bg-zinc-100 px-4 py-2.5 text-sm font-medium text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50"
+            class="inline-flex items-center gap-2 rounded-lg bg-foreground text-background px-4 py-2.5 text-sm font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50"
           >
             Save Site Info
           </button>
-          <span id="settings-status" class="text-sm text-zinc-500"></span>
+          <span id="settings-status" class="text-sm text-muted-foreground"></span>
         </div>
       </form>
     </div>
 
     <!-- Social Links -->
-    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
-      <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Social Links</h2>
+    <div class="rounded-xl border border-border bg-card p-6">
+      <h2 class="text-lg font-semibold text-foreground mb-4">Social Links</h2>
       <form id="social-form" class="space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label for="social_github" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">GitHub</label>
+            <label for="social_github" class="block text-sm font-medium text-foreground mb-1">GitHub</label>
             <input id="social_github" type="url" value={socialLinks.github || ''} placeholder="https://github.com/username"
-              class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400" />
+              class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
           <div>
-            <label for="social_twitter" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Twitter / X</label>
+            <label for="social_twitter" class="block text-sm font-medium text-foreground mb-1">Twitter / X</label>
             <input id="social_twitter" type="url" value={socialLinks.twitter || ''} placeholder="https://twitter.com/username"
-              class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400" />
+              class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
           <div>
-            <label for="social_linkedin" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">LinkedIn</label>
+            <label for="social_linkedin" class="block text-sm font-medium text-foreground mb-1">LinkedIn</label>
             <input id="social_linkedin" type="url" value={socialLinks.linkedin || ''} placeholder="https://linkedin.com/in/username"
-              class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400" />
+              class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
           <div>
-            <label for="social_website" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Website</label>
+            <label for="social_website" class="block text-sm font-medium text-foreground mb-1">Website</label>
             <input id="social_website" type="url" value={socialLinks.website || ''} placeholder="https://example.com"
-              class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400" />
+              class="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
         </div>
 
         <div class="flex items-center gap-3 pt-2">
           <button
             type="submit"
-            class="inline-flex items-center gap-2 rounded-lg bg-zinc-900 dark:bg-zinc-100 px-4 py-2.5 text-sm font-medium text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50"
+            class="inline-flex items-center gap-2 rounded-lg bg-foreground text-background px-4 py-2.5 text-sm font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50"
           >
             Save Social Links
           </button>
-          <span id="social-status" class="text-sm text-zinc-500"></span>
+          <span id="social-status" class="text-sm text-muted-foreground"></span>
         </div>
       </form>
     </div>
