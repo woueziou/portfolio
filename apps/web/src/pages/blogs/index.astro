@@ -1,0 +1,86 @@
+---
+import type { Database } from '@repo/shared'
+import { supabase } from '@repo/shared'
+import { ArrowLeft, Calendar, Clock } from 'lucide-react'
+import BaseLayout from '@/layouts/BaseLayout.astro'
+import { formatDate } from '@/utils/formater'
+
+type Article = Database['public']['Tables']['articles']['Row']
+
+const { data: articles, error } = await supabase
+  .from('articles')
+  .select('*')
+  .eq('status', 'published')
+  .order('published_at', { ascending: false })
+
+const typedArticles: Article[] = !error && articles ? (articles as Article[]) : []
+---
+
+<BaseLayout title="Blogs — Taas S. Ekpaye">
+  <div class="antialiased bg-[url('/noise-bg.png')] font-baufra min-h-screen">
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
+      <div class="container mx-auto px-4 py-3 flex items-center">
+        <a
+          href="/"
+          class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft class="h-4 w-4" />
+          Back to Portfolio
+        </a>
+      </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-12 max-w-3xl">
+      <header class="mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4">Blogs</h1>
+        <p class="text-lg text-muted-foreground">
+          Thoughts, tutorials, and deep dives on software development.
+        </p>
+      </header>
+
+      {
+        error ? (
+          <p class="text-sm text-muted-foreground text-center py-12">
+            Articles are currently unavailable. Please check back later.
+          </p>
+        ) : typedArticles.length === 0 ? (
+          <p class="text-sm text-muted-foreground text-center py-12">
+            No articles yet. Stay tuned!
+          </p>
+        ) : (
+          <div class="space-y-10">
+            {typedArticles.map((article) => (
+              <article class="group border-b border-border pb-10 last:border-none">
+                <a href={`/blogs/${article.slug}`} class="block">
+                  <h2 class="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">
+                    {article.title}
+                  </h2>
+                  <div class="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                    {article.published_at && (
+                      <span class="flex items-center gap-1.5">
+                        <Calendar class="h-3.5 w-3.5" />
+                        {formatDate(article.published_at, 'MMMM D, YYYY')}
+                      </span>
+                    )}
+                    {article.reading_time_minutes && (
+                      <span class="flex items-center gap-1.5">
+                        <Clock class="h-3.5 w-3.5" />
+                        {article.reading_time_minutes} min read
+                      </span>
+                    )}
+                  </div>
+                  {article.summary && (
+                    <p class="text-muted-foreground leading-relaxed line-clamp-2">
+                      {article.summary}
+                    </p>
+                  )}
+                </a>
+              </article>
+            ))}
+          </div>
+        )
+      }
+    </main>
+  </div>
+</BaseLayout>

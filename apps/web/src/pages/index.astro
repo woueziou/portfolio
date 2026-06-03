@@ -23,7 +23,7 @@ const fetchError = error?.message ?? null
 <BaseLayout title="Taas S. Ekpaye — Software Developer">
   <div class="antialiased bg-[url('/noise-bg.png')] font-baufra min-h-screen flex flex-col justify-between">
     <!-- Top bar: nav links + theme switcher -->
-    <div class="fixed top-0 left-0 right-0 z-50 flex items-center justify-center px-4 py-3 ">
+    <div id="topbar" class="fixed top-0 left-0 right-0 z-50 flex items-center justify-center px-4 py-3 transition-all duration-200">
       <nav class="flex items-center gap-6 text-sm font-medium">
         <a href="/#hero" class="text-muted-foreground hover:text-foreground transition-colors">
           Home
@@ -31,14 +31,33 @@ const fetchError = error?.message ?? null
         <a href="/#projects" class="text-muted-foreground hover:text-foreground transition-colors">
           Projects
         </a>
-        <a href="/#contact" class="text-muted-foreground hover:text-foreground transition-colors">
-          Contact
+        <a href="/#blogs" class="text-muted-foreground hover:text-foreground transition-colors">
+          Blogs
         </a>
       </nav>
       <div class="absolute right-4 top-1/2 -translate-y-1/2">
         <ThemeSwitcher client:load />
       </div>
     </div>
+
+    <script>
+      const topbar = document.getElementById('topbar')
+      let ticking = false
+
+      const onScroll = () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            const scrolled = window.scrollY > 20
+            topbar?.classList.toggle('bg-background/60', scrolled)
+            topbar?.classList.toggle('backdrop-blur-sm', scrolled)
+            ticking = false
+          })
+          ticking = true
+        }
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true })
+    </script>
 
     <div class="flex-grow">
       <div class="flex flex-col items-center justify-center min-h-screen">
@@ -64,7 +83,7 @@ const fetchError = error?.message ?? null
           }
         </section>
 
-        <section id="contact" class="w-full scroll-mt-20">
+        <section id="blogs" class="w-full scroll-mt-20">
           <Footer client:load />
         </section>
       </div>
