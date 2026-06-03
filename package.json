@@ -11,7 +11,8 @@
     "lint:fix": "biome check --fix .",
     "format": "biome format --write .",
     "typecheck": "bun run --filter '*' typecheck",
-    "build": "bun run lint && bun run typecheck && bun run --filter web build"
+    "build": "bun run lint && bun run typecheck && bun run --filter web build",
+    "deploy": "bash scripts/deploy-local.sh"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",
