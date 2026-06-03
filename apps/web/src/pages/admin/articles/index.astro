@@ -1,0 +1,50 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro'
+import { ArticleList } from '@/components/admin/ArticleList'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
+
+export const prerender = false
+
+const supabase = createSupabaseServerClient(Astro.cookies)
+
+const { data: articles, error, count } = await supabase
+  .from('articles')
+  .select('*', { count: 'exact' })
+  .order('created_at', { ascending: false })
+  .range(0, 11)
+
+if (error) {
+  console.error('Error fetching articles:', error)
+}
+
+const initialData = {
+  articles: articles || [],
+  total: count || 0,
+  page: 1,
+  perPage: 12,
+  totalPages: Math.ceil((count || 0) / 12),
+}
+---
+
+<AdminLayout title="Articles" activeItem="articles">
+  <div class="space-y-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-semibold text-foreground">Articles</h1>
+        <p class="mt-0.5 text-sm text-muted-foreground">
+          Manage your blog articles and project documentation
+        </p>
+      </div>
+      <Button size="sm" className="whitespace-nowrap" asChild>
+        <a href="/admin/articles/new" class="flex items-center">
+          <Plus className="h-4 w-4 mr-1.5 shrink-0" />
+          <span>New Article</span>
+        </a>
+      </Button>
+    </div>
+
+    <ArticleList client:load initialData={initialData} />
+  </div>
+</AdminLayout>

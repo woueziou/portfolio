@@ -1,0 +1,72 @@
+---
+import AdminLayout from "@/layouts/AdminLayout.astro";
+import { ProjectList } from "@/components/admin/ProjectList";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+
+export const prerender = false;
+
+const supabase = createSupabaseServerClient(Astro.cookies);
+
+const {
+  data: projects,
+  error,
+  count,
+} = await supabase
+  .from("projects")
+  .select(
+    `*,
+    project_techstacks(
+      techstack_id,
+      techstacks(id, name, icon)
+    )`,
+    { count: "exact" },
+  )
+  .order("created_at", { ascending: false })
+  .range(0, 11);
+
+if (error) {
+  console.error("Error fetching projects:", error);
+}
+
+const initialData = {
+  projects: projects || [],
+  total: count || 0,
+  page: 1,
+  perPage: 12,
+  totalPages: Math.ceil((count || 0) / 12),
+};
+---
+
+<AdminLayout title="Projects" activeItem="projects">
+  <div class="space-y-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-semibold text-foreground">Projects</h1>
+        <p class="mt-0.5 text-sm text-muted-foreground">
+          Manage your portfolio projects
+        </p>
+      </div>
+      <Button id="new-project-btn" className="" variant={"ghost"}>
+        <span class="flex items-center">
+          <Plus className="h-4 w-4" />
+          <span>Add</span>
+        </span>
+      </Button>
+    </div>
+
+    <ProjectList client:load initialData={initialData} />
+  </div>
+</AdminLayout>
+
+<script>
+  import { navigate } from 'astro:transitions/client'
+
+  const newProjectBtn = document.getElementById('new-project-btn')
+  if (newProjectBtn) {
+    newProjectBtn.addEventListener('click', () => {
+      navigate('/admin/projects/new')
+    })
+  }
+</script>

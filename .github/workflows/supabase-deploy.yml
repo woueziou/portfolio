@@ -1,0 +1,83 @@
+# name: supabase-deploy
+
+# on:
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - 'apps/supabase/supabase/migrations/**'
+#   workflow_dispatch:
+#     inputs:
+#       dry_run:
+#         description: 'Preview public-schema changes without applying'
+#         type: boolean
+#         default: false
+
+# env:
+#   SUPABASE_DIR: apps/supabase
+#   SUPABASE_PROJECT_ID: kfbzgkjffmfzjzbxoqvr
+
+# jobs:
+#   deploy-supabase:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
+
+#       - name: Install Supabase CLI
+#         uses: supabase/setup-cli@v1
+#         with:
+#           version: latest
+
+#       - name: Link Supabase project
+#         working-directory: ${{ env.SUPABASE_DIR }}
+#         run: |
+#           supabase link --project-ref "${{ env.SUPABASE_PROJECT_ID }}"
+#         env:
+#           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+#       - name: Dry-run — preview public-schema changes
+#         if: ${{ github.event.inputs.dry_run == 'true' }}
+#         working-directory: ${{ env.SUPABASE_DIR }}
+#         run: |
+#           echo '--- public schema diff ---'
+#           supabase db diff --linked --schema public
+#         env:
+#           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+#       - name: Push migrations to production
+#         id: push
+#         if: ${{ github.event.inputs.dry_run != 'true' }}
+#         working-directory: ${{ env.SUPABASE_DIR }}
+#         run: |
+#           echo '--- pending migrations ---'
+#           supabase db push --dry-run
+#           echo ''
+#           echo '--- applying public-schema migrations ---'
+#           supabase db push 2>&1
+#         env:
+#           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+#       - name: Repair & retry on "already exists"
+#         if: ${{ steps.push.outcome == 'failure' && github.event.inputs.dry_run != 'true' }}
+#         working-directory: ${{ env.SUPABASE_DIR }}
+#         run: |
+#           echo '--- repairing migration history for already-existing objects ---'
+#           PENDING=$(supabase db push --dry-run 2>&1)
+#           VERSIONS=$(echo "$PENDING" | grep -oE '• [0-9]{14}' | sed 's/• //')
+
+#           if [ -z "$VERSIONS" ]; then
+#             VERSIONS=$(ls supabase/migrations | grep -oE '^[0-9]{14}' | sort)
+#           fi
+
+#           for VERSION in $VERSIONS; do
+#             echo "Repairing migration $VERSION as applied…"
+#             supabase migration repair --linked --status applied "$VERSION"
+#           done
+
+#           echo ''
+#           echo '--- retrying migration push ---'
+#           supabase db push
+#         env:
+#           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}

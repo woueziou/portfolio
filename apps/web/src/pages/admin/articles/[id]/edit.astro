@@ -1,0 +1,122 @@
+---
+import ArticleEditorIsland from '@/components/admin/editor/ArticleEditorIsland'
+import AdminLayout from '@/layouts/AdminLayout.astro'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+
+export const prerender = false
+
+const { id } = Astro.params
+
+const supabase = createSupabaseServerClient(Astro.cookies)
+
+// Get current user
+const {
+  data: { user },
+  error: authError,
+} = await supabase.auth.getUser()
+if (authError || !user) {
+  return Astro.redirect('/admin/login')
+}
+
+// Fetch article
+const { data: article, error } = await supabase
+  .from('articles')
+  .select('*')
+  .eq('id', id)
+  .eq('user_id', user.id)
+  .single()
+
+if (error || !article) {
+  return Astro.redirect('/admin/articles')
+}
+
+// Fetch projects for the form
+const { data: projects } = await supabase
+  .from('projects')
+  .select('id, title')
+  .eq('user_id', user.id)
+  .order('title')
+---
+
+<AdminLayout title={`Edit: ${article.title}`} activeItem="articles">
+  <div class="space-y-8">
+    {/* Header */}
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-foreground">
+          Edit Article
+        </h1>
+        <p class="mt-1 text-sm text-muted-foreground">
+          {article.title}
+        </p>
+      </div>
+      <div class="flex items-center gap-3">
+        <a
+          href="/admin/articles"
+          class="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
+        >
+          Back to Articles
+        </a>
+      </div>
+    </div>
+
+    {/* Publication Controls */}
+    {/* Editor Section */}
+    <div class="rounded-xl border border-border bg-card p-6">
+      <ArticleEditorIsland
+        client:load
+        article={{
+          id: article.id,
+          title: article.title,
+          slug: article.slug,
+          status: article.status,
+          published_at: article.published_at,
+          updated_at: article.updated_at,
+          content: article.content,
+          summary: article.summary,
+          image_url: article.image_url,
+          url: article.url,
+        }}
+      />
+    </div>
+
+    {/* Article Info */}
+    <div class="rounded-xl border border-border bg-card p-6">
+      <h2 class="text-lg font-semibold text-foreground mb-4">
+        Article Info
+      </h2>
+      <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <dt class="text-sm text-muted-foreground">Created</dt>
+          <dd class="text-sm text-foreground">
+            {new Date(article.created_at).toLocaleString()}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-muted-foreground">Last Updated</dt>
+          <dd class="text-sm text-foreground">
+            {new Date(article.updated_at).toLocaleString()}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-muted-foreground">Published At</dt>
+          <dd class="text-sm text-foreground">
+            {article.published_at ? new Date(article.published_at).toLocaleString() : 'Not published'}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-muted-foreground">Reading Time</dt>
+          <dd class="text-sm text-foreground">
+            {article.reading_time_minutes ? `${article.reading_time_minutes} min` : '—'}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-muted-foreground">Linked Project</dt>
+          <dd class="text-sm text-foreground">
+            {article.project_id ? (projects?.find(p => p.id === article.project_id)?.title || '—') : 'Standalone'}
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</AdminLayout>

@@ -1,0 +1,25 @@
+---
+import ArticleForm from '@/components/admin/ArticleForm'
+import AdminLayout from '@/layouts/AdminLayout.astro'
+
+export const prerender = false
+---
+
+<AdminLayout title="New Article" activeItem="articles">
+  <div class="space-y-6">
+    <div>
+      <h1 class="text-2xl font-bold text-foreground">Create New Article</h1>
+      <p class="mt-1 text-sm text-muted-foreground">
+        Write and publish a new article
+      </p>
+    </div>
+
+    <div class="rounded-xl border border-border bg-card p-6">
+      <ArticleForm
+        client:load
+        onSuccessPath="/admin/articles"
+        onCancelPath="/admin/articles"
+      />
+    </div>
+  </div>
+</AdminLayout>

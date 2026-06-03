@@ -1,0 +1,23 @@
+---
+import ProjectForm from '@/components/admin/ProjectForm'
+import AdminLayout from '@/layouts/AdminLayout.astro'
+
+export const prerender = false
+---
+
+<AdminLayout title="New Project" activeItem="projects">
+  <div class="space-y-6">
+    <div>
+      <h1 class="text-xl font-semibold text-foreground">Create New Project</h1>
+      <p class="mt-0.5 text-sm text-muted-foreground">
+        Add a new project to your portfolio
+      </p>
+    </div>
+
+    <ProjectForm
+      client:load
+      onSuccessPath="/admin/projects"
+      onCancelPath="/admin/projects"
+    />
+  </div>
+</AdminLayout>

@@ -1,0 +1,59 @@
+---
+import ProjectForm from '@/components/admin/ProjectForm'
+import AdminLayout from '@/layouts/AdminLayout.astro'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+
+export const prerender = false
+
+const { id } = Astro.params
+const supabase = createSupabaseServerClient(Astro.cookies)
+
+// Get current user
+const {
+  data: { user },
+  error: authError,
+} = await supabase.auth.getUser()
+if (authError || !user) {
+  return Astro.redirect('/admin/login')
+}
+
+// Fetch project
+const { data: project, error } = await supabase
+  .from('projects')
+  .select('*')
+  .eq('id', id)
+  .eq('user_id', user.id)
+  .single()
+
+if (error || !project) {
+  return Astro.redirect('/admin/projects')
+}
+
+// Fetch linked articles
+const { data: articles } = await supabase
+  .from('articles')
+  .select('id, title, slug, status')
+  .eq('project_id', id)
+  .order('created_at', { ascending: false })
+---
+
+<AdminLayout title={`Edit: ${project.title}`} activeItem="projects">
+  <div class="space-y-6">
+    <div>
+      <h1 class="text-xl font-semibold text-foreground">
+        Edit Project
+      </h1>
+      <p class="mt-0.5 text-sm text-muted-foreground">
+        {project.title}
+      </p>
+    </div>
+
+    <ProjectForm
+      client:load
+      project={project}
+      articles={articles || []}
+      onSuccessPath="/admin/projects"
+      onCancelPath="/admin/projects"
+    />
+  </div>
+</AdminLayout>
