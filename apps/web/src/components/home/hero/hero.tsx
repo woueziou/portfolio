@@ -1,7 +1,9 @@
 import { SiGithub, SiMedium } from '@icons-pack/react-simple-icons'
 import { Linkedin, Mail } from 'lucide-react'
+import { useCallback, useRef } from 'react'
 import type React from 'react'
 import GitHubCalendar from '@/components/GitHubCalendar'
+import { showToast } from '@/components/ui/toast'
 import { Image } from '@/components/ui/image'
 import { cn } from '@/lib/utils'
 
@@ -12,9 +14,18 @@ type ContactType = {
   type: 'email' | 'url'
 }
 
+/** Track an outbound link click (analytics placeholder). */
+function trackOutbound(label: string, url: string) {
+  // Placeholder — swap in real analytics later (e.g. Plausible, Umami)
+  if (typeof window !== 'undefined') {
+    // biome-ignore lint/suspicious/noConsole: intentional analytics event
+    console.info('[track] outbound', { label, url })
+  }
+}
+
 export default function Hero() {
   const linkClass =
-    'h-10 flex space-x-2 items-center border border-secondary/30 px-4 hover:bg-primary hover:text-white '
+    'h-10 flex space-x-2 items-center border border-secondary/30 px-4 hover:bg-primary hover:text-white active:scale-95 transition-all duration-150'
 
   const contacts: ContactType[] = [
     {
@@ -50,17 +61,36 @@ export default function Hero() {
 
   const yearsSince2019 = `${getYearsSince2019()}+`
 
+  const handleEmailClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, email: string) => {
+    trackOutbound('email', email)
+
+    // Copy to clipboard as fallback
+    navigator.clipboard.writeText(email).then(
+      () => showToast('Email copied to clipboard!'),
+      () => {
+        // Clipboard API unavailable — do nothing, mailto: will still open
+      },
+    )
+  }, [])
+
+  const handleUrlClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>, name: string, url: string) => {
+      trackOutbound(name, url)
+    },
+    [],
+  )
+
   return (
-    <div className=" md:h-[90vh] w-full rounded-md relative flex flex-col items-center justify-center antialiased">
+    <div className="md:h-[90vh] w-full rounded-md relative flex flex-col items-center justify-center antialiased">
       <div
         className={cn('md:w-40 md:h-40 bg-background rounded-full md:overflow-hidden', 'w-15 h-15')}
       >
         <Image alt="logo" src="/woueziou.png" width={200} height={200} loading="eager" />
       </div>
-      <div className={cn('grid place-items-center  md:gap-y-2 pt-4', '')}>
+      <div className={cn('grid place-items-center md:gap-y-2 pt-4', '')}>
         <h1 className={cn('text-3xl font-black lg:text-7xl font-audiowide')}>Taas S. Ekpaye</h1>
         <div className="row-span-1 flex flex-col items-center md:gap-8 gap-2">
-          <h3 className="text-balance text-muted-foreground px-8 py-2 rounded-full   lg:text-xl font-semibold flex items-center space-x-2">
+          <h3 className="text-balance text-muted-foreground px-8 py-2 rounded-full lg:text-xl font-semibold flex items-center space-x-2">
             <div className="font-extrabold item flex border h-8 w-8 justify-center rounded-sm items-center">
               {yearsSince2019}
             </div>
@@ -70,14 +100,19 @@ export default function Hero() {
             From building my first Flutter app in 2019 to deploying AI-powered tools in{' '}
             {new Date().getFullYear()} — each project marks a step forward.
           </p>
-          <div className={cn('md:flex md:space-x-4 ', 'grid gap-y-4')}>
+          <div className={cn('md:flex md:space-x-4', 'grid gap-y-4')}>
             {contacts.map((contact, index) => {
               if (contact.type === 'email') {
                 return (
                   <a
                     key={index}
                     href={`mailto:${contact.value}`}
-                    className="h-10 flex space-x-2 items-center border border-secondary/30 px-4 hover:bg-primary hover:text-white "
+                    onClick={(e) => handleEmailClick(e, contact.value)}
+                    className={cn(
+                      linkClass,
+                      'relative overflow-hidden',
+                      'after:absolute after:inset-0 after:rounded-[inherit] after:bg-primary/10 after:opacity-0 after:transition-opacity after:duration-300 active:after:opacity-100',
+                    )}
                   >
                     <span>{contact.icon}</span>
                     <span>{contact.value}</span>
@@ -89,7 +124,12 @@ export default function Hero() {
                   key={index}
                   target="_blank"
                   href={contact.value}
-                  className={cn(linkClass)}
+                  onClick={(e) => handleUrlClick(e, contact.name, contact.value)}
+                  className={cn(
+                    linkClass,
+                    'relative overflow-hidden',
+                    'after:absolute after:inset-0 after:rounded-[inherit] after:bg-primary/10 after:opacity-0 after:transition-opacity after:duration-300 active:after:opacity-100',
+                  )}
                   rel="noopener"
                 >
                   <span>{contact.icon}</span>

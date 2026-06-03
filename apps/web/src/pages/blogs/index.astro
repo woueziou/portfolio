@@ -25,7 +25,7 @@ const typedArticles: Article[] = !error && articles ? (articles as Article[]) : 
           href="/"
           class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ArrowLeft class="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" />
           Back to Portfolio
         </a>
       </div>
@@ -55,13 +55,13 @@ const typedArticles: Article[] = !error && articles ? (articles as Article[]) : 
                   <div class="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                     {article.published_at && (
                       <span class="flex items-center gap-1.5">
-                        <Calendar class="h-3.5 w-3.5" />
+                        <Calendar className="h-3.5 w-3.5" />
                         {formatDate(article.published_at, 'MMMM D, YYYY')}
                       </span>
                     )}
                     {article.reading_time_minutes && (
                       <span class="flex items-center gap-1.5">
-                        <Clock class="h-3.5 w-3.5" />
+                        <Clock className="h-3.5 w-3.5" />
                         {article.reading_time_minutes} min read
                       </span>
                     )}
