@@ -147,7 +147,25 @@
 
 /* ── CSS noise texture (4.5KB inline PNG, replaces noise-bg.png) ── */
 .bg-noise {
-  filter: url(#noise);
+  position: relative;
+}
+
+.bg-noise::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  filter: url(#noise-light);
+  z-index: 0;
+}
+
+.dark .bg-noise::after {
+  filter: url(#noise-dark);
+}
+
+.bg-noise > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Touch devices: show tech stack names by default (no hover available) */

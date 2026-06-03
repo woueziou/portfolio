@@ -88,11 +88,17 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site)
     <ClientRouter />
   </head>
   <body class="min-h-screen bg-background text-foreground">
-    <!-- SVG noise filter (referenced by .bg-noise via filter: url(#noise)) -->
+    <!-- SVG noise filters (referenced by .bg-noise via filter: url(#noise-*) ) -->
     <svg width="0" height="0" aria-hidden="true" style="position:absolute">
-      <filter id="noise">
+      <!-- Light mode: dark noise with 35% opacity -->
+      <filter id="noise-light">
         <feTurbulence type="fractalNoise" baseFrequency=".4" numOctaves="3" result="noise" />
-        <feBlend in="SourceGraphic" in2="noise" mode="multiply" />
+        <feColorMatrix type="matrix" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0   0.35 0 0 0 0" />
+      </filter>
+      <!-- Dark mode: white noise with 25% opacity -->
+      <filter id="noise-dark">
+        <feTurbulence type="fractalNoise" baseFrequency=".4" numOctaves="3" result="noise" />
+        <feColorMatrix type="matrix" values="0 0 0 0 1   0 0 0 0 1   0 0 0 0 1   0.25 0 0 0 0" />
       </filter>
     </svg>
     <slot />
