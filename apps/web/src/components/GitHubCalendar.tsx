@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { GitHubCalendar as ReactGitHubCalendar } from 'react-github-calendar'
-import { cn } from '@/lib/utils'
 
 type ApiResponse = {
   total: Record<string, number>
@@ -9,15 +8,17 @@ type ApiResponse = {
 
 const YEAR = 'last'
 
-// Warm palette: beige background → brown/amber intensity
-const theme = {
-  light: ['#ece9e0', '#c4bc9d', '#9b8e62', '#6b5d3a', '#3d3220'],
-  dark: ['#1c1a14', '#2d281a', '#4a3f24', '#7a683a', '#c49a3c'],
+const lightTheme = ['#ece9e0', '#c4bc9d', '#9b8e62', '#6b5d3a', '#3d3220']
+const darkTheme = ['#1c1a14', '#2d281a', '#4a3f24', '#7a683a', '#c49a3c']
+
+function isDarkMode(): boolean {
+  return document.documentElement.classList.contains('dark')
 }
 
 export default function GitHubCalendar() {
   const [totalContributions, setTotalContributions] = useState<number | null>(null)
   const [error, setError] = useState(false)
+  const [dark, setDark] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -36,6 +37,18 @@ export default function GitHubCalendar() {
     return () => {
       cancelled = true
     }
+  }, [])
+
+  // Track dark mode via class on <html>
+  useEffect(() => {
+    setDark(isDarkMode())
+
+    const observer = new MutationObserver(() => {
+      setDark(isDarkMode())
+    })
+
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
   }, [])
 
   return (
@@ -59,10 +72,10 @@ export default function GitHubCalendar() {
       </div>
 
       {/* Calendar */}
-      <div className={cn('w-full overflow-x-auto', 'md:max-w-xl md:mx-auto')}>
+      <div className="w-full overflow-x-auto">
         <ReactGitHubCalendar
           username="woueziou"
-          theme={theme}
+          theme={{ light: dark ? darkTheme : lightTheme }}
           showColorLegend
           labels={{
             totalCount: '{{count}} contributions in the last year',
