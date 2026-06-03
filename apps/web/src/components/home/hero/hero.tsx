@@ -89,7 +89,7 @@ export default function Hero() {
         <h1 className={cn('text-3xl font-black lg:text-7xl font-audiowide')}>Taas S. Ekpaye</h1>
         <div className="row-span-1 flex flex-col items-center md:gap-8 gap-2">
           <h3 className="text-balance text-muted-foreground px-8 py-2 rounded-full lg:text-xl font-semibold flex items-center space-x-2">
-            <div className="font-extrabold item flex border h-8 w-8 justify-center rounded-sm items-center">
+            <div className="font-extrabold item flex h-8 w-8 justify-center rounded-sm items-center">
               {yearsSince2019}
             </div>
             <div>Full Stack Engineer</div>

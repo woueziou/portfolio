@@ -177,7 +177,7 @@ In dark mode, `hsl(50 28% 5%)` is very dark brown (almost black), and borders ar
 
 ## 15. `noise-bg.png` Background Adds Visual Noise Without Benefit
 
-**Issue**: The `__root.tsx` layout sets `bg-[url('/noise-bg.png')]` on the body container. This adds a subtle grain texture overlay. However, on screens with scaling (retina) or compression, noise textures can look like JPEG artifacts or dirty screen smudges rather than intentional grain.
+**Issue**: `bg-[url('/noise-bg.png')]` is set on the body container. This adds a subtle grain texture overlay. However, on screens with scaling (retina) or compression, noise textures can look like JPEG artifacts or dirty screen smudges rather than intentional grain.
 
 **Recommendation**:
 - Evaluate if the noise texture is visible at all on common displays. If not, remove it — it adds to page weight.

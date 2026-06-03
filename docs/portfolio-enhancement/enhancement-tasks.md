@@ -106,3 +106,77 @@ If any of these are slow or unreachable, the page degrades poorly.
 - ✅ add a qualifier based on my current role as full stack engineer in an airline enterprise. doing web and mobile application. 
 
 ---
+
+## 9. Grid Layout Breaks at Certain Breakpoints ✅
+
+**Issue**: The project grid uses `grid md:grid-cols-3` but `grid-cols-1`. There's no 2-column layout — it jumps from 1 to 3 columns. Between ~480px and 768px, you get a single-column layout with very wide cards that look stretched.
+
+**Recommendation**:
+- ✅ Add `sm:grid-cols-2` for an intermediate 2-column layout.
+- ✅ Add `lg:grid-cols-3` and let md be 2 columns.
+- ✅ Use `gap-6` or `gap-8` for better spacing between cards.
+
+
+## 10. Color Palette Is Monochromatic and Low Contrast
+
+**Issue**: The entire site uses a single hue — `hsl(50, ...)` (a warm yellow/beige) — for all semantic colors:
+- Background: `hsl(50 28% 95%)` — light cream
+- Primary: `hsl(50 20% 15%)` — dark brown
+- Border: `hsl(50 28% 50%)` — mid beige
+
+In dark mode, `hsl(50 28% 5%)` is very dark brown (almost black), and borders are `hsl(50 28% 18%)` — borderline invisible.
+
+**Recommendation**:
+- Lighten dark mode borders to at least `30%` lightness.
+- Introduce an accent color (blue, teal, or purple) for interactive elements — currently EVERYTHING is warm beige/brown. The `BackgroundBeams` component uses cyan/purple gradients that would contrast beautifully.
+- The hover effect `hover:bg-primary hover:text-white` works but the `primary` color is the same brown — for project cards, consider a subtle blue or purple accent on hover instead.
+
+---
+
+
+## 11. GitHub Calendar Styling Clashes
+
+**Issue**: `react-github-calendar` renders with its own default green color scheme. The portfolio uses warm beige/brown tones. The green calendar grid is visually disconnected from the rest of the page. On mobile, `w-screen px-2` forces full-width which may not be desirable.
+
+**Recommendation**:
+- Customize the calendar's color scheme to match the portfolio palette (brown/warm tones).
+- Use `react-github-calendar`'s `theme` prop or `colorScheme` prop.
+- On desktop, constrain the calendar width (e.g., `max-w-xl mx-auto`) rather than full width.
+- Add the `labels` prop with `totalCount` and a legend.
+
+---
+
+
+## 12. Avatar Has No Alt Text Fallback
+
+**Issue**: The avatar image uses `<Image alt="logo" .../>`. The alt text is "logo" — not descriptive. If the image fails to load, there's no fallback (no initials, no placeholder).
+
+**Recommendation**:
+- Change alt to "Taas S. Ekpaye" or "Taas Ekpaye portrait".
+- Add an `onError` handler that shows initials "TE" in a circle.
+- Use a grey/neutral background on the image container so it's visible even before loading.
+
+---
+
+
+## 13. Responsive Avatar Sizing Is Abrupt
+
+**Issue**: `w-15 h-15` on mobile, `md:w-40 md:h-40` on desktop. The jump from 60px to 160px is large. There's also a typo/bug: `w-15 h-15` is not a standard Tailwind class (Tailwind goes w-14, w-16). This likely renders as `w-15` (invalid/ignored).
+
+**Recommendation**:
+- Use standard Tailwind sizes: `w-20 h-20 md:w-40 md:h-40` or `w-24 md:w-40`.
+- Add `sm:w-32` for intermediate sizing.
+
+---
+
+
+## 14. `noise-bg.png` Background Adds Visual Noise Without Benefit
+
+**Issue**: `bg-[url('/noise-bg.png')]` is set on the body container. This adds a subtle grain texture overlay. However, on screens with scaling (retina) or compression, noise textures can look like JPEG artifacts or dirty screen smudges rather than intentional grain.
+
+**Recommendation**:
+- Evaluate if the noise texture is visible at all on common displays. If not, remove it — it adds to page weight.
+- If keeping it, use a smaller tileable noise pattern and ensure it's rendered with `image-rendering: pixelated` or via a CSS `filter` for a cleaner effect.
+- Consider making it theme-dependent (lighter grain on dark mode, subtler on light).
+
+---

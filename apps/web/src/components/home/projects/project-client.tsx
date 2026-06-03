@@ -121,7 +121,7 @@ export default function ProjectClient({ data }: { data: Project[] }) {
 
               {/* ── Project grid ── */}
               <div
-                className={cn('grid md:grid-cols-3 w-full', 'grid-cols-1', 'place-content-center')}
+                className={cn('grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 place-content-center gap-6')}
               >
                 {projects.map((item) => (
                   <ProjectItem item={item} key={item.id} />
