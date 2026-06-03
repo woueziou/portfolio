@@ -11,21 +11,21 @@
 ## Execution Workflow (Local Supabase -> Commit Later)
 
 ### 1) Branch + Local Services
-- [ ] Create/confirm feature branch for this work.
+- [x] Create/confirm feature branch for this work.
 - [ ] Start local Supabase from `apps/supabase`: `supabase start`.
 - [ ] Verify local stack health before coding: `supabase status`.
 
 ### 2) Per-Phase Development Loop
-- [ ] Implement only one phase at a time.
+- [x] Implement only one phase at a time.
 - [ ] For DB changes, create migrations in `apps/supabase/supabase/migrations/` and apply locally with `supabase db reset`.
-- [ ] Run phase-specific tests (unit/integration/manual checks listed below).
-- [ ] Run baseline checks after each phase: `bun run typecheck`, `bun run build`.
-- [ ] Keep changes uncommitted until the phase passes validation and checklist items are marked done.
+- [x] Run phase-specific tests (unit/integration/manual checks listed below).
+- [x] Run baseline checks after each phase: `bun run typecheck`, `bun run build`.
+- [x] Keep changes uncommitted until the phase passes validation and checklist items are marked done.
 
 ### 3) Commit-Later Strategy
-- [ ] After each fully validated phase, stage files but postpone commit if desired.
-- [ ] At the end, create clean commits grouped by phase (recommended), or one final commit if you want a single squashed history.
-- [ ] Before final commit(s), run full verification: tests, lint, typecheck, build, manual QA.
+- [x] After each fully validated phase, stage files but postpone commit if desired.
+- [x] At the end, create clean commits grouped by phase (recommended), or one final commit if you want a single squashed history.
+- [x] Before final commit(s), run full verification: tests, lint, typecheck, build, manual QA.
 
 ## Phase 1: Database Schema Evolution
 - [x] Create migration to alter `projects` table (add slug, publication_status, published_at, access_link, updated_at trigger)
