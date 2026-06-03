@@ -170,13 +170,13 @@ In dark mode, `hsl(50 28% 5%)` is very dark brown (almost black), and borders ar
 ---
 
 
-## 14. `noise-bg.png` Background Adds Visual Noise Without Benefit
+## 14. `noise-bg.png` Background Adds Visual Noise Without Benefit ✅
 
 **Issue**: `bg-[url('/noise-bg.png')]` is set on the body container. This adds a subtle grain texture overlay. However, on screens with scaling (retina) or compression, noise textures can look like JPEG artifacts or dirty screen smudges rather than intentional grain.
 
 **Recommendation**:
-- Evaluate if the noise texture is visible at all on common displays. If not, remove it — it adds to page weight.
-- If keeping it, use a smaller tileable noise pattern and ensure it's rendered with `image-rendering: pixelated` or via a CSS `filter` for a cleaner effect.
-- Consider making it theme-dependent (lighter grain on dark mode, subtler on light).
+- ✅ Evaluate if the noise texture is visible at all on common displays. If not, remove it — it adds to page weight.
+- ✅ If keeping it, use a smaller tileable noise pattern and ensure it's rendered with `image-rendering: pixelated` or via a CSS `filter` for a cleaner effect.
+- ✅ Consider making it theme-dependent (lighter grain on dark mode, subtler on light).
 
 ---
