@@ -1,6 +1,6 @@
 import { SiGithub, SiMedium } from '@icons-pack/react-simple-icons'
 import { Linkedin, Mail } from 'lucide-react'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import type React from 'react'
 import GitHubCalendar from '@/components/GitHubCalendar'
 import { showToast } from '@/components/ui/toast'
@@ -78,12 +78,30 @@ export default function Hero() {
     [],
   )
 
+  const [imgError, setImgError] = useState(false)
+
   return (
     <div className="md:h-[90vh] w-full rounded-md relative flex flex-col items-center justify-center antialiased">
       <div
-        className={cn('md:w-40 md:h-40 bg-background rounded-full md:overflow-hidden', 'w-15 h-15')}
+        className={cn(
+          'md:w-40 md:h-40 bg-background rounded-full md:overflow-hidden flex items-center justify-center',
+          'w-15 h-15',
+        )}
       >
-        <Image alt="logo" src="/woueziou.png" width={200} height={200} loading="eager" />
+        {imgError ? (
+          <span className="select-none text-2xl font-bold text-muted-foreground md:text-4xl">
+            TE
+          </span>
+        ) : (
+          <Image
+            alt="Taas S. Ekpaye portrait"
+            src="/woueziou.png"
+            width={200}
+            height={200}
+            loading="eager"
+            onError={() => setImgError(true)}
+          />
+        )}
       </div>
       <div className={cn('grid place-items-center md:gap-y-2 pt-4', '')}>
         <h1 className={cn('text-3xl font-black lg:text-7xl font-audiowide')}>Taas S. Ekpaye</h1>

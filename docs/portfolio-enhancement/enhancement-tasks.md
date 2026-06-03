@@ -147,13 +147,13 @@ In dark mode, `hsl(50 28% 5%)` is very dark brown (almost black), and borders ar
 ---
 
 
-## 12. Avatar Has No Alt Text Fallback
+## 12. Avatar Has No Alt Text Fallback ✅
 
 **Issue**: The avatar image uses `<Image alt="logo" .../>`. The alt text is "logo" — not descriptive. If the image fails to load, there's no fallback (no initials, no placeholder).
 
 **Recommendation**:
-- Change alt to "Taas S. Ekpaye" or "Taas Ekpaye portrait".
-- Add an `onError` handler that shows initials "TE" in a circle.
+- ✅ Change alt to "Taas S. Ekpaye" or "Taas Ekpaye portrait".
+- ✅ Add an `onError` handler that shows initials "TE" in a circle.
 - Use a grey/neutral background on the image container so it's visible even before loading.
 
 ---
