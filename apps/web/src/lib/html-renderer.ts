@@ -46,11 +46,12 @@ function renderMarks(text: string, marks?: TipTapNode['marks']): string {
       case 'code':
         result = `<code>${result}</code>`
         break
-      case 'link':
+      case 'link': {
         const href = mark.attrs?.href || '#'
         const target = mark.attrs?.target || '_blank'
         result = `<a href="${escapeHtml(href)}" target="${target}" rel="noopener noreferrer">${result}</a>`
         break
+      }
       case 'highlight':
         result = `<mark>${result}</mark>`
         break

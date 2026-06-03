@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react'
-import { NodeViewWrapper, type NodeViewProps } from '@tiptap/react'
+import { type NodeViewProps, NodeViewWrapper } from '@tiptap/react'
+import { useCallback, useState } from 'react'
 
 const LANGUAGES = [
   { value: '', label: 'Auto' },
@@ -22,11 +22,7 @@ const LANGUAGES = [
   { value: 'dockerfile', label: 'Dockerfile' },
 ]
 
-export default function CodeBlockComponent({
-  node,
-  updateAttributes,
-  selected,
-}: NodeViewProps) {
+export default function CodeBlockComponent({ node, updateAttributes, selected }: NodeViewProps) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = useCallback(async () => {
@@ -43,7 +39,7 @@ export default function CodeBlockComponent({
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       updateAttributes({ language: e.target.value })
     },
-    [updateAttributes]
+    [updateAttributes],
   )
 
   return (
@@ -89,12 +85,7 @@ export default function CodeBlockComponent({
             </>
           ) : (
             <>
-              <svg
-                className="h-3.5 w-3.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -112,9 +103,7 @@ export default function CodeBlockComponent({
       <pre className="bg-zinc-900 dark:bg-zinc-950 p-4 overflow-x-auto">
         <code
           className={`text-sm text-zinc-100 font-mono ${
-            node.attrs.language
-              ? `language-${node.attrs.language}`
-              : ''
+            node.attrs.language ? `language-${node.attrs.language}` : ''
           }`}
         >
           {/* Content is rendered by TipTap */}

@@ -13,7 +13,7 @@ interface ReadingTimeResult {
  * Extract plain text from TipTap JSON content
  */
 function extractTextFromTiptapJson(json: any): string {
-  if (!json || !json.content) return ''
+  if (!json?.content) return ''
 
   const texts: string[] = []
 

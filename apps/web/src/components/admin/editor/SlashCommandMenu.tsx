@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { type Editor } from '@tiptap/react'
+import type { Editor } from '@tiptap/react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface SlashCommandMenuProps {
   editor: Editor
@@ -29,10 +29,7 @@ export default function SlashCommandMenu({
   // Delete the slash character that triggered the menu
   useEffect(() => {
     const { from } = editor.state.selection
-    const textBefore = editor.state.doc.textBetween(
-      Math.max(0, from - 1),
-      from
-    )
+    const textBefore = editor.state.doc.textBetween(Math.max(0, from - 1), from)
 
     if (textBefore === '/') {
       editor
@@ -46,12 +43,7 @@ export default function SlashCommandMenu({
   const commands: CommandItem[] = [
     {
       icon: (
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -69,12 +61,7 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -92,12 +79,7 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -115,12 +97,7 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -138,12 +115,7 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -161,12 +133,7 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -184,12 +151,7 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -207,12 +169,7 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -229,18 +186,8 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M20 12H4"
-          />
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
         </svg>
       ),
       label: 'Horizontal Rule',
@@ -252,12 +199,7 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -279,7 +221,7 @@ export default function SlashCommandMenu({
   const filteredCommands = commands.filter(
     (cmd) =>
       cmd.label.toLowerCase().includes(filterText.toLowerCase()) ||
-      cmd.description.toLowerCase().includes(filterText.toLowerCase())
+      cmd.description.toLowerCase().includes(filterText.toLowerCase()),
   )
 
   // Handle keyboard navigation
@@ -288,15 +230,11 @@ export default function SlashCommandMenu({
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault()
-          setSelectedIndex((prev) =>
-            prev < filteredCommands.length - 1 ? prev + 1 : 0
-          )
+          setSelectedIndex((prev) => (prev < filteredCommands.length - 1 ? prev + 1 : 0))
           break
         case 'ArrowUp':
           e.preventDefault()
-          setSelectedIndex((prev) =>
-            prev > 0 ? prev - 1 : filteredCommands.length - 1
-          )
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : filteredCommands.length - 1))
           break
         case 'Enter':
           e.preventDefault()
@@ -357,7 +295,7 @@ export default function SlashCommandMenu({
         onClose()
       }
     },
-    [onImageUpload, onClose]
+    [onImageUpload, onClose],
   )
 
   return (
@@ -388,16 +326,12 @@ export default function SlashCommandMenu({
                     : 'hover:bg-zinc-50 dark:hover:bg-zinc-800'
                 }`}
               >
-                <span className="text-zinc-600 dark:text-zinc-400">
-                  {cmd.icon}
-                </span>
+                <span className="text-zinc-600 dark:text-zinc-400">{cmd.icon}</span>
                 <div>
                   <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
                     {cmd.label}
                   </p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    {cmd.description}
-                  </p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">{cmd.description}</p>
                 </div>
               </button>
             ))

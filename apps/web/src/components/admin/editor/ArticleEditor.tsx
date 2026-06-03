@@ -1,15 +1,15 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import Image from '@tiptap/extension-image'
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
-import Placeholder from '@tiptap/extension-placeholder'
-import Link from '@tiptap/extension-link'
-import Underline from '@tiptap/extension-underline'
-import TextAlign from '@tiptap/extension-text-align'
-import Highlight from '@tiptap/extension-highlight'
-import { common, createLowlight } from 'lowlight'
 import { actions } from 'astro:actions'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import Highlight from '@tiptap/extension-highlight'
+import Image from '@tiptap/extension-image'
+import Link from '@tiptap/extension-link'
+import Placeholder from '@tiptap/extension-placeholder'
+import TextAlign from '@tiptap/extension-text-align'
+import Underline from '@tiptap/extension-underline'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { common, createLowlight } from 'lowlight'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import FloatingToolbar from './FloatingToolbar'
 import SlashCommandMenu from './SlashCommandMenu'
 
@@ -68,7 +68,7 @@ export default function ArticleEditor({
         console.error('Auto-save error:', err)
       }
     },
-    [articleId, onSave]
+    [articleId, onSave],
   )
 
   // Debounced auto-save
@@ -84,7 +84,7 @@ export default function ArticleEditor({
         autoSave(content)
       }, 1500) // 1.5 second debounce
     },
-    [autoSave]
+    [autoSave],
   )
 
   const editor = useEditor({
@@ -151,8 +151,7 @@ export default function ArticleEditor({
           const { $from } = view.state.selection
           const isAtStart = $from.parentOffset === 0
           const isEmptyParagraph =
-            $from.parent.type.name === 'paragraph' &&
-            $from.parent.content.size === 0
+            $from.parent.type.name === 'paragraph' && $from.parent.content.size === 0
 
           if (isAtStart || isEmptyParagraph) {
             setShowSlashMenu(true)
@@ -213,16 +212,12 @@ export default function ArticleEditor({
         }
 
         // Insert image into editor
-        editor
-          .chain()
-          .focus()
-          .setImage({ src: result.data.url, alt: file.name })
-          .run()
+        editor.chain().focus().setImage({ src: result.data.url, alt: file.name }).run()
       } catch (err) {
         console.error('Image upload error:', err)
       }
     },
-    [editor]
+    [editor],
   )
 
   // Handle paste with images
@@ -283,9 +278,7 @@ export default function ArticleEditor({
   }, [editor, handleImageUpload])
 
   if (!editor) {
-    return (
-      <div className="animate-pulse bg-zinc-100 dark:bg-zinc-800 rounded-lg h-[500px]" />
-    )
+    return <div className="animate-pulse bg-zinc-100 dark:bg-zinc-800 rounded-lg h-[500px]" />
   }
 
   return (
@@ -347,26 +340,11 @@ export default function ArticleEditor({
       <div className="mt-4 text-xs text-zinc-400 dark:text-zinc-500">
         <p>
           <strong>Shortcuts:</strong>{' '}
-          <kbd className="px-1 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">
-            Ctrl+B
-          </kbd>{' '}
-          Bold ·{' '}
-          <kbd className="px-1 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">
-            Ctrl+I
-          </kbd>{' '}
-          Italic ·{' '}
-          <kbd className="px-1 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">
-            Ctrl+U
-          </kbd>{' '}
-          Underline ·{' '}
-          <kbd className="px-1 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">
-            Ctrl+K
-          </kbd>{' '}
-          Link · Type{' '}
-          <kbd className="px-1 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">
-            /
-          </kbd>{' '}
-          for commands
+          <kbd className="px-1 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">Ctrl+B</kbd> Bold ·{' '}
+          <kbd className="px-1 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">Ctrl+I</kbd> Italic ·{' '}
+          <kbd className="px-1 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">Ctrl+U</kbd> Underline ·{' '}
+          <kbd className="px-1 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">Ctrl+K</kbd> Link · Type{' '}
+          <kbd className="px-1 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">/</kbd> for commands
         </p>
       </div>
     </div>

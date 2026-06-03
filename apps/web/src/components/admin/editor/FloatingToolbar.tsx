@@ -1,15 +1,12 @@
+import type { Editor } from '@tiptap/react'
 import { useCallback, useRef, useState } from 'react'
-import { type Editor } from '@tiptap/react'
 
 interface FloatingToolbarProps {
   editor: Editor
   onImageUpload?: (file: File) => void
 }
 
-export default function FloatingToolbar({
-  editor,
-  onImageUpload,
-}: FloatingToolbarProps) {
+export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showLinkInput, setShowLinkInput] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
@@ -29,17 +26,12 @@ export default function FloatingToolbar({
         fileInputRef.current.value = ''
       }
     },
-    [onImageUpload]
+    [onImageUpload],
   )
 
   const handleLinkSubmit = useCallback(() => {
     if (linkUrl) {
-      editor
-        .chain()
-        .focus()
-        .extendMarkRange('link')
-        .setLink({ href: linkUrl })
-        .run()
+      editor.chain().focus().extendMarkRange('link').setLink({ href: linkUrl }).run()
     }
     setShowLinkInput(false)
     setLinkUrl('')
@@ -61,12 +53,7 @@ export default function FloatingToolbar({
   const toolbarItems = [
     {
       icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -76,18 +63,12 @@ export default function FloatingToolbar({
         </svg>
       ),
       label: 'Heading 1',
-      action: () =>
-        editor.chain().focus().toggleHeading({ level: 1 }).run(),
+      action: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
       isActive: editor.isActive('heading', { level: 1 }),
     },
     {
       icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -97,18 +78,12 @@ export default function FloatingToolbar({
         </svg>
       ),
       label: 'Heading 2',
-      action: () =>
-        editor.chain().focus().toggleHeading({ level: 2 }).run(),
+      action: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
       isActive: editor.isActive('heading', { level: 2 }),
     },
     {
       icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -118,8 +93,7 @@ export default function FloatingToolbar({
         </svg>
       ),
       label: 'Heading 3',
-      action: () =>
-        editor.chain().focus().toggleHeading({ level: 3 }).run(),
+      action: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
       isActive: editor.isActive('heading', { level: 3 }),
     },
     { type: 'separator' },
@@ -151,11 +125,7 @@ export default function FloatingToolbar({
       isActive: editor.isActive('strike'),
     },
     {
-      icon: (
-        <span className="text-xs bg-yellow-200 dark:bg-yellow-800 px-1 rounded">
-          H
-        </span>
-      ),
+      icon: <span className="text-xs bg-yellow-200 dark:bg-yellow-800 px-1 rounded">H</span>,
       label: 'Highlight',
       action: () => editor.chain().focus().toggleHighlight().run(),
       isActive: editor.isActive('highlight'),
@@ -163,12 +133,7 @@ export default function FloatingToolbar({
     { type: 'separator' },
     {
       icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -183,12 +148,7 @@ export default function FloatingToolbar({
     },
     {
       icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -203,12 +163,7 @@ export default function FloatingToolbar({
     },
     {
       icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -223,12 +178,7 @@ export default function FloatingToolbar({
     },
     {
       icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -244,12 +194,7 @@ export default function FloatingToolbar({
     { type: 'separator' },
     {
       icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -265,12 +210,7 @@ export default function FloatingToolbar({
     },
     {
       icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -285,12 +225,7 @@ export default function FloatingToolbar({
     { type: 'separator' },
     {
       icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -305,12 +240,7 @@ export default function FloatingToolbar({
     },
     {
       icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -325,12 +255,7 @@ export default function FloatingToolbar({
     },
     {
       icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -346,18 +271,8 @@ export default function FloatingToolbar({
     { type: 'separator' },
     {
       icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M20 12H4"
-          />
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
         </svg>
       ),
       label: 'Horizontal Rule',
@@ -365,12 +280,7 @@ export default function FloatingToolbar({
     },
     {
       icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -385,12 +295,7 @@ export default function FloatingToolbar({
     },
     {
       icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -411,10 +316,7 @@ export default function FloatingToolbar({
         {toolbarItems.map((item, index) => {
           if (item.type === 'separator') {
             return (
-              <div
-                key={`sep-${index}`}
-                className="w-px h-6 bg-zinc-200 dark:bg-zinc-700 mx-1"
-              />
+              <div key={`sep-${index}`} className="w-px h-6 bg-zinc-200 dark:bg-zinc-700 mx-1" />
             )
           }
 
@@ -455,7 +357,6 @@ export default function FloatingToolbar({
                   setLinkUrl('')
                 }
               }}
-              autoFocus
             />
             <button
               onClick={handleLinkSubmit}
@@ -470,12 +371,7 @@ export default function FloatingToolbar({
               }}
               className="p-2 text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
             >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
