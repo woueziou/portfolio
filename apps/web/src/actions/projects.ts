@@ -1,13 +1,13 @@
-import { defineAction, ActionError } from 'astro:actions'
+import { ActionError, defineAction } from 'astro:actions'
 import { z } from 'zod'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
 import {
   createProjectSchema,
-  updateProjectSchema,
-  publishProjectSchema,
   deleteProjectSchema,
+  publishProjectSchema,
+  updateProjectSchema,
 } from '@/lib/schemas/project'
 import { generateSlug, makeUniqueSlug } from '@/lib/slug'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 export const projects = {
   create: defineAction({
@@ -17,7 +17,10 @@ export const projects = {
       const supabase = createSupabaseServerClient(context.cookies)
 
       // Get current user
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser()
       if (authError || !user) {
         throw new ActionError({
           message: 'Unauthorized',
@@ -41,10 +44,7 @@ export const projects = {
           .select('slug')
           .like('slug', `${slug}%`)
 
-        slug = makeUniqueSlug(
-          slug,
-          existingSlugs?.map((p) => p.slug) || []
-        )
+        slug = makeUniqueSlug(slug, existingSlugs?.map((p) => p.slug) || [])
       }
 
       // Insert project
@@ -85,7 +85,10 @@ export const projects = {
       const supabase = createSupabaseServerClient(context.cookies)
 
       // Get current user
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser()
       if (authError || !user) {
         throw new ActionError({
           message: 'Unauthorized',
@@ -115,7 +118,7 @@ export const projects = {
       }
 
       // Handle slug update
-      let slug = updates.slug
+      const slug = updates.slug
       if (slug && slug !== existingProject.slug) {
         // Check new slug uniqueness
         const { data: slugCheck } = await supabase
@@ -163,7 +166,10 @@ export const projects = {
       const supabase = createSupabaseServerClient(context.cookies)
 
       // Get current user
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser()
       if (authError || !user) {
         throw new ActionError({
           message: 'Unauthorized',
@@ -217,7 +223,10 @@ export const projects = {
       const supabase = createSupabaseServerClient(context.cookies)
 
       // Get current user
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser()
       if (authError || !user) {
         throw new ActionError({
           message: 'Unauthorized',
@@ -285,7 +294,10 @@ export const projects = {
       const supabase = createSupabaseServerClient(context.cookies)
 
       // Get current user
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser()
       if (authError || !user) {
         throw new ActionError({
           message: 'Unauthorized',
@@ -339,9 +351,7 @@ export const projects = {
       }
 
       // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('content-images')
-        .getPublicUrl(data.path)
+      const { data: urlData } = supabase.storage.from('content-images').getPublicUrl(data.path)
 
       return { url: urlData.publicUrl, path: data.path }
     },
@@ -355,7 +365,10 @@ export const projects = {
     handler: async ({ id }, context) => {
       const supabase = createSupabaseServerClient(context.cookies)
 
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser()
       if (authError || !user) {
         throw new ActionError({
           message: 'Unauthorized',
@@ -391,7 +404,10 @@ export const projects = {
     handler: async ({ page, perPage, status }, context) => {
       const supabase = createSupabaseServerClient(context.cookies)
 
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser()
       if (authError || !user) {
         throw new ActionError({
           message: 'Unauthorized',

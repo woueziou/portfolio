@@ -1,16 +1,16 @@
-import { defineAction, ActionError } from 'astro:actions'
+import { ActionError, defineAction } from 'astro:actions'
 import { z } from 'zod'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { renderTiptapToHtml } from '@/lib/html-renderer'
+import { getReadingTimeMinutes } from '@/lib/reading-time'
 import {
   createArticleSchema,
-  updateArticleSchema,
   deleteArticleSchema,
   publishArticleSchema,
   saveArticleContentSchema,
+  updateArticleSchema,
 } from '@/lib/schemas/article'
 import { generateSlug, makeUniqueSlug } from '@/lib/slug'
-import { getReadingTimeMinutes } from '@/lib/reading-time'
-import { renderTiptapToHtml } from '@/lib/html-renderer'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 export const articles = {
   /**
@@ -50,19 +50,12 @@ export const articles = {
           .select('slug')
           .like('slug', `${slug}%`)
 
-        slug = makeUniqueSlug(
-          slug,
-          existingSlugs?.map((a) => a.slug) || []
-        )
+        slug = makeUniqueSlug(slug, existingSlugs?.map((a) => a.slug) || [])
       }
 
       // Calculate reading time and render HTML if content provided
-      const readingTime = input.content
-        ? getReadingTimeMinutes(input.content)
-        : null
-      const contentHtml = input.content
-        ? renderTiptapToHtml(input.content)
-        : null
+      const readingTime = input.content ? getReadingTimeMinutes(input.content) : null
+      const contentHtml = input.content ? renderTiptapToHtml(input.content) : null
 
       // Insert article
       const { data: article, error: insertError } = await supabase
@@ -134,7 +127,7 @@ export const articles = {
       }
 
       // Handle slug update
-      let slug = updates.slug
+      const slug = updates.slug
       if (slug && slug !== existingArticle.slug) {
         // Check new slug uniqueness
         const { data: slugCheck } = await supabase
@@ -156,12 +149,8 @@ export const articles = {
       let readingTime: number | undefined
       let contentHtml: string | undefined
       if (updates.content !== undefined) {
-        readingTime = updates.content
-          ? getReadingTimeMinutes(updates.content)
-          : undefined
-        contentHtml = updates.content
-          ? renderTiptapToHtml(updates.content)
-          : undefined
+        readingTime = updates.content ? getReadingTimeMinutes(updates.content) : undefined
+        contentHtml = updates.content ? renderTiptapToHtml(updates.content) : undefined
       }
 
       // Update article

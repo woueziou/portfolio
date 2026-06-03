@@ -1,6 +1,6 @@
 import { defineMiddleware } from 'astro:middleware'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { assertCoreSchema } from '@/lib/supabase/schema-health'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 let schemaCheckPromise: Promise<void> | null = null
 

@@ -4,16 +4,10 @@ import { z } from 'zod'
  * Schema for creating a new article
  */
 export const createArticleSchema = z.object({
-  title: z
-    .string()
-    .min(1, 'Title is required')
-    .max(200, 'Title must be less than 200 characters'),
+  title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
   slug: z
     .string()
-    .regex(
-      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-      'Slug must be lowercase with hyphens only'
-    )
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase with hyphens only')
     .optional(),
   content: z.any().optional(), // TipTap JSON content
   project_id: z.number().int().positive().nullable().optional(),
@@ -32,10 +26,7 @@ export const updateArticleSchema = z.object({
     .optional(),
   slug: z
     .string()
-    .regex(
-      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-      'Slug must be lowercase with hyphens only'
-    )
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase with hyphens only')
     .optional(),
   content: z.any().optional(), // TipTap JSON content
   project_id: z.number().int().positive().nullable().optional(),

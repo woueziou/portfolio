@@ -16,7 +16,9 @@ if (error) {
 }
 
 // Fetch project titles for linked articles
-const projectIds = [...new Set(articles?.filter(a => a.project_id).map(a => a.project_id) || [])]
+const projectIds = [
+  ...new Set(articles?.filter((a) => a.project_id).map((a) => a.project_id) || []),
+]
 let projectMap: Record<number, string> = {}
 
 if (projectIds.length > 0) {
@@ -26,7 +28,7 @@ if (projectIds.length > 0) {
     .in('id', projectIds)
 
   if (projects) {
-    projectMap = Object.fromEntries(projects.map(p => [p.id, p.title]))
+    projectMap = Object.fromEntries(projects.map((p) => [p.id, p.title]))
   }
 }
 

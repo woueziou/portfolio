@@ -1,64 +1,28 @@
 import { z } from 'zod'
 
 // Project type enum matching the database
-export const projectTypeEnum = z.enum([
-  'web',
-  'mobile',
-  'desktop',
-  'api',
-  'library',
-  'other',
-])
+export const projectTypeEnum = z.enum(['web', 'mobile', 'desktop', 'api', 'library', 'other'])
 
 // Publication status enum
-export const publicationStatusEnum = z.enum([
-  'draft',
-  'published',
-  'archived',
-])
+export const publicationStatusEnum = z.enum(['draft', 'published', 'archived'])
 
 // Project state enum (lifecycle)
-export const projectStateEnum = z.enum([
-  'ongoing',
-  'finished',
-  'production',
-])
+export const projectStateEnum = z.enum(['ongoing', 'finished', 'production'])
 
 // Create project schema
 export const createProjectSchema = z.object({
-  title: z
-    .string()
-    .min(1, 'Title is required')
-    .max(200, 'Title must be less than 200 characters'),
+  title: z.string().min(1, 'Title is required').max(200, 'Title must be less than 200 characters'),
   description: z
     .string()
     .min(1, 'Description is required')
     .max(2000, 'Description must be less than 2000 characters'),
-  main_image_url: z
-    .string()
-    .url('Must be a valid URL')
-    .optional()
-    .or(z.literal('')),
-  url: z
-    .string()
-    .url('Must be a valid URL')
-    .optional()
-    .or(z.literal('')),
-  access_link: z
-    .string()
-    .url('Must be a valid URL')
-    .optional()
-    .or(z.literal('')),
+  main_image_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  access_link: z.string().url('Must be a valid URL').optional().or(z.literal('')),
   state: projectStateEnum.default('ongoing'),
-  project_date: z
-    .string()
-    .optional(),
-  type: z
-    .array(projectTypeEnum)
-    .min(1, 'Select at least one project type'),
-  tech_stack: z
-    .array(z.string())
-    .min(1, 'Add at least one technology'),
+  project_date: z.string().optional(),
+  type: z.array(projectTypeEnum).min(1, 'Select at least one project type'),
+  tech_stack: z.array(z.string()).min(1, 'Add at least one technology'),
   slug: z
     .string()
     .min(1, 'Slug is required')
@@ -79,33 +43,13 @@ export const updateProjectSchema = z.object({
     .min(1, 'Description is required')
     .max(2000, 'Description must be less than 2000 characters')
     .optional(),
-  main_image_url: z
-    .string()
-    .url('Must be a valid URL')
-    .optional()
-    .or(z.literal('')),
-  url: z
-    .string()
-    .url('Must be a valid URL')
-    .optional()
-    .or(z.literal('')),
-  access_link: z
-    .string()
-    .url('Must be a valid URL')
-    .optional()
-    .or(z.literal('')),
+  main_image_url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  url: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  access_link: z.string().url('Must be a valid URL').optional().or(z.literal('')),
   state: projectStateEnum.optional(),
-  project_date: z
-    .string()
-    .optional(),
-  type: z
-    .array(projectTypeEnum)
-    .min(1, 'Select at least one project type')
-    .optional(),
-  tech_stack: z
-    .array(z.string())
-    .min(1, 'Add at least one technology')
-    .optional(),
+  project_date: z.string().optional(),
+  type: z.array(projectTypeEnum).min(1, 'Select at least one project type').optional(),
+  tech_stack: z.array(z.string()).min(1, 'Add at least one technology').optional(),
   slug: z
     .string()
     .min(1, 'Slug is required')

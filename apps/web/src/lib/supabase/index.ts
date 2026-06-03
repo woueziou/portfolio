@@ -1,2 +1,2 @@
-export { createSupabaseServerClient } from './server'
 export { createSupabaseBrowserClient } from './browser'
+export { createSupabaseServerClient } from './server'

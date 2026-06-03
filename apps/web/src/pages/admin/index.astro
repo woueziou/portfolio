@@ -7,15 +7,18 @@ export const prerender = false
 const supabase = createSupabaseServerClient(Astro.cookies)
 
 // Fetch counts for dashboard
-const [
-  { count: totalProjects },
-  { count: publishedProjects },
-  { count: draftProjects },
-] = await Promise.all([
-  supabase.from('projects').select('*', { count: 'exact', head: true }),
-  supabase.from('projects').select('*', { count: 'exact', head: true }).eq('publication_status', 'published'),
-  supabase.from('projects').select('*', { count: 'exact', head: true }).eq('publication_status', 'draft'),
-])
+const [{ count: totalProjects }, { count: publishedProjects }, { count: draftProjects }] =
+  await Promise.all([
+    supabase.from('projects').select('*', { count: 'exact', head: true }),
+    supabase
+      .from('projects')
+      .select('*', { count: 'exact', head: true })
+      .eq('publication_status', 'published'),
+    supabase
+      .from('projects')
+      .select('*', { count: 'exact', head: true })
+      .eq('publication_status', 'draft'),
+  ])
 
 const stats = [
   {

@@ -1,4 +1,4 @@
-import { defineAction, ActionError } from 'astro:actions'
+import { ActionError, defineAction } from 'astro:actions'
 import { z } from 'zod'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
@@ -54,7 +54,10 @@ export const auth = {
     handler: async (_, context) => {
       const supabase = createSupabaseServerClient(context.cookies)
 
-      const { data: { user }, error } = await supabase.auth.getUser()
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser()
 
       if (error || !user) {
         return { user: null }

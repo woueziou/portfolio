@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
 import { actions } from 'astro:actions'
 import { navigate } from 'astro:transitions/client'
+import { useCallback, useEffect, useState } from 'react'
 import { generateSlug } from '@/lib/slug'
 
 interface ProjectFormProps {
@@ -51,7 +51,13 @@ interface ProjectFormData {
   slug: string
 }
 
-export default function ProjectForm({ project, onSuccess, onCancel, onSuccessPath, onCancelPath }: ProjectFormProps) {
+export default function ProjectForm({
+  project,
+  onSuccess,
+  onCancel,
+  onSuccessPath,
+  onCancelPath,
+}: ProjectFormProps) {
   const isEditing = !!project
 
   const [formData, setFormData] = useState<ProjectFormData>({
@@ -75,7 +81,7 @@ export default function ProjectForm({ project, onSuccess, onCancel, onSuccessPat
   // Auto-generate slug from title
   useEffect(() => {
     if (!slugManuallyEdited && formData.title) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         slug: generateSlug(prev.title),
       }))
@@ -83,18 +89,16 @@ export default function ProjectForm({ project, onSuccess, onCancel, onSuccessPat
   }, [formData.title, slugManuallyEdited])
 
   const handleTypeToggle = useCallback((type: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      type: prev.type.includes(type)
-        ? prev.type.filter(t => t !== type)
-        : [...prev.type, type],
+      type: prev.type.includes(type) ? prev.type.filter((t) => t !== type) : [...prev.type, type],
     }))
   }, [])
 
   const handleAddTech = useCallback(() => {
     const tech = techInput.trim()
     if (tech && !formData.tech_stack.includes(tech)) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         tech_stack: [...prev.tech_stack, tech],
       }))
@@ -103,9 +107,9 @@ export default function ProjectForm({ project, onSuccess, onCancel, onSuccessPat
   }, [techInput, formData.tech_stack])
 
   const handleRemoveTech = useCallback((tech: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      tech_stack: prev.tech_stack.filter(t => t !== tech),
+      tech_stack: prev.tech_stack.filter((t) => t !== tech),
     }))
   }, [])
 
@@ -172,14 +176,17 @@ export default function ProjectForm({ project, onSuccess, onCancel, onSuccessPat
 
       {/* Title */}
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+        <label
+          htmlFor="title"
+          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+        >
           Title *
         </label>
         <input
           id="title"
           type="text"
           value={formData.title}
-          onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
+          onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
           required
           maxLength={200}
           className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors"
@@ -189,7 +196,10 @@ export default function ProjectForm({ project, onSuccess, onCancel, onSuccessPat
 
       {/* Slug */}
       <div>
-        <label htmlFor="slug" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+        <label
+          htmlFor="slug"
+          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+        >
           Slug *
         </label>
         <div className="flex items-center gap-2">
@@ -198,9 +208,9 @@ export default function ProjectForm({ project, onSuccess, onCancel, onSuccessPat
             id="slug"
             type="text"
             value={formData.slug}
-            onChange={e => {
+            onChange={(e) => {
               setSlugManuallyEdited(true)
-              setFormData(prev => ({ ...prev, slug: e.target.value }))
+              setFormData((prev) => ({ ...prev, slug: e.target.value }))
             }}
             required
             pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
@@ -215,13 +225,16 @@ export default function ProjectForm({ project, onSuccess, onCancel, onSuccessPat
 
       {/* Description */}
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+        <label
+          htmlFor="description"
+          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+        >
           Description *
         </label>
         <textarea
           id="description"
           value={formData.description}
-          onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
           required
           maxLength={2000}
           rows={4}
@@ -236,7 +249,7 @@ export default function ProjectForm({ project, onSuccess, onCancel, onSuccessPat
           Project Type *
         </label>
         <div className="flex flex-wrap gap-2">
-          {PROJECT_TYPES.map(type => (
+          {PROJECT_TYPES.map((type) => (
             <button
               key={type.value}
               type="button"
@@ -262,8 +275,8 @@ export default function ProjectForm({ project, onSuccess, onCancel, onSuccessPat
           <input
             type="text"
             value={techInput}
-            onChange={e => setTechInput(e.target.value)}
-            onKeyDown={e => {
+            onChange={(e) => setTechInput(e.target.value)}
+            onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault()
                 handleAddTech()
@@ -281,7 +294,7 @@ export default function ProjectForm({ project, onSuccess, onCancel, onSuccessPat
           </button>
         </div>
         <div className="flex flex-wrap gap-2">
-          {formData.tech_stack.map(tech => (
+          {formData.tech_stack.map((tech) => (
             <span
               key={tech}
               className="inline-flex items-center gap-1 rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-1 text-sm text-zinc-700 dark:text-zinc-300"
@@ -301,16 +314,19 @@ export default function ProjectForm({ project, onSuccess, onCancel, onSuccessPat
 
       {/* State */}
       <div>
-        <label htmlFor="state" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+        <label
+          htmlFor="state"
+          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+        >
           Project State
         </label>
         <select
           id="state"
           value={formData.state}
-          onChange={e => setFormData(prev => ({ ...prev, state: e.target.value }))}
+          onChange={(e) => setFormData((prev) => ({ ...prev, state: e.target.value }))}
           className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-zinc-900 dark:text-zinc-100 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors"
         >
-          {PROJECT_STATES.map(state => (
+          {PROJECT_STATES.map((state) => (
             <option key={state.value} value={state.value}>
               {state.label}
             </option>
@@ -320,14 +336,17 @@ export default function ProjectForm({ project, onSuccess, onCancel, onSuccessPat
 
       {/* Date */}
       <div>
-        <label htmlFor="project_date" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+        <label
+          htmlFor="project_date"
+          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+        >
           Project Date
         </label>
         <input
           id="project_date"
           type="date"
           value={formData.project_date}
-          onChange={e => setFormData(prev => ({ ...prev, project_date: e.target.value }))}
+          onChange={(e) => setFormData((prev) => ({ ...prev, project_date: e.target.value }))}
           className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-zinc-900 dark:text-zinc-100 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors"
         />
       </div>
@@ -335,27 +354,33 @@ export default function ProjectForm({ project, onSuccess, onCancel, onSuccessPat
       {/* URLs */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="url" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+          <label
+            htmlFor="url"
+            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+          >
             Repository URL
           </label>
           <input
             id="url"
             type="url"
             value={formData.url}
-            onChange={e => setFormData(prev => ({ ...prev, url: e.target.value }))}
+            onChange={(e) => setFormData((prev) => ({ ...prev, url: e.target.value }))}
             className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors"
             placeholder="https://github.com/..."
           />
         </div>
         <div>
-          <label htmlFor="access_link" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+          <label
+            htmlFor="access_link"
+            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+          >
             Live Demo URL
           </label>
           <input
             id="access_link"
             type="url"
             value={formData.access_link}
-            onChange={e => setFormData(prev => ({ ...prev, access_link: e.target.value }))}
+            onChange={(e) => setFormData((prev) => ({ ...prev, access_link: e.target.value }))}
             className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors"
             placeholder="https://..."
           />
@@ -364,14 +389,17 @@ export default function ProjectForm({ project, onSuccess, onCancel, onSuccessPat
 
       {/* Image URL */}
       <div>
-        <label htmlFor="main_image_url" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+        <label
+          htmlFor="main_image_url"
+          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+        >
           Cover Image URL
         </label>
         <input
           id="main_image_url"
           type="url"
           value={formData.main_image_url}
-          onChange={e => setFormData(prev => ({ ...prev, main_image_url: e.target.value }))}
+          onChange={(e) => setFormData((prev) => ({ ...prev, main_image_url: e.target.value }))}
           className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors"
           placeholder="https://..."
         />

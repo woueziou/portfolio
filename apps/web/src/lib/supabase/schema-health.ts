@@ -36,17 +36,12 @@ export async function assertCoreSchema(supabase: SupabaseSchemaClient): Promise<
       continue
     }
 
-    if (
-      error.code === MISSING_COLUMN_ERROR_CODE ||
-      error.code === MISSING_TABLE_ERROR_CODE
-    ) {
+    if (error.code === MISSING_COLUMN_ERROR_CODE || error.code === MISSING_TABLE_ERROR_CODE) {
       throw new Error(
         `Database schema mismatch for '${requirement.table}'. Missing required columns in '${requirement.columns}'. Apply pending Supabase migrations before serving admin routes.`,
       )
     }
 
-    throw new Error(
-      `Schema health check failed for '${requirement.table}': ${error.message}`,
-    )
+    throw new Error(`Schema health check failed for '${requirement.table}': ${error.message}`)
   }
 }

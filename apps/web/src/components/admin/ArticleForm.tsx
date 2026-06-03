@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
 import { actions } from 'astro:actions'
 import { navigate } from 'astro:transitions/client'
+import { useEffect, useState } from 'react'
 import { generateSlug } from '@/lib/slug'
 
 interface ArticleFormProps {
@@ -24,7 +24,13 @@ interface ArticleFormData {
   status: 'draft' | 'published' | 'archived'
 }
 
-export default function ArticleForm({ article, onSuccess, onCancel, onSuccessPath, onCancelPath }: ArticleFormProps) {
+export default function ArticleForm({
+  article,
+  onSuccess,
+  onCancel,
+  onSuccessPath,
+  onCancelPath,
+}: ArticleFormProps) {
   const isEditing = !!article
 
   const [formData, setFormData] = useState<ArticleFormData>({
@@ -61,7 +67,7 @@ export default function ArticleForm({ article, onSuccess, onCancel, onSuccessPat
   // Auto-generate slug from title
   useEffect(() => {
     if (!slugManuallyEdited && formData.title) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         slug: generateSlug(prev.title),
       }))
@@ -79,7 +85,7 @@ export default function ArticleForm({ article, onSuccess, onCancel, onSuccessPat
       const submitData = {
         title: formData.title,
         slug: formData.slug || undefined,
-        project_id: formData.project_id ? parseInt(formData.project_id) : null,
+        project_id: formData.project_id ? parseInt(formData.project_id, 10) : null,
         status: formData.status,
       }
 
@@ -128,14 +134,17 @@ export default function ArticleForm({ article, onSuccess, onCancel, onSuccessPat
 
       {/* Title */}
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+        <label
+          htmlFor="title"
+          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+        >
           Title *
         </label>
         <input
           id="title"
           type="text"
           value={formData.title}
-          onChange={e => setFormData(prev => ({ ...prev, title: e.target.value }))}
+          onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
           required
           maxLength={200}
           className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors"
@@ -145,7 +154,10 @@ export default function ArticleForm({ article, onSuccess, onCancel, onSuccessPat
 
       {/* Slug */}
       <div>
-        <label htmlFor="slug" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+        <label
+          htmlFor="slug"
+          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+        >
           Slug *
         </label>
         <div className="flex items-center gap-2">
@@ -154,9 +166,9 @@ export default function ArticleForm({ article, onSuccess, onCancel, onSuccessPat
             id="slug"
             type="text"
             value={formData.slug}
-            onChange={e => {
+            onChange={(e) => {
               setSlugManuallyEdited(true)
-              setFormData(prev => ({ ...prev, slug: e.target.value }))
+              setFormData((prev) => ({ ...prev, slug: e.target.value }))
             }}
             required
             pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
@@ -171,18 +183,21 @@ export default function ArticleForm({ article, onSuccess, onCancel, onSuccessPat
 
       {/* Project Link */}
       <div>
-        <label htmlFor="project_id" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+        <label
+          htmlFor="project_id"
+          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+        >
           Linked Project (Optional)
         </label>
         <select
           id="project_id"
           value={formData.project_id}
-          onChange={e => setFormData(prev => ({ ...prev, project_id: e.target.value }))}
+          onChange={(e) => setFormData((prev) => ({ ...prev, project_id: e.target.value }))}
           disabled={loadingProjects}
           className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-zinc-900 dark:text-zinc-100 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors disabled:opacity-50"
         >
           <option value="">Standalone article</option>
-          {projects.map(project => (
+          {projects.map((project) => (
             <option key={project.id} value={project.id}>
               {project.title}
             </option>
@@ -195,13 +210,16 @@ export default function ArticleForm({ article, onSuccess, onCancel, onSuccessPat
 
       {/* Status */}
       <div>
-        <label htmlFor="status" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+        <label
+          htmlFor="status"
+          className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2"
+        >
           Status
         </label>
         <select
           id="status"
           value={formData.status}
-          onChange={e => setFormData(prev => ({ ...prev, status: e.target.value as any }))}
+          onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value as any }))}
           className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-zinc-900 dark:text-zinc-100 focus:border-zinc-500 dark:focus:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:focus:ring-zinc-400/20 transition-colors"
         >
           <option value="draft">Draft</option>
