@@ -98,11 +98,11 @@ If any of these are slow or unreachable, the page degrades poorly.
 ---
 
 
-## 8. The "Software Developer" Title Doesn't Evolve ⏳
+## 8. The "Software Developer" Title Doesn't Evolve ✅
 
 **Issue**: The years counter (`getYearsSince2019()`) dynamically updates the badge number. That's clever — but the title "Software Developer" never changes. A visitor in 2028 will see "8+ Software Developer" which accurately reflects experience but misses the opportunity to signal seniority.
 
 **Recommendation**:
-- ⏳ add a qualifier based on my current role as full stack engineer in an airline enterprise. doing web and mobile application. 
+- ✅ add a qualifier based on my current role as full stack engineer in an airline enterprise. doing web and mobile application. 
 
 ---

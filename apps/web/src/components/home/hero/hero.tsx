@@ -92,7 +92,7 @@ export default function Hero() {
             <div className="font-extrabold item flex border h-8 w-8 justify-center rounded-sm items-center">
               {yearsSince2019}
             </div>
-            <div>Software Developer</div>
+            <div>Full Stack Engineer</div>
           </h3>
           <p className="max-w-md text-center text-sm text-muted-foreground/70 italic">
             From building my first Flutter app in 2019 to deploying AI-powered tools in{' '}
