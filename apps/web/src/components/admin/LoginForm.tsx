@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { navigate } from 'astro:transitions/client'
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser'
 
 export default function LoginForm() {
@@ -26,8 +27,8 @@ export default function LoginForm() {
       return
     }
 
-    // Redirect to admin dashboard on success
-    window.location.href = '/admin'
+    // Navigate to admin dashboard on success without full reload
+    await navigate('/admin')
   }
 
   return (

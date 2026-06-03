@@ -77,13 +77,13 @@
 - [x] Manual test admin CRUD flow end-to-end with local Supabase.
 
 ## Phase 4: Rich Text Editor (Medium-like)
-- [ ] Install TipTap editor packages
-- [ ] Create `ArticleEditor.tsx` main component with auto-save indicator
-- [ ] Create `FloatingToolbar.tsx` for text selection formatting
-- [ ] Create `SlashCommandMenu.tsx` for block insertions
-- [ ] Create `ImageUpload.tsx` for drag-drop / paste uploading via Actions
-- [ ] Create `CodeBlockComponent.tsx` with syntax highlighting
-- [ ] Implement server-side HTML rendering helper for cached HTML
+- [x] Install TipTap editor packages
+- [x] Create `ArticleEditor.tsx` main component with auto-save indicator
+- [x] Create `FloatingToolbar.tsx` for text selection formatting
+- [x] Create `SlashCommandMenu.tsx` for block insertions
+- [x] Create `ImageUpload.tsx` for drag-drop / paste uploading via Actions
+- [x] Create `CodeBlockComponent.tsx` with syntax highlighting
+- [x] Implement server-side HTML rendering helper for cached HTML
 
 ### Phase 4 Tests & Validation
 - [ ] Unit test reading time utility and HTML rendering helper (`content` -> `content_html`).

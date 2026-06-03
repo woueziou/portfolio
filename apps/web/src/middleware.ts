@@ -1,5 +1,8 @@
 import { defineMiddleware } from 'astro:middleware'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { assertCoreSchema } from '@/lib/supabase/schema-health'
+
+let schemaCheckPromise: Promise<void> | null = null
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { url, cookies, redirect } = context
@@ -21,6 +24,23 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     if (error || !user) {
       return redirect('/admin/login')
+    }
+
+    if (!schemaCheckPromise) {
+      schemaCheckPromise = assertCoreSchema(supabase).catch((schemaError) => {
+        schemaCheckPromise = null
+        throw schemaError
+      })
+    }
+
+    try {
+      await schemaCheckPromise
+    } catch (schemaError) {
+      console.error('Supabase schema health check failed:', schemaError)
+      return new Response(
+        'Admin is unavailable because the database schema is out of date. Apply pending Supabase migrations and retry.',
+        { status: 500 },
+      )
     }
 
     // Attach user to locals for use in pages

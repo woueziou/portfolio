@@ -17,12 +17,8 @@ export const prerender = false
     <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
       <ProjectForm
         client:load
-        onSuccess={() => {
-          window.location.href = '/admin/projects'
-        }}
-        onCancel={() => {
-          window.location.href = '/admin/projects'
-        }}
+        onSuccessPath="/admin/projects"
+        onCancelPath="/admin/projects"
       />
     </div>
   </div>

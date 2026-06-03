@@ -50,12 +50,8 @@ if (error || !project) {
       <ProjectForm
         client:load
         project={project}
-        onSuccess={() => {
-          window.location.href = '/admin/projects'
-        }}
-        onCancel={() => {
-          window.location.href = '/admin/projects'
-        }}
+        onSuccessPath="/admin/projects"
+        onCancelPath="/admin/projects"
       />
     </div>
   </div>

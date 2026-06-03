@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css'
+import { ClientRouter } from 'astro:transitions'
 
 interface Props {
   title: string
@@ -81,6 +82,8 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site)
           : 'light')
       document.documentElement.classList.toggle('dark', theme === 'dark')
     </script>
+
+    <ClientRouter />
   </head>
   <body class="min-h-screen bg-background text-foreground">
     <slot />

@@ -1,0 +1,142 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro'
+import ArticleEditor from '@/components/admin/editor/ArticleEditor'
+import ArticleForm from '@/components/admin/ArticleForm'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+
+export const prerender = false
+
+const { id } = Astro.params
+
+const supabase = createSupabaseServerClient(Astro.cookies)
+
+// Get current user
+const { data: { user }, error: authError } = await supabase.auth.getUser()
+if (authError || !user) {
+  return Astro.redirect('/admin/login')
+}
+
+// Fetch article
+const { data: article, error } = await supabase
+  .from('articles')
+  .select('*')
+  .eq('id', id)
+  .eq('user_id', user.id)
+  .single()
+
+if (error || !article) {
+  return Astro.redirect('/admin/articles')
+}
+
+// Fetch projects for the form
+const { data: projects } = await supabase
+  .from('projects')
+  .select('id, title')
+  .eq('user_id', user.id)
+  .order('title')
+---
+
+<AdminLayout title={`Edit: ${article.title}`} activeItem="articles">
+  <div class="space-y-8">
+    {/* Header */}
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+          Edit Article
+        </h1>
+        <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          {article.title}
+        </p>
+      </div>
+      <div class="flex items-center gap-3">
+        <a
+          href="/admin/articles"
+          class="rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+        >
+          Back to Articles
+        </a>
+      </div>
+    </div>
+
+    {/* Metadata Section */}
+    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+      <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+        Article Metadata
+      </h2>
+      <ArticleForm
+        client:load
+        article={{
+          id: article.id,
+          title: article.title,
+          slug: article.slug,
+          project_id: article.project_id,
+          status: article.status,
+        }}
+        onSuccessPath="/admin/articles"
+      />
+    </div>
+
+    {/* Editor Section */}
+    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+      <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+        Content
+      </h2>
+      <ArticleEditor
+        client:load
+        articleId={article.id}
+        initialContent={article.content}
+      />
+    </div>
+
+    {/* Article Info */}
+    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+      <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+        Article Info
+      </h2>
+      <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Created</dt>
+          <dd class="text-sm text-zinc-900 dark:text-zinc-100">
+            {new Date(article.created_at).toLocaleString()}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Last Updated</dt>
+          <dd class="text-sm text-zinc-900 dark:text-zinc-100">
+            {new Date(article.updated_at).toLocaleString()}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Published At</dt>
+          <dd class="text-sm text-zinc-900 dark:text-zinc-100">
+            {article.published_at ? new Date(article.published_at).toLocaleString() : 'Not published'}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Reading Time</dt>
+          <dd class="text-sm text-zinc-900 dark:text-zinc-100">
+            {article.reading_time_minutes ? `${article.reading_time_minutes} min` : '—'}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Status</dt>
+          <dd class="text-sm">
+            <span class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+              article.status === 'published' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
+              article.status === 'archived' ? 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-400' :
+              'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+            }`}>
+              {article.status.charAt(0).toUpperCase() + article.status.slice(1)}
+            </span>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Linked Project</dt>
+          <dd class="text-sm text-zinc-900 dark:text-zinc-100">
+            {article.project_id ? (projects?.find(p => p.id === article.project_id)?.title || '—') : 'Standalone'}
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</AdminLayout>

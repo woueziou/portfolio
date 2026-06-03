@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { actions } from 'astro:actions'
+import { navigate } from 'astro:transitions/client'
 import { generateSlug } from '@/lib/slug'
 
 interface ProjectFormProps {
@@ -18,6 +19,8 @@ interface ProjectFormProps {
   }
   onSuccess?: (project: any) => void
   onCancel?: () => void
+  onSuccessPath?: string
+  onCancelPath?: string
 }
 
 const PROJECT_TYPES = [
@@ -48,7 +51,7 @@ interface ProjectFormData {
   slug: string
 }
 
-export default function ProjectForm({ project, onSuccess, onCancel }: ProjectFormProps) {
+export default function ProjectForm({ project, onSuccess, onCancel, onSuccessPath, onCancelPath }: ProjectFormProps) {
   const isEditing = !!project
 
   const [formData, setFormData] = useState<ProjectFormData>({
@@ -137,11 +140,25 @@ export default function ProjectForm({ project, onSuccess, onCancel }: ProjectFor
         setError(result.error.message)
       } else {
         onSuccess?.(result.data.project)
+        if (!onSuccess && onSuccessPath) {
+          await navigate(onSuccessPath)
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleCancel = async () => {
+    if (onCancel) {
+      onCancel()
+      return
+    }
+
+    if (onCancelPath) {
+      await navigate(onCancelPath)
     }
   }
 
@@ -362,10 +379,12 @@ export default function ProjectForm({ project, onSuccess, onCancel }: ProjectFor
 
       {/* Actions */}
       <div className="flex items-center justify-end gap-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-        {onCancel && (
+        {(onCancel || onCancelPath) && (
           <button
             type="button"
-            onClick={onCancel}
+            onClick={() => {
+              void handleCancel()
+            }}
             className="rounded-lg border border-zinc-300 dark:border-zinc-700 px-4 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
           >
             Cancel
