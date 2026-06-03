@@ -128,6 +128,7 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
           <input
             type="search"
             placeholder="Search projects by title or slug..."
+            aria-label="Search projects"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
             class="w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-500 dark:focus:ring-zinc-400"
@@ -136,6 +137,7 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
+          aria-label="Filter by status"
           class="rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
         >
           {STATUS_OPTIONS.map((o) => (
@@ -145,6 +147,7 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
         <select
           value={typeFilter}
           onChange={(e) => { setTypeFilter(e.target.value); setPage(1) }}
+          aria-label="Filter by type"
           class="rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
         >
           {TYPE_OPTIONS.map((o) => (
@@ -155,7 +158,7 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
 
       {/* Loading indicator */}
       {loading && (
-        <div class="text-center text-sm text-zinc-500 py-4">Loading...</div>
+        <div role="status" aria-label="Loading" class="text-center text-sm text-zinc-500 py-4">Loading...</div>
       )}
 
       {/* Cards grid */}
@@ -244,11 +247,12 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
+              aria-label="Previous page"
               class={cn(
                 'rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
                 page <= 1
                   ? 'border-zinc-200 dark:border-zinc-700 text-zinc-400 cursor-not-allowed'
-                  : 'border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800',
+                  : 'border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500',
               )}
             >
               Previous
@@ -256,11 +260,12 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
             <button
               onClick={() => setPage((p) => Math.min(data.totalPages, p + 1))}
               disabled={page >= data.totalPages}
+              aria-label="Next page"
               class={cn(
                 'rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
                 page >= data.totalPages
                   ? 'border-zinc-200 dark:border-zinc-700 text-zinc-400 cursor-not-allowed'
-                  : 'border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800',
+                  : 'border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500',
               )}
             >
               Next
