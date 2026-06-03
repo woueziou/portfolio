@@ -72,6 +72,10 @@ export default function Hero() {
             </div>
             <div>Software Developer</div>
           </h3>
+          <p className="max-w-md text-center text-sm text-muted-foreground/70 italic">
+            From building my first Flutter app in 2019 to deploying AI-powered tools in{' '}
+            {new Date().getFullYear()} — each project marks a step forward.
+          </p>
           <div className={cn('md:flex md:space-x-4 ', 'grid gap-y-4')}>
             {contacts.map((contact, index) => {
               if (contact.type === 'email') {
