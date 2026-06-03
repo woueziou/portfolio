@@ -60,14 +60,14 @@ If any of these are slow or unreachable, the page degrades poorly.
 
 ---
 
-## 5. No Way to Share or Bookmark Specific Content ⏳
+## 5. No Way to Share or Bookmark Specific Content ✅
 
 **Issue**: The page is a single route (`/`). There's no way to link to a specific project, filter state, or section. A visitor who wants to share "check out Taas's AI projects" cannot.
 
 **Recommendation**:
-- ⏳ Add URL search params for filters: `/?type=ai` → shows only AI projects.
-- ⏳ Add hash links for sections: `/#projects`, `/#contact`.
-- ⏳ Individual project pages/routes: `/projects/1`.
+- ✅ Add URL search params for filters: `/?type=ai` → shows only AI projects.
+- ✅ Add hash links for sections: `/#projects`, `/#contact`.
+- ✅ Individual project pages/routes: `/projects/:slug`.
 
 ---
 
@@ -98,7 +98,7 @@ If any of these are slow or unreachable, the page degrades poorly.
 ---
 
 
-## 15. The "Software Developer" Title Doesn't Evolve ⏳
+## 8. The "Software Developer" Title Doesn't Evolve ⏳
 
 **Issue**: The years counter (`getYearsSince2019()`) dynamically updates the badge number. That's clever — but the title "Software Developer" never changes. A visitor in 2028 will see "8+ Software Developer" which accurately reflects experience but misses the opportunity to signal seniority.
 
