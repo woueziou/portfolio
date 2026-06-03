@@ -1,7 +1,8 @@
 ---
-import AdminLayout from '@/layouts/AdminLayout.astro'
-import ArticleEditor from '@/components/admin/editor/ArticleEditor'
 import ArticleForm from '@/components/admin/ArticleForm'
+import ArticlePublishControls from '@/components/admin/ArticlePublishControls'
+import ArticleEditorIsland from '@/components/admin/editor/ArticleEditorIsland'
+import AdminLayout from '@/layouts/AdminLayout.astro'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 export const prerender = false
@@ -11,7 +12,10 @@ const { id } = Astro.params
 const supabase = createSupabaseServerClient(Astro.cookies)
 
 // Get current user
-const { data: { user }, error: authError } = await supabase.auth.getUser()
+const {
+  data: { user },
+  error: authError,
+} = await supabase.auth.getUser()
 if (authError || !user) {
   return Astro.redirect('/admin/login')
 }
@@ -58,6 +62,22 @@ const { data: projects } = await supabase
       </div>
     </div>
 
+    {/* Publication Controls */}
+    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+      <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+        Publication
+      </h2>
+      <ArticlePublishControls
+        client:load
+        articleId={article.id}
+        articleTitle={article.title}
+        currentStatus={article.status}
+        publishedAt={article.published_at}
+        slug={article.slug}
+        projectId={article.project_id}
+      />
+    </div>
+
     {/* Metadata Section */}
     <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
       <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
@@ -81,7 +101,7 @@ const { data: projects } = await supabase
       <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
         Content
       </h2>
-      <ArticleEditor
+      <ArticleEditorIsland
         client:load
         articleId={article.id}
         initialContent={article.content}
@@ -116,18 +136,6 @@ const { data: projects } = await supabase
           <dt class="text-sm text-zinc-500 dark:text-zinc-400">Reading Time</dt>
           <dd class="text-sm text-zinc-900 dark:text-zinc-100">
             {article.reading_time_minutes ? `${article.reading_time_minutes} min` : '—'}
-          </dd>
-        </div>
-        <div>
-          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Status</dt>
-          <dd class="text-sm">
-            <span class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-              article.status === 'published' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-              article.status === 'archived' ? 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-400' :
-              'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-            }`}>
-              {article.status.charAt(0).toUpperCase() + article.status.slice(1)}
-            </span>
           </dd>
         </div>
         <div>

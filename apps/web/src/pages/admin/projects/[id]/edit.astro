@@ -1,6 +1,7 @@
 ---
-import AdminLayout from '@/layouts/AdminLayout.astro'
 import ProjectForm from '@/components/admin/ProjectForm'
+import ProjectPublishControls from '@/components/admin/ProjectPublishControls'
+import AdminLayout from '@/layouts/AdminLayout.astro'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 export const prerender = false
@@ -9,7 +10,10 @@ const { id } = Astro.params
 const supabase = createSupabaseServerClient(Astro.cookies)
 
 // Get current user
-const { data: { user }, error: authError } = await supabase.auth.getUser()
+const {
+  data: { user },
+  error: authError,
+} = await supabase.auth.getUser()
 if (authError || !user) {
   return Astro.redirect('/admin/login')
 }
@@ -46,7 +50,26 @@ if (error || !project) {
       </a>
     </div>
 
+    {/* Publication Controls */}
     <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+      <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+        Publication
+      </h2>
+      <ProjectPublishControls
+        client:load
+        projectId={project.id}
+        projectTitle={project.title}
+        currentStatus={project.publication_status}
+        publishedAt={project.published_at}
+        slug={project.slug}
+      />
+    </div>
+
+    {/* Project Metadata */}
+    <div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
+      <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+        Project Metadata
+      </h2>
       <ProjectForm
         client:load
         project={project}
