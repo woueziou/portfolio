@@ -82,3 +82,25 @@ If any of these are slow or unreachable, the page degrades poorly.
 - The `HoverCardContent` has `border-none` — add a subtle border or shadow so it's distinguishable from the background.
 
 ---
+
+
+## 7. No Feedback Loop After Interaction
+
+**Issue**: When a visitor clicks a contact link, there's no confirmation, no "thanks for reaching out", no subtle animation. The click opens a new tab or mail client silently.
+
+**Recommendation**:
+- Add a subtle click animation (scale pulse, ripple) on contact buttons.
+- Track outbound clicks for analytics.
+- For the email link, copy the email to clipboard as a fallback and show a brief toast: "Email copied to clipboard!".
+
+---
+
+
+## 15. The "Software Developer" Title Doesn't Evolve
+
+**Issue**: The years counter (`getYearsSince2019()`) dynamically updates the badge number. That's clever — but the title "Software Developer" never changes. A visitor in 2028 will see "8+ Software Developer" which accurately reflects experience but misses the opportunity to signal seniority.
+
+**Recommendation**:
+- add a qualifier based on my current role as full stack engineer in an airline enterprise. doing web and mobile application. 
+
+---

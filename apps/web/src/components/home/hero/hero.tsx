@@ -57,7 +57,7 @@ export default function Hero() {
       >
         <Image
           alt="logo"
-          src="https://kfbzgkjffmfzjzbxoqvr.supabase.co/storage/v1/object/public/images//woueziou.png"
+          src="/woueziou.png"
           width={200}
           height={200}
           loading="eager"
