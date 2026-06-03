@@ -159,13 +159,13 @@ In dark mode, `hsl(50 28% 5%)` is very dark brown (almost black), and borders ar
 ---
 
 
-## 13. Responsive Avatar Sizing Is Abrupt
+## 13. Responsive Avatar Sizing Is Abrupt ✅
 
 **Issue**: `w-15 h-15` on mobile, `md:w-40 md:h-40` on desktop. The jump from 60px to 160px is large. There's also a typo/bug: `w-15 h-15` is not a standard Tailwind class (Tailwind goes w-14, w-16). This likely renders as `w-15` (invalid/ignored).
 
 **Recommendation**:
-- Use standard Tailwind sizes: `w-20 h-20 md:w-40 md:h-40` or `w-24 md:w-40`.
-- Add `sm:w-32` for intermediate sizing.
+- ✅ Use standard Tailwind sizes: `w-20 h-20 md:w-40 md:h-40` or `w-24 md:w-40`.
+- ✅ Add `sm:w-32` for intermediate sizing.
 
 ---
 

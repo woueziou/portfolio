@@ -84,8 +84,7 @@ export default function Hero() {
     <div className="md:h-[90vh] w-full rounded-md relative flex flex-col items-center justify-center antialiased">
       <div
         className={cn(
-          'md:w-40 md:h-40 bg-background rounded-full md:overflow-hidden flex items-center justify-center',
-          'w-15 h-15',
+          'w-20 h-20 sm:w-32 sm:h-32 md:w-40 md:h-40 bg-background rounded-full flex items-center justify-center',
         )}
       >
         {imgError ? (
