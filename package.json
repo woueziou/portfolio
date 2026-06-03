@@ -18,5 +18,8 @@
     "@vitest/coverage-v8": "^4.1.8",
     "vitest": "^4.1.8",
     "web": "workspace:*"
+  },
+  "dependencies": {
+    "@tiptap/extension-bubble-menu": "^3.25.0"
   }
 }

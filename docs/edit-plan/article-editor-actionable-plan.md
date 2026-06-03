@@ -11,11 +11,16 @@ The source plan has strong UX direction, but it is not directly executable again
 - Good behavior specs for autosave, slash menu, and floating toolbar.
 - Practical keyboard shortcut matrix and responsive constraints.
 
-### Gaps to resolve before implementation
-- **Framework mismatch**: the source uses TanStack route-loader examples, while this project is Astro pages + React islands.
-- **State architecture mismatch**: source proposes Stunk atoms, but current admin editor uses React state/hooks and no stunk in `apps/web`.
-- **Data model mismatch**: source expects fields not in current schema/types (`subtitle`, tags array, canonical URL, SEO fields, cover alt/url pair).
-- **Route mismatch**: current editor is only in `admin/articles/[id]/edit`, not in create flow.
+### Gap closure decisions (resolved)
+- **Framework mismatch -> resolved**: implement server data loading in Astro page frontmatter (`admin/articles/new.astro`, `admin/articles/[id]/edit.astro`) and keep interactive behavior in React islands. No TanStack loader pattern will be used.
+- **State architecture mismatch -> resolved**: implement typed reducer/context (`editor-state.ts`) plus API wrappers (`editor-api.ts`) inside `apps/web/src/components/admin/editor/`.
+- **Data model mismatch -> resolved for V1**: ship V1 with existing columns only (`summary`, `image_url`, `url`, `status`). Defer `subtitle/tags/seo/cover_alt` to V1.1 migration track.
+- **Route mismatch -> resolved by phased scope**: Release A/B targets edit flow parity first; Release C adds create-mode parity for `admin/articles/new` with first-save bootstrap.
+
+### Immediate constraints (locked)
+- No schema migration in Release A/B.
+- No Stunk introduction in `apps/web`.
+- No replacement of existing Astro auth/ownership checks in admin routes.
 
 ---
 
@@ -31,16 +36,29 @@ Ship in 3 incremental releases to avoid regressions in existing admin publishing
 
 ## 3) Action plan by workstream
 
-## Workstream 0 — Freeze scope and contracts (required first)
+## Workstream 0 — Freeze scope and contracts (completed)
 
 - [ ] Define **V1 schema policy**:
-  - **V1.0 (no DB migration)**: map metadata to existing fields only (`summary`, `image_url`, `url`, `status`).
-  - **V1.1 (with DB migration)**: add missing columns for subtitle/tags/canonical/seo/cover alt.
+  - **V1.0 (active)**: map metadata to existing fields only (`summary`, `image_url`, `url`, `status`).
+  - **V1.1 (deferred)**: add missing columns for subtitle/tags/canonical/seo/cover alt.
 - [ ] Approve execution sequence: A -> B -> C.
-- [ ] Define feature flags (optional) for staged rollout in admin only.
+- [ ] Define feature-flag stance: no feature flags for A/B; gate rollout by route-level replacement only after QA pass.
 
 **Acceptance criteria**
-- A written decision in this file section for V1.0 vs V1.1 before coding starts.
+- Scope, architecture, and migration boundaries are explicitly defined before implementation.
+
+### WS0 output contracts
+- **Astro page contract**
+  - `admin/articles/[id]/edit.astro`: server fetches owned article, passes payload to editor island.
+  - `admin/articles/new.astro`: server passes create defaults payload (title/content/status/project).
+- **Editor state contract**
+  - Reducer state: `mode`, `articleId`, `content`, `saveState`, `lastSavedAt`, overlay states.
+  - API adapters: `saveContent`, `updateMetadata`, `publish`, `unpublish`.
+- **Metadata mapping contract (V1.0)**
+  - Excerpt -> `articles.summary`
+  - Cover image URL -> `articles.image_url`
+  - Canonical URL -> `articles.url`
+  - Publication state -> `articles.status`
 
 ---
 

@@ -277,12 +277,41 @@ CREATE POLICY "site_config_authenticated_update"
   WITH CHECK (true);
 
 -- ============================================================
--- 8. Grant function execution to anon (for visitor tracking)
+-- 8. RLS policies for profiles (missing from initial schema)
+-- ============================================================
+
+-- Authenticated owner: can insert own profile
+CREATE POLICY "profiles_owner_insert"
+  ON "public"."profiles"
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (id = auth.uid());
+
+-- Authenticated owner: can update own profile
+CREATE POLICY "profiles_owner_update"
+  ON "public"."profiles"
+  FOR UPDATE
+  TO authenticated
+  USING (id = auth.uid())
+  WITH CHECK (id = auth.uid());
+
+-- Authenticated owner: can delete own profile
+CREATE POLICY "profiles_owner_delete"
+  ON "public"."profiles"
+  FOR DELETE
+  TO authenticated
+  USING (id = auth.uid());
+
+-- ============================================================
+-- 9. Grant function execution to anon (for visitor tracking)
 -- ============================================================
 GRANT EXECUTE ON FUNCTION "public"."increment_page_view"(text) TO anon;
 
 -- ============================================================
 -- Rollback notes:
+--   DROP POLICY IF EXISTS profiles_owner_insert ON public.profiles;
+--   DROP POLICY IF EXISTS profiles_owner_update ON public.profiles;
+--   DROP POLICY IF EXISTS profiles_owner_delete ON public.profiles;
 --   DROP FUNCTION IF EXISTS increment_page_view;
 --   DROP TABLE IF EXISTS site_config;
 --   DROP TABLE IF EXISTS page_views;

@@ -281,7 +281,7 @@ Mode should be route-derived and immutable during session. Create mode initializ
 - `/articles/new` → `mode = 'create'`
 - `/articles/$id/edit` → `mode = 'edit'`
 
-#### Loader contract (TanStack Start style requested)
+#### Loader contract
 ```ts
 export type EditorLoaderData =
   | {
