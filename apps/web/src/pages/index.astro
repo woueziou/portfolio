@@ -29,6 +29,15 @@ const [
   ),
   withTimeout(
     supabase
+      .from('articles')
+      .select('*')
+      .eq('status', 'published')
+      .order('published_at', { ascending: false }),
+    8000,
+    { data: null, error: { message: 'Articles query timed out' } } as any,
+  ),
+  withTimeout(
+    supabase
       .from('profiles')
       .select('first_name, last_name, title, description, avatar_url, username')
       .limit(1),
@@ -111,6 +120,6 @@ const fullName = `${profileData.firstName} ${profileData.lastName}`
         </section>
       </div>
     </div>
-    <ToastContainer client:idle />
+    <ToastContainer client:load />
   </div>
 </BaseLayout>
