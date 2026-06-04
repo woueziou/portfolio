@@ -1,4 +1,5 @@
 import { navigate } from 'astro:transitions/client'
+import { navigate } from 'astro:transitions/client'
 import { ExternalLink } from 'lucide-react'
 import { useState } from 'react'
 import type { PublicationStatus } from '@/lib/schemas/project'

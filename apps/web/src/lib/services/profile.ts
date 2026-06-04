@@ -87,11 +87,8 @@ export class ProfileService {
 
     // If nothing meaningful to update, just return the current profile.
     if (Object.keys(sanitized).length === 0) {
-      console.log('Nothing to update')
       return this.getProfile(userId)
     }
-
-    console.log(sanitized)
     const { data, error } = await this.supabase
       .from('profiles')
       .update(sanitized as Database['public']['Tables']['profiles']['Update'])
@@ -106,11 +103,8 @@ export class ProfileService {
     // If the update matched 0 rows (e.g. RLS filtered the user out),
     // fall back to a read so the caller gets a meaningful error.
     if (!data) {
-      console.log('No data found')
       return this.getProfile(userId)
     }
-
-    console.log('updated data', data)
     return data
   }
 

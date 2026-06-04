@@ -3,17 +3,22 @@ import type { Database } from '@portfolio/shared'
 import { ArrowLeft, Calendar, Clock } from 'lucide-react'
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { withTimeout } from '@/lib/supabase/with-timeout'
 import { formatDate } from '@/utils/formater'
 
 type Article = Database['public']['Tables']['articles']['Row']
 
 const supabase = createSupabaseServerClient(Astro.cookies)
 
-const { data: articles, error } = await supabase
-  .from('articles')
-  .select('*')
-  .eq('status', 'published')
-  .order('published_at', { ascending: false })
+const { data: articles, error } = await withTimeout(
+  supabase
+    .from('articles')
+    .select('id, title, slug, summary, published_at, reading_time_minutes, status')
+    .eq('status', 'published')
+    .order('published_at', { ascending: false }),
+  8000,
+  { data: null, error: { message: 'Articles query timed out' } } as any,
+)
 
 const typedArticles: Article[] = !error && articles ? (articles as Article[]) : []
 ---
