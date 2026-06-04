@@ -6,3 +6,6 @@ bun.lock
 !.env.*.example
 **/dist/
 .astro/
+.turbo/
+
+apps/web/.astro/
