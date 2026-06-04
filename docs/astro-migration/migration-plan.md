@@ -84,7 +84,7 @@ portfolio/
 │   ├── ui/          # TanStack Router SPA (port 3000)
 │   └── supabase/    # Local Supabase config + migrations
 └── packages/
-    └── shared/      # Supabase client + generated DB types (@repo/shared)
+    └── shared/      # Supabase client + generated DB types (@portfolio/shared)
 ```
 
 ### 2.2 Project Health
@@ -145,7 +145,7 @@ Astro's frontmatter in `.astro` files runs at build time. The Supabase query run
 ```astro
 ---
 // Runs at BUILD TIME — result is static HTML
-import { supabase } from '@repo/shared'
+import { supabase } from '@portfolio/shared'
 const { data: projects } = await supabase.from('projects').select().order('project_date', { ascending: false })
 ---
 <ul>
@@ -289,8 +289,8 @@ portfolio/
 | Package | Notes |
 |---|---|
 | `tailwindcss` v4 | Config is CSS-first — transfers directly |
-| `@repo/shared` | Supabase client + types — unchanged |
-| `@supabase/supabase-js` | Used inside `@repo/shared` |
+| `@portfolio/shared` | Supabase client + types — unchanged |
+| `@supabase/supabase-js` | Used inside `@portfolio/shared` |
 | `lucide-react` | Used in React islands |
 | `@icons-pack/react-simple-icons` | Used in React islands |
 | `react-github-calendar` | React island |
@@ -466,7 +466,7 @@ Create `src/pages/index.astro` with build-time data fetching:
 
 ```astro
 ---
-import { supabase } from '@repo/shared'
+import { supabase } from '@portfolio/shared'
 import BaseLayout from '../layouts/BaseLayout.astro'
 
 const { data: projects, error } = await supabase
@@ -662,7 +662,7 @@ Then add `@astrojs/vercel` to `apps/web/package.json`. No other changes needed �
 | Radix UI `HoverCard` hydration mismatch (server HTML vs client) | Low | Low | Use `client:only="react"` directive if mismatch occurs — skips SSR for that island |
 | Vercel output directory misconfigured → 404 on deploy | Low | High | Explicitly set output dir to `apps/web/dist` in Vercel dashboard before first deploy |
 | `apps/ui` deleted before `apps/web` is fully verified | Low | High | Keep both apps until production deploy is confirmed healthy (Step 8 is last) |
-| Bun workspace resolution differs between Vite and Astro | Low | Medium | Test `@repo/shared` import in Astro context early (Step 4) to surface issues before they compound |
+| Bun workspace resolution differs between Vite and Astro | Low | Medium | Test `@portfolio/shared` import in Astro context early (Step 4) to surface issues before they compound |
 
 ---
 

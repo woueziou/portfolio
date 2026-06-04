@@ -19,7 +19,7 @@ import {
   SiTelegram,
   SiTypescript,
 } from '@icons-pack/react-simple-icons'
-import type { Database } from '@repo/shared'
+import type { Database } from '@portfolio/shared'
 import { DatabaseZap, ExternalLink } from 'lucide-react'
 import { Image } from '@/components/ui/image'
 import { cn } from '@/lib/utils'

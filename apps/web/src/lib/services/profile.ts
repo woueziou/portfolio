@@ -1,4 +1,4 @@
-import type { Database } from '@repo/shared'
+import type { Database } from '@portfolio/shared'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**

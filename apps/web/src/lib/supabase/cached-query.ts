@@ -4,7 +4,7 @@
  * while refreshing in the background.
  */
 
-import type { Database } from '@repo/shared'
+import type { Database } from '@portfolio/shared'
 import { createSupabaseBrowserClient } from './browser'
 import { getCached, setCache } from './cache'
 

@@ -5,7 +5,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 const updateSiteConfigSchema = z.object({
   site_title: z.string().min(1, 'Site title is required').max(200).optional(),
   site_tagline: z.string().max(500).optional().nullable(),
-  social_links: z.record(z.string()).optional(),
+  social_links: z.record(z.string(), z.string()).optional(),
   seo_description: z.string().max(500).optional().nullable(),
   seo_og_image: z.string().url().optional().nullable().or(z.literal('')),
 })

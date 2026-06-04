@@ -1,4 +1,4 @@
-import type { Database } from '@repo/shared'
+import type { Database } from '@portfolio/shared'
 import { useEffect, useMemo, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { formatDate } from '@/utils/formater'

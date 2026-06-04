@@ -1,5 +1,5 @@
 import { ActionError, defineAction } from 'astro:actions'
-import type { Database } from '@repo/shared'
+import type { Database } from '@portfolio/shared'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { ProfileService, ProfileServiceError } from '@/lib/services/profile'
@@ -12,7 +12,7 @@ const updateProfileSchema = z
     title: z.string().max(200).optional(),
     description: z.string().max(1000).optional(),
     avatar_url: z.string().optional(),
-    socials: z.record(z.string()).optional(),
+    socials: z.record(z.string(), z.string()).optional(),
     skills: z.array(z.string()).optional(),
   })
   .refine((data) => Object.values(data).some((v) => v !== undefined), {
