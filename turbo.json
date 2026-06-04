@@ -3,7 +3,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".vercel/output/**", "dist/**"]
+      "outputs": ["dist/**", ".astro/**"]
     },
     "dev": {
       "cache": false,
