@@ -1,5 +1,4 @@
 import { actions } from 'astro:actions'
-import { useFileDialog } from '@mantine/hooks'
 import { useForm } from '@tanstack/react-form'
 
 import { useStore } from '@tanstack/react-store'
@@ -14,7 +13,7 @@ import {
   Upload,
   User,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -89,10 +88,7 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
   const [avatarError, setAvatarError] = useState<string | null>(null)
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
-  const avatarDialog = useFileDialog({
-    accept: 'image/jpeg,image/png,image/gif,image/webp',
-    multiple: false,
-  })
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // --------------- TanStack Form ---------------
   const form = useForm({
@@ -183,37 +179,33 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
   }
 
   // --------------- Avatar upload ---------------
-  useEffect(() => {
-    const uploadFile = async () => {
-      if (!avatarDialog.files?.length) return
+  const handleAvatarSelected = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-      const file = avatarDialog.files[0]
-      setUploadingAvatar(true)
-      setAvatarError(null)
+    setUploadingAvatar(true)
+    setAvatarError(null)
 
-      try {
-        const fd = new FormData()
-        fd.append('file', file)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
 
-        // Uploads, cleans up old avatar, and persists URL to profile in one call
-        const { data, error: uploadError } = await actions.profiles.uploadAvatar(fd)
+      // Uploads, cleans up old avatar, and persists URL to profile in one call
+      const { data, error: uploadError } = await actions.profiles.uploadAvatar(fd)
 
-        if (uploadError) {
-          setAvatarError(uploadError.message)
-        } else if (data?.url) {
-          setAvatarUrl(data.url)
-          // await actions.profiles.update({ avatar_url: data.url })
-        }
-      } catch {
-        setAvatarError('Failed to upload avatar')
-      } finally {
-        setUploadingAvatar(false)
+      if (uploadError) {
+        setAvatarError(uploadError.message)
+      } else if (data?.url) {
+        setAvatarUrl(data.url)
       }
+    } catch {
+      setAvatarError('Failed to upload avatar')
+    } finally {
+      setUploadingAvatar(false)
+      // Reset so the same file can be re-selected
+      if (e.target) e.target.value = ''
     }
-
-    uploadFile()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [avatarDialog.files])
+  }, [])
 
   // --------------- Reactive subscriptions ---------------
   // biome-ignore lint/suspicious/noExplicitAny: TanStack store type is complex
@@ -247,7 +239,7 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
           {/* Avatar preview + upload trigger */}
           <button
             type="button"
-            onClick={() => !uploadingAvatar && avatarDialog.open()}
+            onClick={() => !uploadingAvatar && fileInputRef.current?.click()}
             className={cn(
               'relative h-24 w-24 bg-muted flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity overflow-hidden rounded-md',
               uploadingAvatar && 'pointer-events-none opacity-70',
@@ -274,6 +266,13 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
             <p className="text-xs text-muted-foreground">JPG, PNG or WebP, max 5MB</p>
             {uploadingAvatar && <p className="text-xs text-muted-foreground mt-1">Uploading…</p>}
             {avatarError && <p className="text-xs text-destructive mt-1">{avatarError}</p>}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              hidden
+              onChange={handleAvatarSelected}
+            />
           </div>
         </div>
       </section>

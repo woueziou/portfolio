@@ -6,6 +6,7 @@ export const prerender = false
 
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { withTimeout } from '@/lib/supabase/with-timeout'
 import { formatDate } from '@/utils/formater'
 
 type Project = Database['public']['Tables']['projects']['Row']
@@ -26,18 +27,26 @@ const supabase = createSupabaseServerClient(Astro.cookies)
 
 // Fetch profile and project in parallel — profile is independent of the slug lookup.
 const [{ data: profile }, { data: project, error: projectError }] = await Promise.all([
-  supabase.from('profiles').select('first_name, last_name').limit(1).single(),
-  supabase
-    .from('projects')
-    .select(`
-      title, description, main_image_url, url, access_link, state, project_date, type, tech_stack, slug, publication_status, id, published_at,
-    project_techstacks(
-      techstack_id,
-      techstacks(id, name, icon)
-    )`)
-    .eq('slug', slug)
-    .eq('publication_status', 'published')
-    .single(),
+  withTimeout(
+    supabase.from('profiles').select('first_name, last_name').limit(1).single(),
+    8000,
+    { data: null, error: { message: 'Profile query timed out' } } as any,
+  ),
+  withTimeout(
+    supabase
+      .from('projects')
+      .select(`
+        title, description, main_image_url, url, access_link, state, project_date, type, tech_stack, slug, publication_status, id, published_at,
+      project_techstacks(
+        techstack_id,
+        techstacks(id, name, icon)
+      )`)
+      .eq('slug', slug)
+      .eq('publication_status', 'published')
+      .single(),
+    8000,
+    { data: null, error: { message: 'Project query timed out' } } as any,
+  ),
 ])
 
 const authorName = profile ? `${profile.first_name} ${profile.last_name}` : 'Taas S. Ekpaye'
@@ -55,15 +64,8 @@ const typedProject = project as Project & {
 
 const projectId = typedProject.id
 
-// Fetch published articles linked to this project
-const { data: articles } = await supabase
-  .from('articles')
-  .select('*')
-  .eq('project_id', projectId)
-  .eq('status', 'published')
-  .order('published_at', { ascending: false })
-
 // Extract techstacks from relation (fall back to legacy tech_stack)
+// Do this synchronously before the async article fetch — no reason to wait.
 const techstacksFromRelation: TechstackInfo[] =
   typedProject.project_techstacks
     ?.filter((pt: Record<string, unknown>) => (pt as Record<string, unknown>).techstacks)
@@ -75,6 +77,19 @@ const techstacksFromRelation: TechstackInfo[] =
 const legacyTechs = (typedProject.tech_stack || []).filter(
   (t: string) => !techstacksFromRelation.some((r) => r.name.toLowerCase() === t.toLowerCase()),
 )
+
+// Fetch published articles linked to this project
+const { data: articles } = await withTimeout(
+  supabase
+    .from('articles')
+    .select('id, title, slug, content_html, published_at, created_at, reading_time_minutes, status')
+    .eq('project_id', projectId)
+    .eq('status', 'published')
+    .order('published_at', { ascending: false }),
+  8000,
+  { data: null, error: { message: 'Articles query timed out' } } as any,
+)
+
 const typedArticles = (articles || []) as Article[]
 
 const projectTitle = typedProject.title ?? 'Untitled Project'

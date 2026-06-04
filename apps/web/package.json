@@ -17,8 +17,6 @@
     "@astrojs/vercel": "10.0.8",
     "@fontsource-variable/geist": "^5.2.9",
     "@icons-pack/react-simple-icons": "^11.2.0",
-    "@mantine/core": "^9.3.0",
-    "@mantine/hooks": "^9.3.0",
     "@portfolio/shared": "workspace:*",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "latest",
