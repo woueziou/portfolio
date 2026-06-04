@@ -1,11 +1,13 @@
 ---
 import type { Database } from '@portfolio/shared'
-import Footer from '@/components/home/footer/footer'
-import Hero from '@/components/home/hero/hero'
+import Footer from '@/components/home/footer/footer.astro'
+import HeroStatic from '@/components/home/hero/hero-static.astro'
+import GitHubCalendarIsland from '@/components/home/hero/GitHubCalendarIsland'
 import ProjectClient from '@/components/home/projects/project-client'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
 import { ToastContainer } from '@/components/ui/toast'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { withTimeout } from '@/lib/supabase/with-timeout'
 import BaseLayout from '../layouts/BaseLayout.astro'
 
 type Project = Database['public']['Tables']['projects']['Row']
@@ -18,12 +20,24 @@ const [
   { data: profiles },
   { data: configs },
 ] = await Promise.all([
-  supabase.from('projects').select().order('project_date', { ascending: false }),
-  supabase
-    .from('profiles')
-    .select('first_name, last_name, title, description, avatar_url, username')
-    .limit(1),
-  supabase.from('site_config').select('social_links').limit(1),
+  withTimeout(
+    supabase.from('projects').select('id, title, description, main_image_url, url, access_link, state, project_date, type, tech_stack, slug, publication_status').order('project_date', { ascending: false }),
+    8000,
+    { data: null, error: { message: 'Projects query timed out' } } as any,
+  ),
+  withTimeout(
+    supabase
+      .from('profiles')
+      .select('first_name, last_name, title, description, avatar_url, username')
+      .limit(1),
+    8000,
+    { data: null, error: { message: 'Profile query timed out' } } as any,
+  ),
+  withTimeout(
+    supabase.from('site_config').select('social_links').limit(1),
+    8000,
+    { data: null, error: { message: 'Site config query timed out' } } as any,
+  ),
 ])
 
 const typedProjects: Project[] = !error && projects ? (projects as Project[]) : []
@@ -79,7 +93,8 @@ const fullName = `${profileData.firstName} ${profileData.lastName}`
     <div class="flex-grow">
       <div class="flex flex-col items-stretch min-h-screen">
         <section id="hero">
-          <Hero client:load profile={profileData} socialLinks={socialLinks} />
+          <HeroStatic profile={profileData} socialLinks={socialLinks} />
+          <GitHubCalendarIsland client:visible />
         </section>
 
         <section
@@ -101,10 +116,10 @@ const fullName = `${profileData.firstName} ${profileData.lastName}`
         </section>
 
         <section class="w-full">
-          <Footer client:visible />
+          <Footer />
         </section>
       </div>
     </div>
-    <ToastContainer client:load />
+    <ToastContainer client:idle />
   </div>
 </BaseLayout>

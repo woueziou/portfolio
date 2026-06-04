@@ -1,7 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
-
 /*
- * Audiowide is loaded from Google Fonts with display=swap.
+ * Audiowide is loaded from Google Fonts via <link> in BaseLayout.astro.
+ * font-display: swap is set so text renders in fallback immediately.
  * If the CDN is unreachable, the text renders in the fallback
  * stack (Impact → fantasy → sans-serif) with no invisible text.
  */

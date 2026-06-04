@@ -118,11 +118,7 @@ export const profiles = {
 
         // Upload new file and persist URL to profile in one step
         const { url } = await service.uploadAvatar(userId, file)
-        console.log('Profile picture', url)
-        console.log('User id', userId)
-
-        const p = await service.updateProfile(userId, { avatar_url: url })
-        console.log(p)
+        await service.updateProfile(userId, { avatar_url: url })
 
         return { url }
       } catch (e: unknown) {

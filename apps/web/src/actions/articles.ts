@@ -108,24 +108,18 @@ export const articles = {
         })
       }
 
-      // Check ownership
-      const { data: existingArticle, error: fetchError } = await supabase
+      // Fetch slug — ownership is enforced by .eq('user_id', user.id) on the UPDATE below
+      const { data: existingArticle } = await supabase
         .from('articles')
-        .select('user_id, slug')
+        .select('slug')
         .eq('id', id)
+        .eq('user_id', user.id)
         .single()
 
-      if (fetchError || !existingArticle) {
+      if (!existingArticle) {
         throw new ActionError({
           message: 'Article not found',
           code: 'NOT_FOUND',
-        })
-      }
-
-      if (existingArticle.user_id !== user.id) {
-        throw new ActionError({
-          message: 'You can only edit your own articles',
-          code: 'FORBIDDEN',
         })
       }
 
@@ -204,38 +198,19 @@ export const articles = {
         })
       }
 
-      // Check ownership
-      const { data: existingArticle } = await supabase
-        .from('articles')
-        .select('user_id')
-        .eq('id', id)
-        .single()
-
-      if (!existingArticle) {
-        throw new ActionError({
-          message: 'Article not found',
-          code: 'NOT_FOUND',
-        })
-      }
-
-      if (existingArticle.user_id !== user.id) {
-        throw new ActionError({
-          message: 'You can only delete your own articles',
-          code: 'FORBIDDEN',
-        })
-      }
-
-      // Delete article
-      const { error: deleteError } = await supabase
+      // Delete article — ownership is enforced by .eq('user_id', user.id)
+      const { data: deleted, error: deleteError } = await supabase
         .from('articles')
         .delete()
         .eq('id', id)
         .eq('user_id', user.id)
+        .select('id')
+        .single()
 
-      if (deleteError) {
+      if (deleteError || !deleted) {
         throw new ActionError({
-          message: deleteError.message,
-          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Article not found',
+          code: 'NOT_FOUND',
         })
       }
 
@@ -264,24 +239,18 @@ export const articles = {
         })
       }
 
-      // Check ownership
+      // Fetch current state — ownership is enforced by .eq('user_id', user.id)
       const { data: existingArticle } = await supabase
         .from('articles')
-        .select('user_id, status, published_at')
+        .select('status, published_at')
         .eq('id', id)
+        .eq('user_id', user.id)
         .single()
 
       if (!existingArticle) {
         throw new ActionError({
           message: 'Article not found',
           code: 'NOT_FOUND',
-        })
-      }
-
-      if (existingArticle.user_id !== user.id) {
-        throw new ActionError({
-          message: 'You can only publish your own articles',
-          code: 'FORBIDDEN',
         })
       }
 
@@ -338,24 +307,18 @@ export const articles = {
         })
       }
 
-      // Check ownership
+      // Fetch article — ownership is enforced by .eq('user_id', user.id) on the UPDATE below
       const { data: existingArticle } = await supabase
         .from('articles')
-        .select('user_id')
+        .select('id')
         .eq('id', id)
+        .eq('user_id', user.id)
         .single()
 
       if (!existingArticle) {
         throw new ActionError({
           message: 'Article not found',
           code: 'NOT_FOUND',
-        })
-      }
-
-      if (existingArticle.user_id !== user.id) {
-        throw new ActionError({
-          message: 'You can only edit your own articles',
-          code: 'FORBIDDEN',
         })
       }
 

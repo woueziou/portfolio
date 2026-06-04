@@ -16,6 +16,7 @@ export async function cachedSelect<T extends TableName>(
     queryKey?: string
     ttl?: number
     order?: { column: string; ascending?: boolean }
+    columns?: string
   },
 ): Promise<{ data: Database['public']['Tables'][T]['Row'][]; error: string | null }> {
   const queryKey = options?.queryKey ?? 'all'
@@ -29,7 +30,7 @@ export async function cachedSelect<T extends TableName>(
 
   // Fetch fresh
   const supabase = createSupabaseBrowserClient()
-  let query = supabase.from(table as string).select()
+  let query = supabase.from(table as string).select(options?.columns ?? '*')
   if (options?.order) {
     query = query.order(options.order.column, {
       ascending: options.order.ascending ?? true,
@@ -50,7 +51,7 @@ export async function cachedSelect<T extends TableName>(
     return { data: [], error: error.message }
   }
 
-  const rows = (data ?? []) as Database['public']['Tables'][T]['Row'][]
+  const rows = (data ?? []) as unknown as Database['public']['Tables'][T]['Row'][]
   setCache(table as string, queryKey, rows, ttl)
   return { data: rows, error: null }
 }

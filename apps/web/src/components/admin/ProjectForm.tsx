@@ -1,6 +1,6 @@
 import { actions } from 'astro:actions'
 import { navigate } from 'astro:transitions/client'
-import { useDisclosure, useFileDialog } from '@mantine/hooks'
+
 import { format } from 'date-fns'
 import {
   ArrowLeft,
@@ -22,7 +22,7 @@ import {
   Upload,
   X,
 } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -142,8 +142,9 @@ export default function ProjectForm({
   const [typeSearch, setTypeSearch] = useState('')
   const [typePopoverOpen, setTypePopoverOpen] = useState(false)
   const [newTechName, setNewTechName] = useState('')
-  const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false)
-  const fileDialog = useFileDialog({ accept: 'image/*', multiple: false })
+  const [drawerOpened, setDrawerOpened] = useState(false)
+  const closeDrawer = () => setDrawerOpened(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [datePickerOpen, setDatePickerOpen] = useState(false)
 
   const wordCount = countWords(formData.description)
@@ -158,35 +159,32 @@ export default function ProjectForm({
     }
   }, [formData.title, slugManuallyEdited])
 
-  // Handle file selection for image - upload to Supabase
-  useEffect(() => {
-    const uploadFile = async () => {
-      if (fileDialog.files && fileDialog.files.length > 0) {
-        const file = fileDialog.files[0]
-        setUploadingImage(true)
-        setError(null)
+  const handleFileSelected = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-        try {
-          const formData = new FormData()
-          formData.append('file', file)
+    setUploadingImage(true)
+    setError(null)
 
-          const { data, error: uploadError } = await actions.projects.uploadImage(formData)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
 
-          if (uploadError) {
-            setError(uploadError.message)
-          } else if (data?.url) {
-            setFormData((prev) => ({ ...prev, main_image_url: data.url }))
-          }
-        } catch (_err) {
-          setError('Failed to upload image')
-        } finally {
-          setUploadingImage(false)
-        }
+      const { data, error: uploadError } = await actions.projects.uploadImage(formData)
+
+      if (uploadError) {
+        setError(uploadError.message)
+      } else if (data?.url) {
+        setFormData((prev) => ({ ...prev, main_image_url: data.url }))
       }
+    } catch (_err) {
+      setError('Failed to upload image')
+    } finally {
+      setUploadingImage(false)
+      // Reset so the same file can be re-selected
+      if (e.target) e.target.value = ''
     }
-
-    uploadFile()
-  }, [fileDialog.files])
+  }, [])
 
   const handleTypeToggle = useCallback((type: string) => {
     setFormData((prev) => ({
@@ -507,7 +505,7 @@ export default function ProjectForm({
             <Label>Cover Image</Label>
             <button
               type="button"
-              onClick={() => !uploadingImage && fileDialog.open()}
+              onClick={() => !uploadingImage && fileInputRef.current?.click()}
               className={cn(
                 'relative cursor-pointer bg-muted/50 hover:bg-muted/70 transition-colors overflow-hidden',
                 formData.main_image_url ? 'h-48' : 'h-32',
@@ -541,6 +539,13 @@ export default function ProjectForm({
                 </div>
               )}
             </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              hidden
+              onChange={handleFileSelected}
+            />
           </div>
 
           {/* URLs */}
@@ -667,7 +672,7 @@ export default function ProjectForm({
                 <Layers className="h-3.5 w-3.5" />
                 Tech Stack
               </Label>
-              <Sheet open={drawerOpened} onOpenChange={openDrawer}>
+              <Sheet open={drawerOpened} onOpenChange={setDrawerOpened}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="sm" className="h-7 text-xs">
                     <Plus className="h-3 w-3 mr-1" />
