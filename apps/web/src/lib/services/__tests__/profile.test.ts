@@ -1,15 +1,13 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { ProfileService, ProfileServiceError } from '../profile'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@repo/shared'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { ProfileService, ProfileServiceError } from '../profile'
 
 // ---------------------------------------------------------------------------
 //  Factories
 // ---------------------------------------------------------------------------
 
-function fakeFile(
-  overrides: Partial<File> & { name?: string } = {},
-): File {
+function fakeFile(overrides: Partial<File> & { name?: string } = {}): File {
   return {
     name: overrides.name ?? 'avatar.jpg',
     type: overrides.type ?? 'image/jpeg',
@@ -101,7 +99,17 @@ function createMockSupabase(): MockSupabase {
     auth: {},
   } as unknown as SupabaseClient<Database>
 
-  return { client, mockSelect, mockMaybeSingle, mockEq, mockUpdate, mockUpload, mockRemove, mockGetPublicUrl, mockFrom }
+  return {
+    client,
+    mockSelect,
+    mockMaybeSingle,
+    mockEq,
+    mockUpdate,
+    mockUpload,
+    mockRemove,
+    mockGetPublicUrl,
+    mockFrom,
+  }
 }
 
 describe('ProfileService', () => {
@@ -172,9 +180,7 @@ describe('ProfileService', () => {
         error: { message: 'Database constraint violation', code: '23505' },
       })
 
-      await expect(
-        service.updateProfile('user-1', { first_name: 'Jane' }),
-      ).rejects.toMatchObject({
+      await expect(service.updateProfile('user-1', { first_name: 'Jane' })).rejects.toMatchObject({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'Database constraint violation',
       })
@@ -298,9 +304,7 @@ describe('ProfileService', () => {
       expect(result.url).toContain('content-images/avatars/user-1/')
       expect(result.path).toContain('avatars/user-1/')
       expect(mock.mockUpload).toHaveBeenCalledOnce()
-      expect(mock.mockGetPublicUrl).toHaveBeenCalledWith(
-        expect.stringContaining('avatars/user-1/'),
-      )
+      expect(mock.mockGetPublicUrl).toHaveBeenCalledWith(expect.stringContaining('avatars/user-1/'))
     })
 
     it('rejects files with invalid MIME type', async () => {
@@ -322,9 +326,9 @@ describe('ProfileService', () => {
     })
 
     it('rejects empty / null file', async () => {
-      await expect(
-        service.uploadAvatar('user-1', null as unknown as File),
-      ).rejects.toMatchObject({ code: 'BAD_REQUEST' })
+      await expect(service.uploadAvatar('user-1', null as unknown as File)).rejects.toMatchObject({
+        code: 'BAD_REQUEST',
+      })
     })
 
     it('accepts all allowed MIME types', async () => {
@@ -346,9 +350,7 @@ describe('ProfileService', () => {
         error: { message: 'Bucket not found' },
       })
 
-      await expect(
-        service.uploadAvatar('user-1', fakeFile()),
-      ).rejects.toMatchObject({
+      await expect(service.uploadAvatar('user-1', fakeFile())).rejects.toMatchObject({
         code: 'INTERNAL_SERVER_ERROR',
       })
     })
@@ -364,9 +366,7 @@ describe('ProfileService', () => {
 
       await service.deleteAvatar('avatars/user-1/old.jpg')
 
-      expect(mock.mockRemove).toHaveBeenCalledWith([
-        'avatars/user-1/old.jpg',
-      ])
+      expect(mock.mockRemove).toHaveBeenCalledWith(['avatars/user-1/old.jpg'])
     })
 
     it('does not throw on removal failure (non-critical)', async () => {
@@ -376,9 +376,7 @@ describe('ProfileService', () => {
       })
 
       // Should not throw — fire-and-forget
-      await expect(
-        service.deleteAvatar('avatars/user-1/missing.jpg'),
-      ).resolves.toBeUndefined()
+      await expect(service.deleteAvatar('avatars/user-1/missing.jpg')).resolves.toBeUndefined()
     })
   })
 
@@ -394,9 +392,7 @@ describe('ProfileService', () => {
         'https://xxx.supabase.co/storage/v1/object/public/content-images/avatars/user-1/old.jpg',
       )
 
-      expect(mock.mockRemove).toHaveBeenCalledWith([
-        'avatars/user-1/old.jpg',
-      ])
+      expect(mock.mockRemove).toHaveBeenCalledWith(['avatars/user-1/old.jpg'])
     })
 
     it('does nothing when previousAvatarUrl is null', async () => {

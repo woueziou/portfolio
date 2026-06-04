@@ -1,16 +1,34 @@
 import { actions } from 'astro:actions'
 import { navigate } from 'astro:transitions/client'
-import { useCallback, useEffect, useState } from 'react'
-import { generateSlug } from '@/lib/slug'
-import { cn } from '@/lib/utils'
 import { useDisclosure, useFileDialog } from '@mantine/hooks'
 import { format } from 'date-fns'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
+import {
+  ArrowLeft,
+  Calendar as CalendarIcon,
+  Check,
+  ChevronDown,
+  Code2,
+  FileCode,
+  FileText,
+  Globe,
+  ImageIcon,
+  Layers,
+  PenLine,
+  Plus,
+  Save,
+  Send,
+  Tag,
+  Type,
+  Upload,
+  X,
+} from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
   Select,
   SelectContent,
@@ -26,31 +44,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import {
-  Save,
-  Send,
-  ArrowLeft,
-  ImageIcon,
-  Globe,
-  Calendar as CalendarIcon,
-  Layers,
-  Tag,
-  Type,
-  FileText,
-  Plus,
-  X,
-  Upload,
-  PenLine,
-  Code2,
-  ChevronDown,
-  Check,
-  FileCode,
-} from 'lucide-react'
+import { Textarea } from '@/components/ui/textarea'
+import { generateSlug } from '@/lib/slug'
+import { cn } from '@/lib/utils'
 
 interface ProjectFormProps {
   project?: {
@@ -72,7 +68,7 @@ interface ProjectFormProps {
     slug: string
     status: string
   }>
-  onSuccess?: (project: any) => void
+  onSuccess?: (project: Record<string, unknown>) => void
   onCancel?: () => void
   onSuccessPath?: string
   onCancelPath?: string
@@ -181,7 +177,7 @@ export default function ProjectForm({
           } else if (data?.url) {
             setFormData((prev) => ({ ...prev, main_image_url: data.url }))
           }
-        } catch (err) {
+        } catch (_err) {
           setError('Failed to upload image')
         } finally {
           setUploadingImage(false)
@@ -195,9 +191,7 @@ export default function ProjectForm({
   const handleTypeToggle = useCallback((type: string) => {
     setFormData((prev) => ({
       ...prev,
-      type: prev.type.includes(type)
-        ? prev.type.filter((t) => t !== type)
-        : [...prev.type, type],
+      type: prev.type.includes(type) ? prev.type.filter((t) => t !== type) : [...prev.type, type],
     }))
     setTypeSearch('')
     setTypePopoverOpen(false)
@@ -220,7 +214,7 @@ export default function ProjectForm({
         }))
       }
     },
-    [formData.tech_stack]
+    [formData.tech_stack],
   )
 
   const handleRemoveTech = useCallback((tech: string) => {
@@ -240,8 +234,7 @@ export default function ProjectForm({
 
   const filteredTypes = PROJECT_TYPES.filter(
     (t) =>
-      !formData.type.includes(t.value) &&
-      t.label.toLowerCase().includes(typeSearch.toLowerCase())
+      !formData.type.includes(t.value) && t.label.toLowerCase().includes(typeSearch.toLowerCase()),
   )
 
   const handleSubmit = async (e: React.FormEvent, asDraft = false) => {
@@ -263,7 +256,8 @@ export default function ProjectForm({
     setLoading(true)
 
     try {
-      let result
+      // biome-ignore lint/suspicious/noExplicitAny: server action return types are complex
+      let result: any
 
       const submitData = {
         ...formData,
@@ -272,14 +266,7 @@ export default function ProjectForm({
         access_link: formData.access_link || undefined,
         project_date: formData.project_date || undefined,
         state: formData.state as 'ongoing' | 'finished' | 'production',
-        type: formData.type as (
-          | 'web'
-          | 'mobile'
-          | 'desktop'
-          | 'api'
-          | 'library'
-          | 'other'
-        )[],
+        type: formData.type as ('web' | 'mobile' | 'desktop' | 'api' | 'library' | 'other')[],
       }
 
       if (isEditing && project) {
@@ -348,11 +335,7 @@ export default function ProjectForm({
             <Save className="h-4 w-4 mr-1.5" />
             Save as Draft
           </Button>
-          <Button
-            size="sm"
-            disabled={loading}
-            onClick={(e) => void handleSubmit(e, false)}
-          >
+          <Button size="sm" disabled={loading} onClick={(e) => void handleSubmit(e, false)}>
             <Send className="h-4 w-4 mr-1.5" />
             Publish
           </Button>
@@ -379,9 +362,7 @@ export default function ProjectForm({
               <Label htmlFor="state">Project State</Label>
               <Select
                 value={formData.state}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, state: value }))
-                }
+                onValueChange={(value) => setFormData((prev) => ({ ...prev, state: value }))}
               >
                 <SelectTrigger className="border-0 bg-muted/50">
                   <SelectValue />
@@ -408,7 +389,7 @@ export default function ProjectForm({
                     variant="ghost"
                     className={cn(
                       'w-full justify-start text-left font-normal border-0 bg-muted/50',
-                      !formData.project_date && 'text-muted-foreground'
+                      !formData.project_date && 'text-muted-foreground',
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -422,17 +403,11 @@ export default function ProjectForm({
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={
-                      formData.project_date
-                        ? new Date(formData.project_date)
-                        : undefined
-                    }
+                    selected={formData.project_date ? new Date(formData.project_date) : undefined}
                     onSelect={(date) => {
                       setFormData((prev) => ({
                         ...prev,
-                        project_date: date
-                          ? format(date, 'yyyy-MM-dd')
-                          : '',
+                        project_date: date ? format(date, 'yyyy-MM-dd') : '',
                       }))
                       setDatePickerOpen(false)
                     }}
@@ -457,9 +432,7 @@ export default function ProjectForm({
               id="title"
               type="text"
               value={formData.title}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, title: e.target.value }))
-              }
+              onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
               required
               maxLength={200}
               placeholder="My Awesome Project"
@@ -471,9 +444,7 @@ export default function ProjectForm({
           <div className="space-y-2">
             <Label htmlFor="slug">Slug</Label>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground shrink-0">
-                /projects/
-              </span>
+              <span className="text-sm text-muted-foreground shrink-0">/projects/</span>
               <Input
                 id="slug"
                 type="text"
@@ -501,7 +472,7 @@ export default function ProjectForm({
                     ? 'text-destructive'
                     : wordCount > 130
                       ? 'text-yellow-600'
-                      : 'text-muted-foreground'
+                      : 'text-muted-foreground',
                 )}
               >
                 {wordCount}/150 words
@@ -534,12 +505,13 @@ export default function ProjectForm({
           {/* Image Picker */}
           <div className="space-y-2">
             <Label>Cover Image</Label>
-            <div
+            <button
+              type="button"
               onClick={() => !uploadingImage && fileDialog.open()}
               className={cn(
                 'relative cursor-pointer bg-muted/50 hover:bg-muted/70 transition-colors overflow-hidden',
                 formData.main_image_url ? 'h-48' : 'h-32',
-                uploadingImage && 'pointer-events-none opacity-70'
+                uploadingImage && 'pointer-events-none opacity-70',
               )}
             >
               {uploadingImage ? (
@@ -565,12 +537,10 @@ export default function ProjectForm({
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                   <ImageIcon className="h-8 w-8 mb-2 opacity-40" />
                   <span className="text-sm">Click to upload cover image</span>
-                  <span className="text-xs mt-1 opacity-60">
-                    PNG, JPG, WebP up to 5MB
-                  </span>
+                  <span className="text-xs mt-1 opacity-60">PNG, JPG, WebP up to 5MB</span>
                 </div>
               )}
-            </div>
+            </button>
           </div>
 
           {/* URLs */}
@@ -584,18 +554,13 @@ export default function ProjectForm({
                 id="url"
                 type="url"
                 value={formData.url}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, url: e.target.value }))
-                }
+                onChange={(e) => setFormData((prev) => ({ ...prev, url: e.target.value }))}
                 placeholder="https://github.com/..."
                 className="border-0 bg-muted/50"
               />
             </div>
             <div className="space-y-2">
-              <Label
-                htmlFor="access_link"
-                className="flex items-center gap-1.5"
-              >
+              <Label htmlFor="access_link" className="flex items-center gap-1.5">
                 <Globe className="h-3.5 w-3.5" />
                 Live Demo URL
               </Label>
@@ -632,11 +597,7 @@ export default function ProjectForm({
                 {formData.type.map((t) => {
                   const type = PROJECT_TYPES.find((pt) => pt.value === t)
                   return (
-                    <Badge
-                      key={t}
-                      variant="secondary"
-                      className="gap-1 pr-1 font-normal"
-                    >
+                    <Badge key={t} variant="secondary" className="gap-1 pr-1 font-normal">
                       {type?.label || t}
                       <button
                         type="button"
@@ -651,10 +612,7 @@ export default function ProjectForm({
               </div>
             )}
             {/* Autocomplete input */}
-            <Popover
-              open={typePopoverOpen}
-              onOpenChange={setTypePopoverOpen}
-            >
+            <Popover open={typePopoverOpen} onOpenChange={setTypePopoverOpen}>
               <PopoverTrigger asChild>
                 <div className="relative">
                   <Input
@@ -678,9 +636,7 @@ export default function ProjectForm({
               >
                 <div className="max-h-60 overflow-auto">
                   {filteredTypes.length === 0 ? (
-                    <div className="px-3 py-2 text-sm text-muted-foreground">
-                      No types found
-                    </div>
+                    <div className="px-3 py-2 text-sm text-muted-foreground">No types found</div>
                   ) : (
                     filteredTypes.map((type) => (
                       <button
@@ -692,9 +648,7 @@ export default function ProjectForm({
                         <Check
                           className={cn(
                             'mr-2 h-4 w-4',
-                            formData.type.includes(type.value)
-                              ? 'opacity-100'
-                              : 'opacity-0'
+                            formData.type.includes(type.value) ? 'opacity-100' : 'opacity-0',
                           )}
                         />
                         {type.label}
@@ -756,11 +710,7 @@ export default function ProjectForm({
             {formData.tech_stack.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {formData.tech_stack.map((tech) => (
-                  <Badge
-                    key={tech}
-                    variant="outline"
-                    className="gap-1 pr-1 font-normal"
-                  >
+                  <Badge key={tech} variant="outline" className="gap-1 pr-1 font-normal">
                     {tech}
                     <button
                       type="button"
@@ -868,14 +818,10 @@ export default function ProjectForm({
                     <h4 className="text-sm font-medium text-foreground truncate group-hover:text-foreground/80">
                       {article.title}
                     </h4>
-                    <p className="text-xs text-muted-foreground">
-                      /{article.slug}
-                    </p>
+                    <p className="text-xs text-muted-foreground">/{article.slug}</p>
                   </div>
                   <Badge
-                    variant={
-                      article.status === 'published' ? 'default' : 'secondary'
-                    }
+                    variant={article.status === 'published' ? 'default' : 'secondary'}
                     className="text-[10px] px-1.5 py-0 h-4 font-normal"
                   >
                     {article.status || 'draft'}
@@ -912,8 +858,8 @@ export default function ProjectForm({
                 Write an article about this project
               </h3>
               <p className="text-sm text-muted-foreground mt-1">
-                After creating the project, you can write articles to share the
-                story behind it, technical decisions, and lessons learned.
+                After creating the project, you can write articles to share the story behind it,
+                technical decisions, and lessons learned.
               </p>
             </div>
           </div>

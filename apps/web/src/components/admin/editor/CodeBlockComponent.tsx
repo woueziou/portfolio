@@ -44,9 +44,7 @@ export default function CodeBlockComponent({ node, updateAttributes, selected }:
 
   return (
     <NodeViewWrapper
-      className={`relative group rounded-lg overflow-hidden ${
-        selected ? 'ring-2 ring-ring' : ''
-      }`}
+      className={`relative group rounded-lg overflow-hidden ${selected ? 'ring-2 ring-ring' : ''}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 bg-muted border-b border-border">
@@ -63,12 +61,14 @@ export default function CodeBlockComponent({ node, updateAttributes, selected }:
         </select>
 
         <button
+          type="button"
           onClick={handleCopy}
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors opacity-0 group-hover:opacity-100"
         >
           {copied ? (
             <>
               <svg
+                aria-hidden="true"
                 className="h-3.5 w-3.5 text-green-500"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -85,7 +85,13 @@ export default function CodeBlockComponent({ node, updateAttributes, selected }:
             </>
           ) : (
             <>
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                aria-hidden="true"
+                className="h-3.5 w-3.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

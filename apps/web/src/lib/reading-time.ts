@@ -9,15 +9,21 @@ interface ReadingTimeResult {
   text: string
 }
 
+interface TipTapNode {
+  type?: string
+  text?: string
+  content?: TipTapNode[]
+}
+
 /**
  * Extract plain text from TipTap JSON content
  */
-function extractTextFromTiptapJson(json: any): string {
+function extractTextFromTiptapJson(json: TipTapNode | null | undefined): string {
   if (!json?.content) return ''
 
   const texts: string[] = []
 
-  function traverse(node: any) {
+  function traverse(node: TipTapNode) {
     if (node.text) {
       texts.push(node.text)
     }
@@ -57,20 +63,24 @@ function calculateFromText(text: string): ReadingTimeResult {
 /**
  * Calculate reading time from TipTap JSON content
  */
-export function calculateReadingTime(content: any): ReadingTimeResult {
+export function calculateReadingTime(
+  content: string | TipTapNode | null | undefined,
+): ReadingTimeResult {
   if (!content) {
     return { minutes: 1, words: 0, text: '1 min read' }
   }
 
   // If content is a string, try to parse as JSON
-  let jsonContent = content
+  let jsonContent: TipTapNode | null = null
   if (typeof content === 'string') {
     try {
-      jsonContent = JSON.parse(content)
+      jsonContent = JSON.parse(content) as TipTapNode
     } catch {
       // If not valid JSON, treat as plain text
       return calculateFromText(content)
     }
+  } else {
+    jsonContent = content
   }
 
   const text = extractTextFromTiptapJson(jsonContent)
@@ -80,6 +90,6 @@ export function calculateReadingTime(content: any): ReadingTimeResult {
 /**
  * Quick utility to get just the minutes value
  */
-export function getReadingTimeMinutes(content: any): number {
+export function getReadingTimeMinutes(content: string | TipTapNode | null | undefined): number {
   return calculateReadingTime(content).minutes
 }

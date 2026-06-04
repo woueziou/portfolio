@@ -1,4 +1,14 @@
 import { actions } from 'astro:actions'
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  ExternalLink,
+  FileText,
+  Plus,
+  Search,
+} from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -10,16 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  FileText,
-  Search,
-  Plus,
-  Calendar,
-  Clock,
-  ChevronLeft,
-  ChevronRight,
-  ExternalLink,
-} from 'lucide-react'
 
 interface Article {
   id: number
@@ -77,7 +77,8 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
       const { error, data: result } = await actions.articles.list({
         page,
         perPage,
-        status: statusFilter !== 'all' ? (statusFilter as 'draft' | 'published' | 'archived') : undefined,
+        status:
+          statusFilter !== 'all' ? (statusFilter as 'draft' | 'published' | 'archived') : undefined,
       })
       if (!error && result) {
         setData(result as PaginatedResult)
@@ -155,9 +156,7 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
       {!loading && filtered.length === 0 ? (
         <div className="text-center py-16">
           <FileText className="mx-auto h-12 w-12 text-muted-foreground/40" />
-          <h3 className="mt-4 text-lg font-medium text-foreground">
-            No articles found
-          </h3>
+          <h3 className="mt-4 text-lg font-medium text-foreground">No articles found</h3>
           <p className="mt-2 text-sm text-muted-foreground">
             {search || statusFilter !== 'all'
               ? 'Try adjusting your filters.'
@@ -192,9 +191,7 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
                     {article.title}
                   </h3>
                   <Badge
-                    variant={
-                      STATUS_VARIANT[article.status || 'draft'] || 'outline'
-                    }
+                    variant={STATUS_VARIANT[article.status || 'draft'] || 'outline'}
                     className="text-[10px] px-1.5 py-0 h-4 font-normal shrink-0"
                   >
                     {article.status || 'draft'}
@@ -231,9 +228,7 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
       {/* Pagination */}
       {data.totalPages > 1 && (
         <div className="flex items-center justify-between pt-4">
-          <p className="text-sm text-muted-foreground">
-            {data.total} articles
-          </p>
+          <p className="text-sm text-muted-foreground">{data.total} articles</p>
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
@@ -251,9 +246,7 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() =>
-                setPage((p) => Math.min(data.totalPages, p + 1))
-              }
+              onClick={() => setPage((p) => Math.min(data.totalPages, p + 1))}
               disabled={page >= data.totalPages}
               aria-label="Next page"
               className="h-8 w-8"

@@ -1,16 +1,8 @@
 ---
+import { ArrowRight, Eye, FileText, FolderOpen, PenLine, Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import AdminLayout from '@/layouts/AdminLayout.astro'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
-import { Button } from '@/components/ui/button'
-import {
-  Eye,
-  FolderOpen,
-  FileText,
-  PenLine,
-  Plus,
-  ArrowRight,
-  TrendingUp,
-} from 'lucide-react'
 
 export const prerender = false
 
@@ -20,25 +12,33 @@ const supabase = createSupabaseServerClient(Astro.cookies)
 const [{ count: totalProjects }, { count: publishedProjects }, { count: draftProjects }] =
   await Promise.all([
     supabase.from('projects').select('*', { count: 'exact', head: true }),
-    supabase.from('projects').select('*', { count: 'exact', head: true }).eq('publication_status', 'published'),
-    supabase.from('projects').select('*', { count: 'exact', head: true }).eq('publication_status', 'draft'),
+    supabase
+      .from('projects')
+      .select('*', { count: 'exact', head: true })
+      .eq('publication_status', 'published'),
+    supabase
+      .from('projects')
+      .select('*', { count: 'exact', head: true })
+      .eq('publication_status', 'draft'),
   ])
 
 // Article count
-const { count: totalArticles } = await supabase.from('articles').select('*', { count: 'exact', head: true })
+const { count: totalArticles } = await supabase
+  .from('articles')
+  .select('*', { count: 'exact', head: true })
 
 // Visitor metrics
 const today = new Date().toISOString().slice(0, 10)
 
-const { data: todayViews } = await supabase
-  .from('page_views')
-  .select('count')
-  .eq('date', today)
+const { data: todayViews } = await supabase.from('page_views').select('count').eq('date', today)
 
 const { data: monthViews } = await supabase
   .from('page_views')
   .select('count')
-  .gte('date', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10))
+  .gte(
+    'date',
+    new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10),
+  )
 
 const todayCount = todayViews?.reduce((sum, r) => sum + (r.count || 0), 0) || 0
 const monthCount = monthViews?.reduce((sum, r) => sum + (r.count || 0), 0) || 0

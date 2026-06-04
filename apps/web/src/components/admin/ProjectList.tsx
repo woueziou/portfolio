@@ -1,4 +1,14 @@
 import { actions } from 'astro:actions'
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+  FolderOpen,
+  Layers,
+  Plus,
+  Search,
+} from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -10,16 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  FolderOpen,
-  Search,
-  Plus,
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  Layers,
-  ExternalLink,
-} from 'lucide-react'
 
 interface Project {
   id: number
@@ -95,7 +95,8 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
       const { error, data: result } = await actions.projects.list({
         page,
         perPage,
-        status: statusFilter !== 'all' ? (statusFilter as 'draft' | 'published' | 'archived') : undefined,
+        status:
+          statusFilter !== 'all' ? (statusFilter as 'draft' | 'published' | 'archived') : undefined,
       })
       if (!error && result) {
         setData(result as PaginatedResult)
@@ -196,9 +197,7 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
       {!loading && filtered.length === 0 ? (
         <div className="text-center py-16">
           <FolderOpen className="mx-auto h-12 w-12 text-muted-foreground/40" />
-          <h3 className="mt-4 text-lg font-medium text-foreground">
-            No projects found
-          </h3>
+          <h3 className="mt-4 text-lg font-medium text-foreground">No projects found</h3>
           <p className="mt-2 text-sm text-muted-foreground">
             {search || statusFilter !== 'all' || typeFilter !== 'all'
               ? 'Try adjusting your filters.'
@@ -224,11 +223,7 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
               {/* Thumbnail or icon */}
               {project.main_image_url ? (
                 <div className="h-12 w-12 shrink-0 overflow-hidden bg-muted">
-                  <img
-                    src={project.main_image_url}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
+                  <img src={project.main_image_url} alt="" className="h-full w-full object-cover" />
                 </div>
               ) : (
                 <div className="h-12 w-12 shrink-0 bg-muted flex items-center justify-center">
@@ -251,9 +246,7 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
                 </div>
                 <div className="flex items-center gap-3 mt-1">
                   {project.type && project.type.length > 0 && (
-                    <span className="text-xs text-muted-foreground">
-                      {project.type.join(', ')}
-                    </span>
+                    <span className="text-xs text-muted-foreground">{project.type.join(', ')}</span>
                   )}
                   {project.tech_stack && project.tech_stack.length > 0 && (
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -280,9 +273,7 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
       {/* Pagination */}
       {data.totalPages > 1 && (
         <div className="flex items-center justify-between pt-4">
-          <p className="text-sm text-muted-foreground">
-            {data.total} projects
-          </p>
+          <p className="text-sm text-muted-foreground">{data.total} projects</p>
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"

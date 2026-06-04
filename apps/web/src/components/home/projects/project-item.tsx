@@ -142,8 +142,8 @@ export const ProjectItem = ({
 
       {/* ── Type badges ── */}
       <div className="flex space-x-2">
-        {item.type.map((t, index) => (
-          <div key={index} className={cn('border-r pr-2 last:border-none font-semibold text-sm')}>
+        {item.type.map((t) => (
+          <div key={t} className={cn('border-r pr-2 last:border-none font-semibold text-sm')}>
             {t}
           </div>
         ))}
@@ -180,9 +180,9 @@ export const ProjectItem = ({
 
       {/* ── Tech stack (always shows icon + name) ── */}
       <div className="flex flex-wrap gap-2">
-        {item.tech_stack.map((tech, ix) => (
+        {item.tech_stack.map((tech) => (
           <div
-            key={ix}
+            key={tech}
             className={cn(
               'flex items-center gap-1.5 border border-secondary/30 px-2.5 py-1.5 text-sm',
               'hover:bg-accent hover:text-accent-foreground transition-colors',

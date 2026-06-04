@@ -1,21 +1,17 @@
 ---
-import AdminLayout from '@/layouts/AdminLayout.astro'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { Github, Globe, Link2, LinkedinIcon, Save, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Settings, Link2, Save, Globe, Github, Twitter, Linkedin } from 'lucide-react'
+import { Textarea } from '@/components/ui/textarea'
+import AdminLayout from '@/layouts/AdminLayout.astro'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 export const prerender = false
 
 const supabase = createSupabaseServerClient(Astro.cookies)
 
-const { data: config } = await supabase
-  .from('site_config')
-  .select('*')
-  .eq('id', 1)
-  .single()
+const { data: config } = await supabase.from('site_config').select('*').eq('id', 1).single()
 
 const socialLinks = (config?.social_links || {}) as Record<string, string>
 ---
@@ -122,7 +118,7 @@ const socialLinks = (config?.social_links || {}) as Record<string, string>
           </div>
           <div class="space-y-2">
             <Label htmlFor="social_twitter" className="flex items-center gap-1.5">
-              <Twitter className="h-3.5 w-3.5" />
+              <X className="h-3.5 w-3.5" />
               Twitter / X
             </Label>
             <Input
@@ -135,7 +131,7 @@ const socialLinks = (config?.social_links || {}) as Record<string, string>
           </div>
           <div class="space-y-2">
             <Label htmlFor="social_linkedin" className="flex items-center gap-1.5">
-              <Linkedin className="h-3.5 w-3.5" />
+              <LinkedinIcon className="h-3.5 w-3.5" />
               LinkedIn
             </Label>
             <Input

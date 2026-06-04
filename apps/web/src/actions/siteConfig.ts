@@ -15,10 +15,7 @@ export const siteConfig = {
     handler: async (_, context) => {
       const supabase = createSupabaseServerClient(context.cookies)
 
-      const { data: configs, error } = await supabase
-        .from('site_config')
-        .select('*')
-        .limit(1)
+      const { data: configs, error } = await supabase.from('site_config').select('*').limit(1)
 
       if (error) {
         throw new ActionError({ message: error.message, code: 'INTERNAL_SERVER_ERROR' })
@@ -99,7 +96,7 @@ export const siteConfig = {
       }
 
       // Update the config
-      const updateData: Record<string, any> = {}
+      const updateData: Record<string, unknown> = {}
       if (input.site_title !== undefined) updateData.site_title = input.site_title
       if (input.site_tagline !== undefined) updateData.site_tagline = input.site_tagline
       if (input.social_links !== undefined) updateData.social_links = input.social_links
