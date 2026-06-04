@@ -46,12 +46,17 @@ const REQUIRED_VIEWS = [
 ] as const
 
 export async function assertViewsExist(supabase: SupabaseSchemaClient): Promise<void> {
-  for (const requirement of REQUIRED_VIEWS) {
-    const { error } = (await supabase
-      .from(requirement.name)
-      .select(requirement.columns)
-      .limit(1)) as { error: QueryError | null }
+  const results = await Promise.all(
+    REQUIRED_VIEWS.map(async (requirement) => {
+      const { error } = (await supabase
+        .from(requirement.name)
+        .select(requirement.columns)
+        .limit(1)) as { error: QueryError | null }
+      return { requirement, error }
+    }),
+  )
 
+  for (const { requirement, error } of results) {
     if (error) {
       throw new Error(
         `Database schema mismatch: required view '${requirement.name}' is missing or has wrong columns. Apply pending Supabase migrations before serving admin routes.`,
@@ -64,15 +69,22 @@ const MISSING_COLUMN_ERROR_CODE = '42703'
 const MISSING_TABLE_ERROR_CODE = '42P01'
 
 export async function assertCoreSchema(supabase: SupabaseSchemaClient): Promise<void> {
-  for (const requirement of REQUIRED_QUERIES) {
-    const { error } = (await supabase
-      .from(requirement.table)
-      .select(requirement.columns)
-      .limit(1)) as { error: QueryError | null }
+  // Run all table checks + view checks concurrently — they are independent queries.
+  const [tableResults] = await Promise.all([
+    Promise.all(
+      REQUIRED_QUERIES.map(async (requirement) => {
+        const { error } = (await supabase
+          .from(requirement.table)
+          .select(requirement.columns)
+          .limit(1)) as { error: QueryError | null }
+        return { requirement, error }
+      }),
+    ),
+    assertViewsExist(supabase),
+  ])
 
-    if (!error) {
-      continue
-    }
+  for (const { requirement, error } of tableResults) {
+    if (!error) continue
 
     if (error.code === MISSING_COLUMN_ERROR_CODE || error.code === MISSING_TABLE_ERROR_CODE) {
       throw new Error(
@@ -82,7 +94,4 @@ export async function assertCoreSchema(supabase: SupabaseSchemaClient): Promise<
 
     throw new Error(`Schema health check failed for '${requirement.table}': ${error.message}`)
   }
-
-  // Also verify required views
-  await assertViewsExist(supabase)
 }
