@@ -144,7 +144,16 @@
   font-family: "Baufra" !important;
 }
 
-/* ── CSS noise texture (4.5KB inline PNG, replaces noise-bg.png) ── */
+/* ── Noise texture via pre-rasterized SVG data URI ──
+ *
+ * We use SVG inline data URIs with feTurbulence baked in at 200×200.
+ * The browser rasterizes them ONCE at load time and tiles the result
+ * as a repeating background — no procedural repaints on scroll.
+ *
+ * Compare to the old approach (CSS filter: url(#noise-*)) which
+ * re-rendered the full-viewport SVG filter on every paint frame,
+ * causing jank on mobile.
+ */
 .bg-noise {
   position: relative;
 }
@@ -154,12 +163,14 @@
   position: fixed;
   inset: 0;
   pointer-events: none;
-  filter: url(#noise-light);
   z-index: 0;
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.4' numOctaves='2' result='n'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.15 0 0 0 0 0.13 0 0 0 0 0.10 0.20 0 0 0 0' in='n'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 .dark .bg-noise::after {
-  filter: url(#noise-dark);
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.4' numOctaves='2' result='n'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.92 0 0 0 0 0.88 0 0 0 0 0.78 0.06 0 0 0 0' in='n'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 .bg-noise > * {
