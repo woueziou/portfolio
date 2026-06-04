@@ -12,26 +12,23 @@ type Project = Database['public']['Tables']['projects']['Row']
 
 const supabase = createSupabaseServerClient(Astro.cookies)
 
-// Fetch projects
-const { data: projects, error } = await supabase
-  .from('projects')
-  .select()
-  .order('project_date', { ascending: false })
+// Fetch all data in parallel — none of these depends on the other.
+const [
+  { data: projects, error },
+  { data: profiles },
+  { data: configs },
+] = await Promise.all([
+  supabase.from('projects').select().order('project_date', { ascending: false }),
+  supabase
+    .from('profiles')
+    .select('first_name, last_name, title, description, avatar_url, username')
+    .limit(1),
+  supabase.from('site_config').select('social_links').limit(1),
+])
 
 const typedProjects: Project[] = !error && projects ? (projects as Project[]) : []
 const fetchError = error?.message ?? null
-
-// Fetch profile data
-const { data: profiles } = await supabase
-  .from('profiles')
-  .select('first_name, last_name, title, description, avatar_url, username')
-  .limit(1)
-
 const profile = profiles?.[0]
-
-// Fetch social links from site_config
-const { data: configs } = await supabase.from('site_config').select('social_links').limit(1)
-
 const socialLinks = (configs?.[0]?.social_links || {}) as Record<string, string>
 
 // Prepare profile data for Hero component
@@ -108,13 +105,13 @@ const fullName = `${profileData.firstName} ${profileData.lastName}`
             ) : typedProjects.length === 0 ? (
               <p class="text-sm text-muted-foreground">No projects yet.</p>
             ) : (
-              <ProjectClient data={typedProjects} client:load />
+              <ProjectClient data={typedProjects} client:visible />
             )
           }
         </section>
 
         <section class="w-full">
-          <Footer client:load />
+          <Footer client:visible />
         </section>
       </div>
     </div>

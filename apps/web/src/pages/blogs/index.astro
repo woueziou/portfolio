@@ -1,11 +1,13 @@
 ---
 import type { Database } from '@portfolio/shared'
-import { supabase } from '@portfolio/shared'
 import { ArrowLeft, Calendar, Clock } from 'lucide-react'
 import BaseLayout from '@/layouts/BaseLayout.astro'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { formatDate } from '@/utils/formater'
 
 type Article = Database['public']['Tables']['articles']['Row']
+
+const supabase = createSupabaseServerClient(Astro.cookies)
 
 const { data: articles, error } = await supabase
   .from('articles')

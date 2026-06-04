@@ -1,9 +1,9 @@
 ---
 import type { Database } from '@portfolio/shared'
-import { supabase } from '@portfolio/shared'
 import { ArrowLeft, Calendar, Clock, ExternalLink } from 'lucide-react'
 import ArticleRenderer from '@/components/projects/ArticleRenderer.astro'
 import BaseLayout from '@/layouts/BaseLayout.astro'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { formatDate } from '@/utils/formater'
 
 type Project = Database['public']['Tables']['projects']['Row']
@@ -20,28 +20,26 @@ if (!slug) {
   return Astro.redirect('/404')
 }
 
-// Fetch profile for author name
-const { data: profile } = await supabase
-  .from('profiles')
-  .select('first_name, last_name')
-  .limit(1)
-  .single()
+const supabase = createSupabaseServerClient(Astro.cookies)
 
-const authorName = profile ? `${profile.first_name} ${profile.last_name}` : 'Taas S. Ekpaye'
-
-// Fetch published project by slug (with techstack relation)
-const { data: project, error: projectError } = await supabase
-  .from('projects')
-  .select(
-    `*,
+// Fetch profile and project in parallel — profile is independent of the slug lookup.
+const [{ data: profile }, { data: project, error: projectError }] = await Promise.all([
+  supabase.from('profiles').select('first_name, last_name').limit(1).single(),
+  supabase
+    .from('projects')
+    .select(
+      `*,
     project_techstacks(
       techstack_id,
       techstacks(id, name, icon)
     )`,
-  )
-  .eq('slug', slug)
-  .eq('publication_status', 'published')
-  .single()
+    )
+    .eq('slug', slug)
+    .eq('publication_status', 'published')
+    .single(),
+])
+
+const authorName = profile ? `${profile.first_name} ${profile.last_name}` : 'Taas S. Ekpaye'
 
 if (projectError || !project) {
   return Astro.redirect('/404')

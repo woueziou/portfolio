@@ -8,9 +8,19 @@ export const prerender = false
 
 const supabase = createSupabaseServerClient(Astro.cookies)
 
-// Project counts
-const [{ count: totalProjects }, { count: publishedProjects }, { count: draftProjects }] =
-  await Promise.all([
+const today = new Date().toISOString().slice(0, 10)
+const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+  .toISOString()
+  .slice(0, 10)
+
+// All five queries are independent — run them in a single round-trip batch.
+const [
+  [{ count: totalProjects }, { count: publishedProjects }, { count: draftProjects }],
+  { count: totalArticles },
+  { data: todayViews },
+  { data: monthViews },
+] = await Promise.all([
+  Promise.all([
     supabase.from('projects').select('*', { count: 'exact', head: true }),
     supabase
       .from('projects')
@@ -20,25 +30,11 @@ const [{ count: totalProjects }, { count: publishedProjects }, { count: draftPro
       .from('projects')
       .select('*', { count: 'exact', head: true })
       .eq('publication_status', 'draft'),
-  ])
-
-// Article count
-const { count: totalArticles } = await supabase
-  .from('articles')
-  .select('*', { count: 'exact', head: true })
-
-// Visitor metrics
-const today = new Date().toISOString().slice(0, 10)
-
-const { data: todayViews } = await supabase.from('page_views').select('count').eq('date', today)
-
-const { data: monthViews } = await supabase
-  .from('page_views')
-  .select('count')
-  .gte(
-    'date',
-    new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10),
-  )
+  ]),
+  supabase.from('articles').select('*', { count: 'exact', head: true }),
+  supabase.from('page_views').select('count').eq('date', today),
+  supabase.from('page_views').select('count').gte('date', monthStart),
+])
 
 const todayCount = todayViews?.reduce((sum, r) => sum + (r.count || 0), 0) || 0
 const monthCount = monthViews?.reduce((sum, r) => sum + (r.count || 0), 0) || 0

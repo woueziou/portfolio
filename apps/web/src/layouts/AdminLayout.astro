@@ -1,6 +1,5 @@
 ---
 import ThemeSwitcher from '@/components/ThemeSwitcher'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
 import BaseLayout from './BaseLayout.astro'
 
 interface Props {
@@ -10,11 +9,9 @@ interface Props {
 
 const { title, activeItem } = Astro.props
 
-const supabase = createSupabaseServerClient(Astro.cookies)
-const {
-  data: { user },
-} = await supabase.auth.getUser()
-
+// Middleware already verified auth and placed the user in locals —
+// no need for a second getUser() network call here.
+const { user } = Astro.locals
 const userName = user?.user_metadata?.full_name || user?.email || 'Admin'
 const userInitial = userName.charAt(0).toUpperCase()
 
