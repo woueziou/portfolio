@@ -61,9 +61,14 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site)
     <!-- Sitemap -->
     <link rel="sitemap" href="/sitemap-index.xml" />
 
-    <!-- Google Fonts preconnect -->
+    <!-- Google Fonts preconnect + Audiowide -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" media="print" onload="this.media='all'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" />
+    </noscript>
 
     <!-- Baufra Font -->
     <link rel="stylesheet" href="/baufra/stylesheet.css" />

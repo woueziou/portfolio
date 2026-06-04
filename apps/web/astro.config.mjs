@@ -7,7 +7,8 @@ import path from 'path'
 
 export default defineConfig({
   site: 'https://taas-s-ekpaye.vercel.app',
-  output: 'server',
+  output: 'static',
+  prefetch: { defaultStrategy: 'hover' },
   adapter: vercel(),
   integrations: [
     react(),

@@ -1,11 +1,13 @@
 ---
 import type { Database } from '@portfolio/shared'
-import Footer from '@/components/home/footer/footer'
-import Hero from '@/components/home/hero/hero'
+import Footer from '@/components/home/footer/footer.astro'
+import HeroStatic from '@/components/home/hero/hero-static.astro'
+import GitHubCalendarIsland from '@/components/home/hero/GitHubCalendarIsland'
 import ProjectClient from '@/components/home/projects/project-client'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
 import { ToastContainer } from '@/components/ui/toast'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { withTimeout } from '@/lib/supabase/with-timeout'
 import BaseLayout from '../layouts/BaseLayout.astro'
 
 type Project = Database['public']['Tables']['projects']['Row']
@@ -18,12 +20,24 @@ const [
   { data: profiles },
   { data: configs },
 ] = await Promise.all([
-  supabase.from('projects').select().order('project_date', { ascending: false }),
-  supabase
-    .from('profiles')
-    .select('first_name, last_name, title, description, avatar_url, username')
-    .limit(1),
-  supabase.from('site_config').select('social_links').limit(1),
+  withTimeout(
+    supabase.from('projects').select('id, title, description, main_image_url, url, access_link, state, project_date, type, tech_stack, slug, publication_status').order('project_date', { ascending: false }),
+    8000,
+    { data: null, error: { message: 'Projects query timed out' } } as any,
+  ),
+  withTimeout(
+    supabase
+      .from('profiles')
+      .select('first_name, last_name, title, description, avatar_url, username')
+      .limit(1),
+    8000,
+    { data: null, error: { message: 'Profile query timed out' } } as any,
+  ),
+  withTimeout(
+    supabase.from('site_config').select('social_links').limit(1),
+    8000,
+    { data: null, error: { message: 'Site config query timed out' } } as any,
+  ),
 ])
 
 const typedProjects: Project[] = !error && projects ? (projects as Project[]) : []
@@ -50,8 +64,8 @@ const fullName = `${profileData.firstName} ${profileData.lastName}`
 <BaseLayout title={`${fullName} — ${profileData.title}`} profile={{ name: fullName, title: profileData.title, socialLinks }}>
   <div class="antialiased bg-noise font-baufra min-h-screen flex flex-col justify-between">
     <!-- Top bar: nav links + theme switcher -->
-    <div id="topbar" class="fixed top-0 left-0 right-0 z-50 flex items-center justify-center px-4 py-3 transition-all duration-200">
-      <nav class="flex items-center gap-6 text-sm font-medium">
+    <div id="topbar" class="fixed top-0 z-80 w-full flex items-center justify-center px-4 py-8 transition-all duration-200 ">
+      <!-- <nav class="flex items-center gap-6 text-sm font-medium">
         <a href="/#hero" class="text-muted-foreground hover:text-foreground transition-colors">
           Home
         </a>
@@ -61,9 +75,9 @@ const fullName = `${profileData.firstName} ${profileData.lastName}`
         <a href="/blogs" class="text-muted-foreground hover:text-foreground transition-colors">
           Blogs
         </a>
-      </nav>
+      </nav> -->
       <div class="absolute right-4 top-1/2 -translate-y-1/2">
-        <ThemeSwitcher client:load />
+        <ThemeSwitcher client:idle />
       </div>
     </div>
 
@@ -89,7 +103,8 @@ const fullName = `${profileData.firstName} ${profileData.lastName}`
     <div class="flex-grow">
       <div class="flex flex-col items-center justify-center min-h-screen">
         <section id="hero">
-          <Hero client:load profile={profileData} socialLinks={socialLinks} />
+          <HeroStatic profile={profileData} socialLinks={socialLinks} />
+          <GitHubCalendarIsland client:visible />
         </section>
 
         <section
@@ -111,10 +126,10 @@ const fullName = `${profileData.firstName} ${profileData.lastName}`
         </section>
 
         <section class="w-full">
-          <Footer client:visible />
+          <Footer />
         </section>
       </div>
     </div>
-    <ToastContainer client:load />
+    <ToastContainer client:idle />
   </div>
 </BaseLayout>

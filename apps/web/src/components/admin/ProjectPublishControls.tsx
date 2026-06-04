@@ -1,3 +1,4 @@
+import { navigate } from 'astro:transitions/client'
 import { ExternalLink } from 'lucide-react'
 import { useState } from 'react'
 import type { PublicationStatus } from '@/lib/schemas/project'
@@ -71,8 +72,8 @@ export default function ProjectPublishControls({
         onClose={() => setDialogOpen(false)}
         onStatusChange={(newStatus) => {
           setStatus(newStatus)
-          // Reload to reflect changes (published_at, slug link, etc.)
-          window.location.reload()
+          // Client-side navigation to reflect changes
+          void navigate(window.location.pathname)
         }}
       />
     </div>

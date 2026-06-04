@@ -31,18 +31,44 @@ async function syncProjectTechstacks(
 
   if (!matchingStacks?.length) return
 
-  // Delete existing relations, insert new ones
-  await supabase.from('project_techstacks').delete().eq('project_id', projectId)
+  const newIds = matchingStacks.map((ts) => ts.id)
 
-  const { error: insertError } = await supabase.from('project_techstacks').insert(
-    matchingStacks.map((ts) => ({
-      project_id: projectId,
-      techstack_id: ts.id,
-    })),
-  )
+  // Get currently associated techstack IDs
+  const { data: existing } = await supabase
+    .from('project_techstacks')
+    .select('techstack_id')
+    .eq('project_id', projectId)
 
-  if (insertError) {
-    console.error('Failed to sync project_techstacks:', insertError)
+  const existingIds = existing?.map((r) => r.techstack_id) || []
+
+  // Compute diff — only modify what changed
+  const toAdd = newIds.filter((id) => !existingIds.includes(id))
+  const toRemove = existingIds.filter((id) => !newIds.includes(id))
+
+  if (!toAdd.length && !toRemove.length) return
+
+  // INSERT new ones first — if this fails, existing relations remain untouched
+  if (toAdd.length > 0) {
+    const { error: insertError } = await supabase.from('project_techstacks').insert(
+      toAdd.map((techstackId) => ({
+        project_id: projectId,
+        techstack_id: techstackId,
+      })),
+    )
+
+    if (insertError) {
+      console.error('Failed to insert project_techstacks:', insertError)
+      return // Abort — don't delete, existing relations stay intact
+    }
+  }
+
+  // DELETE removed ones only after insert succeeded
+  if (toRemove.length > 0) {
+    await supabase
+      .from('project_techstacks')
+      .delete()
+      .eq('project_id', projectId)
+      .in('techstack_id', toRemove)
   }
 }
 
@@ -136,24 +162,18 @@ export const projects = {
         })
       }
 
-      // Check ownership
-      const { data: existingProject, error: fetchError } = await supabase
+      // Fetch slug — ownership is enforced by .eq('user_id', user.id) on the UPDATE below
+      const { data: existingProject } = await supabase
         .from('projects')
-        .select('user_id, slug')
+        .select('slug')
         .eq('id', id)
+        .eq('user_id', user.id)
         .single()
 
-      if (fetchError || !existingProject) {
+      if (!existingProject) {
         throw new ActionError({
           message: 'Project not found',
           code: 'NOT_FOUND',
-        })
-      }
-
-      if (existingProject.user_id !== user.id) {
-        throw new ActionError({
-          message: 'You can only edit your own projects',
-          code: 'FORBIDDEN',
         })
       }
 
@@ -225,38 +245,19 @@ export const projects = {
         })
       }
 
-      // Check ownership
-      const { data: existingProject } = await supabase
-        .from('projects')
-        .select('user_id')
-        .eq('id', id)
-        .single()
-
-      if (!existingProject) {
-        throw new ActionError({
-          message: 'Project not found',
-          code: 'NOT_FOUND',
-        })
-      }
-
-      if (existingProject.user_id !== user.id) {
-        throw new ActionError({
-          message: 'You can only delete your own projects',
-          code: 'FORBIDDEN',
-        })
-      }
-
-      // Delete project (cascades to project_techstacks)
-      const { error: deleteError } = await supabase
+      // Delete project — ownership is enforced by .eq('user_id', user.id)
+      const { data: deleted, error: deleteError } = await supabase
         .from('projects')
         .delete()
         .eq('id', id)
         .eq('user_id', user.id)
+        .select('id')
+        .single()
 
-      if (deleteError) {
+      if (deleteError || !deleted) {
         throw new ActionError({
-          message: deleteError.message,
-          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Project not found',
+          code: 'NOT_FOUND',
         })
       }
 
@@ -282,24 +283,18 @@ export const projects = {
         })
       }
 
-      // Check ownership
+      // Fetch current state — ownership is enforced by .eq('user_id', user.id)
       const { data: existingProject } = await supabase
         .from('projects')
-        .select('user_id, publication_status, published_at')
+        .select('publication_status, published_at')
         .eq('id', id)
+        .eq('user_id', user.id)
         .single()
 
       if (!existingProject) {
         throw new ActionError({
           message: 'Project not found',
           code: 'NOT_FOUND',
-        })
-      }
-
-      if (existingProject.user_id !== user.id) {
-        throw new ActionError({
-          message: 'You can only publish your own projects',
-          code: 'FORBIDDEN',
         })
       }
 
