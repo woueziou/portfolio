@@ -115,7 +115,7 @@ export const ProjectItem = ({
   return (
     <div
       className={cn(
-        'flex py-8 px-4 transition-all duration-150 ease-linear flex-col space-y-4 ',
+        'flex py-4 px-2 sm:py-6 sm:px-3 md:py-8 md:px-4 transition-all duration-150 ease-linear flex-col space-y-3 sm:space-y-4 ',
         'hover:scale-[1.02] hover:drop-shadow-sm',
         'group/card',
         'items-start',
@@ -123,7 +123,7 @@ export const ProjectItem = ({
       )}
     >
       {/* ── Project image (or initials placeholder) ── */}
-      <div className="h-[350px] w-full overflow-hidden bg-primary/10">
+      <div className="h-[200px] sm:h-[240px] md:h-[280px] w-full overflow-hidden bg-primary/10">
         {item.main_image_url ? (
           <Image
             src={item.main_image_url}

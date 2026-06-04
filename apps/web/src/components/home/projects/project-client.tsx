@@ -64,7 +64,7 @@ export default function ProjectClient({ data }: { data: Project[] }) {
   const years = Array.from(grouped.keys()).sort((a, b) => Number(b) - Number(a))
 
   return (
-    <div className="w-full">
+    <div className="w-full mx-auto">
       {/* ── Type filter bar ── */}
       <div className="mb-8 flex flex-wrap items-center gap-2">
         <button

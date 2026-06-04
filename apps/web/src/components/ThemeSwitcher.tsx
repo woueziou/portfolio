@@ -1,5 +1,6 @@
 import { Moon, Sun } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { Button } from './ui/button'
 
 function getTheme(): 'dark' | 'light' {
   if (typeof window === 'undefined') return 'light'
@@ -45,13 +46,14 @@ export default function ThemeSwitcher() {
   }
 
   return (
-    <button
-      type="button"
+    <Button
+    variant={"ghost"}
+     
       onClick={toggle}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="inline-flex items-center justify-center size-9 rounded-md text-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
+      className="mt-4 inline-flex items-center justify-center size-9 rounded-md  transition-colors  cursor-pointer"
     >
       {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
-    </button>
+    </Button>
   )
 }

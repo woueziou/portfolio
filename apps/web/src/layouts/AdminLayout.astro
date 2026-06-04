@@ -36,7 +36,7 @@ const tabIcons: Record<string, string> = {
 <BaseLayout title={`${title} — Admin`}>
   <div class="min-h-screen bg-background flex flex-col">
     <!-- Top Navigation Bar -->
-    <header class="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header data-astro-transition-persist="admin-header" class="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div class="max-w-5xl mx-auto flex h-14 items-center justify-between px-4 sm:px-6">
         <div class="flex items-center gap-4">
           <!-- Logo links to dashboard home -->
