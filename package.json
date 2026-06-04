@@ -1,24 +1,27 @@
 {
   "name": "monorepo",
   "private": true,
+  "packageManager": "bun@1.3.13",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "dev": "bun run --filter web dev",
+    "dev": "turbo run dev --filter=web",
     "lint": "biome check .",
     "lint:fix": "biome check --fix .",
     "format": "biome format --write .",
-    "typecheck": "bun run --filter '*' typecheck",
-    "build": "bun run lint && bun run typecheck && bun run --filter web build",
+    "typecheck": "turbo run typecheck",
+    "build": "turbo run build --filter=web",
+    "test": "turbo run test",
     "deploy": "bash scripts/deploy-local.sh"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",
     "@vitest/coverage-v8": "^4.1.8",
+    "turbo": "^2.9.16",
     "vitest": "^4.1.8"
-    },
+  },
   "dependencies": {
     "@tiptap/extension-bubble-menu": "^3.25.0"
   }
