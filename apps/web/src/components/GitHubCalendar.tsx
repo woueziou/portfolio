@@ -72,7 +72,7 @@ export default function GitHubCalendar() {
       </div>
 
       {/* Calendar */}
-      <div className="w-full overflow-x-auto">
+      <div className="w-full max-w-full overflow-x-auto">
         <ReactGitHubCalendar
           username="woueziou"
           theme={{ light: dark ? darkTheme : lightTheme }}
