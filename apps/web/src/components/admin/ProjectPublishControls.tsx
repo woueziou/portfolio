@@ -72,8 +72,8 @@ export default function ProjectPublishControls({
         onClose={() => setDialogOpen(false)}
         onStatusChange={(newStatus) => {
           setStatus(newStatus)
-          // Client-side navigation to reflect changes
-          void navigate(window.location.pathname)
+          // Navigate to same page to reflect server-side changes (published_at, slug link, etc.)
+          navigate(window.location.pathname)
         }}
       />
     </div>

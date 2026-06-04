@@ -6,7 +6,7 @@ import GitHubCalendar from '@/components/GitHubCalendar'
  */
 export default function GitHubCalendarIsland() {
   return (
-    <div className="pt-4 md:w-full w-screen px-2">
+    <div className="pt-4 w-full flex justify-center px-2">
       <GitHubCalendar />
     </div>
   )

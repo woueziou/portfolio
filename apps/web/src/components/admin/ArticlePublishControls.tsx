@@ -85,8 +85,8 @@ export default function ArticlePublishControls({
         onClose={() => setDialogOpen(false)}
         onStatusChange={(newStatus) => {
           setStatus(newStatus)
-          // Client-side navigation to reflect changes
-          void navigate(window.location.pathname)
+          // Navigate to same page to reflect server-side changes
+          navigate(window.location.pathname)
         }}
       />
     </div>
