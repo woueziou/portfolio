@@ -6,7 +6,7 @@ import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextAlign from '@tiptap/extension-text-align'
 import Underline from '@tiptap/extension-underline'
-import { EditorContent, useEditor } from '@tiptap/react'
+import { EditorContent, type JSONContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { common, createLowlight } from 'lowlight'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -18,9 +18,9 @@ const lowlight = createLowlight(common)
 
 interface ArticleEditorProps {
   articleId: number
-  initialContent?: any
-  onContentChange?: (content: any) => void
-  onSave?: (article: any) => void
+  initialContent?: JSONContent
+  onContentChange?: (content: JSONContent) => void
+  onSave?: (article: Record<string, unknown>) => void
   onSaveStateChange?: (status: SaveStatus) => void
 }
 
@@ -41,7 +41,7 @@ export default function ArticleEditor({
 
   // Auto-save function
   const autoSave = useCallback(
-    async (content: any) => {
+    async (content: JSONContent) => {
       const contentString = JSON.stringify(content)
 
       // Skip if content hasn't changed
@@ -79,7 +79,7 @@ export default function ArticleEditor({
 
   // Debounced auto-save
   const debouncedSave = useCallback(
-    (content: any) => {
+    (content: JSONContent) => {
       setSaveStatus('unsaved')
       onSaveStateChange?.('unsaved')
 
@@ -322,6 +322,7 @@ export default function ArticleEditor({
           </span>
         </div>
         <button
+          type="button"
           onClick={() => autoSave(editor.getJSON())}
           disabled={saveStatus === 'saving' || saveStatus === 'saved'}
           className="text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -353,9 +354,8 @@ export default function ArticleEditor({
       {/* Keyboard shortcuts help */}
       <div className="mt-4 text-xs text-muted-foreground">
         <p>
-          <strong>Shortcuts:</strong>{' '}
-          <kbd className="px-1 py-0.5 bg-muted rounded">Ctrl+B</kbd> Bold ·{' '}
-          <kbd className="px-1 py-0.5 bg-muted rounded">Ctrl+I</kbd> Italic ·{' '}
+          <strong>Shortcuts:</strong> <kbd className="px-1 py-0.5 bg-muted rounded">Ctrl+B</kbd>{' '}
+          Bold · <kbd className="px-1 py-0.5 bg-muted rounded">Ctrl+I</kbd> Italic ·{' '}
           <kbd className="px-1 py-0.5 bg-muted rounded">Ctrl+U</kbd> Underline ·{' '}
           <kbd className="px-1 py-0.5 bg-muted rounded">Ctrl+K</kbd> Link · Type{' '}
           <kbd className="px-1 py-0.5 bg-muted rounded">/</kbd> for commands

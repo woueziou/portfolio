@@ -118,7 +118,15 @@ export default function PublishDrawer({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose} />
+      <div
+        className="fixed inset-0 z-40 bg-black/40"
+        onClick={onClose}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') onClose()
+        }}
+        role="presentation"
+        aria-hidden="true"
+      />
       <aside className="fixed inset-y-0 right-0 z-50 w-full max-w-md border-l border-border bg-background p-6 shadow-xl">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-foreground">Publish settings</h2>
@@ -139,7 +147,10 @@ export default function PublishDrawer({
           </div>
 
           <div>
-            <label htmlFor="article-excerpt" className="mb-1 block text-sm font-medium text-foreground">
+            <label
+              htmlFor="article-excerpt"
+              className="mb-1 block text-sm font-medium text-foreground"
+            >
               Excerpt
             </label>
             <textarea
@@ -159,7 +170,10 @@ export default function PublishDrawer({
           </div>
 
           <div>
-            <label htmlFor="article-cover-url" className="mb-1 block text-sm font-medium text-foreground">
+            <label
+              htmlFor="article-cover-url"
+              className="mb-1 block text-sm font-medium text-foreground"
+            >
               Cover image URL
             </label>
             <input
@@ -173,7 +187,10 @@ export default function PublishDrawer({
           </div>
 
           <div>
-            <label htmlFor="article-canonical-url" className="mb-1 block text-sm font-medium text-foreground">
+            <label
+              htmlFor="article-canonical-url"
+              className="mb-1 block text-sm font-medium text-foreground"
+            >
               Canonical URL
             </label>
             <input

@@ -116,9 +116,9 @@ export default function EditorShell({ article }: EditorShellProps) {
 
       <ArticleEditor
         articleId={article.id}
-        initialContent={article.content}
+        initialContent={article.content as import('@tiptap/react').JSONContent}
         onSave={(savedArticle) => {
-          setUpdatedAt(savedArticle.updated_at)
+          setUpdatedAt((savedArticle as Record<string, string>).updated_at)
         }}
         onSaveStateChange={setSaveState}
       />

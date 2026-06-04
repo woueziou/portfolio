@@ -7,7 +7,10 @@ import type { SupabaseClient } from '@supabase/supabase-js'
  */
 export type ProfileRow = Database['public']['Tables']['profiles']['Row']
 export type ProfileUpdate = Partial<
-  Pick<ProfileRow, 'first_name' | 'last_name' | 'title' | 'description' | 'avatar_url' | 'socials' | 'skills'>
+  Pick<
+    ProfileRow,
+    'first_name' | 'last_name' | 'title' | 'description' | 'avatar_url' | 'socials' | 'skills'
+  >
 >
 
 /** Keys that the service layer is allowed to write */
@@ -84,7 +87,7 @@ export class ProfileService {
 
     // If nothing meaningful to update, just return the current profile.
     if (Object.keys(sanitized).length === 0) {
-      console.log("Nothing to update")
+      console.log('Nothing to update')
       return this.getProfile(userId)
     }
 
@@ -103,11 +106,11 @@ export class ProfileService {
     // If the update matched 0 rows (e.g. RLS filtered the user out),
     // fall back to a read so the caller gets a meaningful error.
     if (!data) {
-      console.log("No data found")
+      console.log('No data found')
       return this.getProfile(userId)
     }
 
-    console.log("updated data", data)
+    console.log('updated data', data)
     return data
   }
 
@@ -119,7 +122,8 @@ export class ProfileService {
       if (value === null || value === undefined) continue
 
       // Skip empty objects (JSONB edge case).
-      if (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0) continue
+      if (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0)
+        continue
 
       // Skip empty arrays.
       if (Array.isArray(value) && value.length === 0) continue
@@ -161,9 +165,7 @@ export class ProfileService {
       throw new ProfileServiceError(uploadError.message, 'INTERNAL_SERVER_ERROR')
     }
 
-    const { data: urlData } = this.supabase.storage
-      .from(AVATAR_BUCKET)
-      .getPublicUrl(storagePath)
+    const { data: urlData } = this.supabase.storage.from(AVATAR_BUCKET).getPublicUrl(storagePath)
 
     return { url: urlData.publicUrl, path: storagePath }
   }
@@ -173,9 +175,7 @@ export class ProfileService {
    * replacement or clearing the avatar).
    */
   async deleteAvatar(storagePath: string): Promise<void> {
-    const { error } = await this.supabase.storage
-      .from(AVATAR_BUCKET)
-      .remove([storagePath])
+    const { error } = await this.supabase.storage.from(AVATAR_BUCKET).remove([storagePath])
 
     if (error) {
       console.error('Failed to delete avatar from storage:', error.message)
@@ -211,10 +211,7 @@ export class ProfileService {
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      throw new ProfileServiceError(
-        'File too large. Maximum size is 5 MB',
-        'BAD_REQUEST',
-      )
+      throw new ProfileServiceError('File too large. Maximum size is 5 MB', 'BAD_REQUEST')
     }
   }
 

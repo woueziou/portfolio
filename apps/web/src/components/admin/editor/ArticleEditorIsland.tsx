@@ -8,7 +8,7 @@ interface ArticleEditorIslandProps {
     status: 'draft' | 'published' | 'archived'
     published_at: string | null
     updated_at: string
-    content: any
+    content: Record<string, unknown> | null
     summary: string | null
     image_url: string | null
     url: string | null
@@ -35,9 +35,7 @@ class EditorErrorBoundary extends Component<
 
 const LazyEditorShell = lazy(() => import('./EditorShell'))
 
-export default function ArticleEditorIsland({
-  article,
-}: ArticleEditorIslandProps) {
+export default function ArticleEditorIsland({ article }: ArticleEditorIslandProps) {
   return (
     <EditorErrorBoundary>
       {(hasError) => {
@@ -50,11 +48,7 @@ export default function ArticleEditorIsland({
         }
 
         return (
-          <Suspense
-            fallback={
-              <div className="animate-pulse bg-muted rounded-lg h-[500px]" />
-            }
-          >
+          <Suspense fallback={<div className="animate-pulse bg-muted rounded-lg h-[500px]" />}>
             <LazyEditorShell article={article} />
           </Suspense>
         )

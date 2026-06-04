@@ -43,7 +43,13 @@ export default function SlashCommandMenu({
   const commands: CommandItem[] = [
     {
       icon: (
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -61,7 +67,13 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -79,7 +91,13 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -97,7 +115,13 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -115,7 +139,13 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -133,7 +163,13 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -151,7 +187,13 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -169,7 +211,13 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -186,7 +234,13 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
         </svg>
       ),
@@ -199,7 +253,13 @@ export default function SlashCommandMenu({
     },
     {
       icon: (
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -319,18 +379,15 @@ export default function SlashCommandMenu({
             filteredCommands.map((cmd, index) => (
               <button
                 key={cmd.label}
+                type="button"
                 onClick={cmd.action}
                 className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${
-                  index === selectedIndex
-                    ? 'bg-muted'
-                    : 'hover:bg-muted/50'
+                  index === selectedIndex ? 'bg-muted' : 'hover:bg-muted/50'
                 }`}
               >
                 <span className="text-muted-foreground">{cmd.icon}</span>
                 <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {cmd.label}
-                  </p>
+                  <p className="text-sm font-medium text-foreground">{cmd.label}</p>
                   <p className="text-xs text-muted-foreground">{cmd.description}</p>
                 </div>
               </button>
@@ -338,9 +395,7 @@ export default function SlashCommandMenu({
           )}
         </div>
         <div className="px-3 py-2 border-t border-border">
-          <p className="text-xs text-muted-foreground">
-            ↑↓ Navigate · Enter Select · Esc Cancel
-          </p>
+          <p className="text-xs text-muted-foreground">↑↓ Navigate · Enter Select · Esc Cancel</p>
         </div>
       </div>
 

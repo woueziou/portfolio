@@ -53,7 +53,13 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
   const toolbarItems = [
     {
       icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -68,7 +74,13 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
     },
     {
       icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -83,7 +95,13 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
     },
     {
       icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -133,7 +151,13 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
     { type: 'separator' },
     {
       icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -148,7 +172,13 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
     },
     {
       icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -163,7 +193,13 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
     },
     {
       icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -178,7 +214,13 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
     },
     {
       icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -194,7 +236,13 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
     { type: 'separator' },
     {
       icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -210,7 +258,13 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
     },
     {
       icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -225,7 +279,13 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
     { type: 'separator' },
     {
       icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -240,7 +300,13 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
     },
     {
       icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -255,7 +321,13 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
     },
     {
       icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -271,7 +343,13 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
     { type: 'separator' },
     {
       icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
         </svg>
       ),
@@ -280,7 +358,13 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
     },
     {
       icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -295,7 +379,13 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
     },
     {
       icon: (
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          aria-hidden="true"
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -315,14 +405,14 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
       <div className="flex items-center gap-1 flex-wrap">
         {toolbarItems.map((item, index) => {
           if (item.type === 'separator') {
-            return (
-              <div key={`sep-${index}`} className="w-px h-6 bg-border mx-1" />
-            )
+            // biome-ignore lint/suspicious/noArrayIndexKey: separators have no unique identifier
+            return <div key={index} className="w-px h-6 bg-border mx-1" />
           }
 
           return (
             <button
               key={item.label}
+              type="button"
               onClick={item.action}
               disabled={'disabled' in item && item.disabled}
               title={`${item.label}${'shortcut' in item && item.shortcut ? ` (${item.shortcut})` : ''}`}
@@ -359,19 +449,27 @@ export default function FloatingToolbar({ editor, onImageUpload }: FloatingToolb
               }}
             />
             <button
+              type="button"
               onClick={handleLinkSubmit}
               className="px-3 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors"
             >
               Add
             </button>
             <button
+              type="button"
               onClick={() => {
                 setShowLinkInput(false)
                 setLinkUrl('')
               }}
               className="p-2 text-muted-foreground hover:text-foreground"
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                aria-hidden="true"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

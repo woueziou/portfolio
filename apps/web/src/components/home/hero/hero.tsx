@@ -1,10 +1,10 @@
 import { SiGithub, SiMedium } from '@icons-pack/react-simple-icons'
-import { Linkedin, Mail } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { LinkedinIcon, Mail } from 'lucide-react'
 import type React from 'react'
+import { useCallback, useState } from 'react'
 import GitHubCalendar from '@/components/GitHubCalendar'
-import { showToast } from '@/components/ui/toast'
 import { Image } from '@/components/ui/image'
+import { showToast } from '@/components/ui/toast'
 import { cn } from '@/lib/utils'
 
 type ContactType = {
@@ -73,7 +73,7 @@ export default function Hero({ profile, socialLinks }: HeroProps) {
     contacts.push({
       name: 'LinkedIn',
       value: socialLinks.linkedin,
-      icon: <Linkedin className="h-5 w-5" />,
+      icon: <LinkedinIcon className="h-5 w-5" />,
       type: 'url',
     })
   }
@@ -89,12 +89,12 @@ export default function Hero({ profile, socialLinks }: HeroProps) {
     trackOutbound('email', email)
     navigator.clipboard.writeText(email).then(
       () => showToast('Email copied to clipboard!'),
-      () => { },
+      () => {},
     )
   }, [])
 
   const handleUrlClick = useCallback(
-    (e: React.MouseEvent<HTMLAnchorElement>, name: string, url: string) => {
+    (_e: React.MouseEvent<HTMLAnchorElement>, name: string, url: string) => {
       trackOutbound(name, url)
     },
     [],
@@ -126,9 +126,7 @@ export default function Hero({ profile, socialLinks }: HeroProps) {
         )}
       </div>
       <div className={cn('grid place-items-center md:gap-y-2 pt-4', '')}>
-        <h1 className={cn('text-3xl font-black lg:text-7xl font-audiowide')}>
-          {fullName}
-        </h1>
+        <h1 className={cn('text-3xl font-black lg:text-7xl font-audiowide')}>{fullName}</h1>
         <div className="row-span-1 flex flex-col items-center md:gap-8 gap-2">
           <h3 className="text-balance text-muted-foreground px-8 py-2 rounded-full lg:text-xl font-semibold flex items-center space-x-2">
             <div className="font-extrabold item flex h-8 w-8 justify-center rounded-sm items-center">
@@ -140,11 +138,11 @@ export default function Hero({ profile, socialLinks }: HeroProps) {
             {profile.bio}
           </p>
           <div className={cn('md:flex md:space-x-4', 'grid gap-y-4')}>
-            {contacts.map((contact, index) => {
+            {contacts.map((contact) => {
               if (contact.type === 'email') {
                 return (
                   <button
-                    key={index}
+                    key={contact.value}
                     type="button"
                     onClick={() => handleEmailClick(contact.value)}
                     className={cn(
@@ -160,7 +158,7 @@ export default function Hero({ profile, socialLinks }: HeroProps) {
               }
               return (
                 <a
-                  key={index}
+                  key={contact.name}
                   target="_blank"
                   href={contact.value}
                   onClick={(e) => handleUrlClick(e, contact.name, contact.value)}

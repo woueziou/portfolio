@@ -7,9 +7,9 @@
 interface TipTapNode {
   type?: string
   text?: string
-  marks?: Array<{ type: string; attrs?: Record<string, any> }>
+  marks?: Array<{ type: string; attrs?: Record<string, unknown> }>
   content?: TipTapNode[]
-  attrs?: Record<string, any>
+  attrs?: Record<string, unknown>
 }
 
 /**
@@ -47,8 +47,8 @@ function renderMarks(text: string, marks?: TipTapNode['marks']): string {
         result = `<code>${result}</code>`
         break
       case 'link': {
-        const href = mark.attrs?.href || '#'
-        const target = mark.attrs?.target || '_blank'
+        const href = (mark.attrs?.href as string) || '#'
+        const target = (mark.attrs?.target as string) || '_blank'
         result = `<a href="${escapeHtml(href)}" target="${target}" rel="noopener noreferrer">${result}</a>`
         break
       }
@@ -101,7 +101,7 @@ function renderNode(node: TipTapNode): string {
       return `<blockquote>${children}</blockquote>`
 
     case 'codeBlock': {
-      const language = node.attrs?.language || ''
+      const language = (node.attrs?.language as string) || ''
       const langAttr = language ? ` class="language-${escapeHtml(language)}"` : ''
       return `<pre><code${langAttr}>${escapeHtml(children)}</code></pre>`
     }
@@ -113,9 +113,9 @@ function renderNode(node: TipTapNode): string {
       return '<br />'
 
     case 'image': {
-      const src = node.attrs?.src || ''
-      const alt = node.attrs?.alt || ''
-      const title = node.attrs?.title || ''
+      const src = (node.attrs?.src as string) || ''
+      const alt = (node.attrs?.alt as string) || ''
+      const title = (node.attrs?.title as string) || ''
       const titleAttr = title ? ` title="${escapeHtml(title)}"` : ''
       return `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}"${titleAttr} />`
     }
@@ -130,18 +130,22 @@ function renderNode(node: TipTapNode): string {
  * @param content - TipTap JSON content (or string)
  * @returns HTML string
  */
-export function renderTiptapToHtml(content: any): string {
+export function renderTiptapToHtml(content: string | TipTapNode | null | undefined): string {
   if (!content) return ''
 
   // If content is a string, try to parse as JSON
-  let jsonContent = content
+  let jsonContent: TipTapNode
   if (typeof content === 'string') {
     try {
-      jsonContent = JSON.parse(content)
+      jsonContent = JSON.parse(content) as TipTapNode
     } catch {
       // If not valid JSON, wrap in paragraph
       return `<p>${escapeHtml(content)}</p>`
     }
+  } else if (content) {
+    jsonContent = content
+  } else {
+    return ''
   }
 
   // Validate it looks like a TipTap document

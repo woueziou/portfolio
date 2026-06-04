@@ -178,9 +178,7 @@ export default function PublishDialog({
       <div className="relative w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl">
         {/* Header */}
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-foreground">
-            Publication Settings
-          </h2>
+          <h2 className="text-lg font-semibold text-foreground">Publication Settings</h2>
           <p className="mt-1 text-sm text-muted-foreground truncate">{title}</p>
         </div>
 
@@ -218,9 +216,7 @@ export default function PublishDialog({
                 }`}
               >
                 <div className="font-medium text-foreground">{config.label}</div>
-                <div className="mt-1 text-sm text-muted-foreground">
-                  {config.description}
-                </div>
+                <div className="mt-1 text-sm text-muted-foreground">{config.description}</div>
               </button>
             )
           })}

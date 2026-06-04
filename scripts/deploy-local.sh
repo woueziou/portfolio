@@ -156,19 +156,19 @@ else
 fi
 
 # ── Step 3: Build & deploy Astro to Vercel ───────────────
-cd "$ROOT_DIR"
-info "Building Astro app…"
-bun run build
-ok "Build complete"
+# cd "$ROOT_DIR"
+# info "Building Astro app…"
+# bun run build
+# ok "Build complete"
 
-info "Deploying to Vercel…"
-bunx vercel --prod --yes
-ok "Vercel deployment complete"
+# info "Deploying to Vercel…"
+# bunx vercel --prod --yes
+# ok "Vercel deployment complete"
 
-# ── Done ──────────────────────────────────────────────────
-echo ""
-echo "╔══════════════════════════════════════════════════╗"
-echo "║  ✅  Deployment finished                        ║"
-echo "║  Site:    https://taas-s-ekpaye.vercel.app      ║"
-echo "║  Supabase: $SUPABASE_PROJECT_ID"
-echo "╚══════════════════════════════════════════════════╝"
+# # ── Done ──────────────────────────────────────────────────
+# echo ""
+# echo "╔══════════════════════════════════════════════════╗"
+# echo "║  ✅  Deployment finished                        ║"
+# echo "║  Site:    https://taas-s-ekpaye.vercel.app      ║"
+# echo "║  Supabase: $SUPABASE_PROJECT_ID"
+# echo "╚══════════════════════════════════════════════════╝"

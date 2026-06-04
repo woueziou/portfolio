@@ -11,7 +11,7 @@ interface ArticleFormProps {
     project_id: number | null
     status: string
   }
-  onSuccess?: (article: any) => void
+  onSuccess?: (article: Record<string, unknown>) => void
   onCancel?: () => void
   onSuccessPath?: string
   onCancelPath?: string
@@ -37,7 +37,7 @@ export default function ArticleForm({
     title: article?.title || '',
     slug: article?.slug || '',
     project_id: article?.project_id?.toString() || '',
-    status: (article?.status as any) || 'draft',
+    status: (article?.status as ArticleFormData['status']) || 'draft',
   })
 
   const [projects, setProjects] = useState<Array<{ id: number; title: string }>>([])
@@ -80,7 +80,8 @@ export default function ArticleForm({
     setLoading(true)
 
     try {
-      let result
+      // biome-ignore lint/suspicious/noExplicitAny: server action return types are complex
+      let result: any
 
       const submitData = {
         title: formData.title,
@@ -134,10 +135,7 @@ export default function ArticleForm({
 
       {/* Title */}
       <div>
-        <label
-          htmlFor="title"
-          className="block text-sm font-medium text-foreground mb-2"
-        >
+        <label htmlFor="title" className="block text-sm font-medium text-foreground mb-2">
           Title *
         </label>
         <input
@@ -154,10 +152,7 @@ export default function ArticleForm({
 
       {/* Slug */}
       <div>
-        <label
-          htmlFor="slug"
-          className="block text-sm font-medium text-foreground mb-2"
-        >
+        <label htmlFor="slug" className="block text-sm font-medium text-foreground mb-2">
           Slug *
         </label>
         <div className="flex items-center gap-2">
@@ -183,10 +178,7 @@ export default function ArticleForm({
 
       {/* Project Link */}
       <div>
-        <label
-          htmlFor="project_id"
-          className="block text-sm font-medium text-foreground mb-2"
-        >
+        <label htmlFor="project_id" className="block text-sm font-medium text-foreground mb-2">
           Linked Project (Optional)
         </label>
         <select
@@ -210,16 +202,18 @@ export default function ArticleForm({
 
       {/* Status */}
       <div>
-        <label
-          htmlFor="status"
-          className="block text-sm font-medium text-foreground mb-2"
-        >
+        <label htmlFor="status" className="block text-sm font-medium text-foreground mb-2">
           Status
         </label>
         <select
           id="status"
           value={formData.status}
-          onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value as any }))}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              status: e.target.value as ArticleFormData['status'],
+            }))
+          }
           className="w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors"
         >
           <option value="draft">Draft</option>

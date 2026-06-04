@@ -1,9 +1,9 @@
 import { ActionError, defineAction } from 'astro:actions'
-import { z } from 'zod'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@repo/shared'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { z } from 'zod'
 import { ProfileService, ProfileServiceError } from '@/lib/services/profile'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 const updateProfileSchema = z
   .object({
@@ -15,10 +15,9 @@ const updateProfileSchema = z
     socials: z.record(z.string()).optional(),
     skills: z.array(z.string()).optional(),
   })
-  .refine(
-    (data) => Object.values(data).some((v) => v !== undefined),
-    { message: 'At least one field must be provided' },
-  )
+  .refine((data) => Object.values(data).some((v) => v !== undefined), {
+    message: 'At least one field must be provided',
+  })
 
 /**
  * Bootstrap a single Supabase client, authenticate, and return both
@@ -26,9 +25,9 @@ const updateProfileSchema = z
  * (one for auth, one for queries) which can lead to mismatched auth
  * contexts and RLS-driven "no rows returned" errors.
  */
-async function bootstrap(
-  context: { cookies: import('astro').AstroCookies },
-): Promise<{ userId: string; service: ProfileService }> {
+async function bootstrap(context: {
+  cookies: import('astro').AstroCookies
+}): Promise<{ userId: string; service: ProfileService }> {
   const supabase = createSupabaseServerClient(context.cookies) as SupabaseClient<Database>
 
   const {
@@ -119,8 +118,8 @@ export const profiles = {
 
         // Upload new file and persist URL to profile in one step
         const { url } = await service.uploadAvatar(userId, file)
-        console.log("Profile picture", url)
-        console.log("User id", userId)
+        console.log('Profile picture', url)
+        console.log('User id', userId)
 
         const p = await service.updateProfile(userId, { avatar_url: url })
         console.log(p)

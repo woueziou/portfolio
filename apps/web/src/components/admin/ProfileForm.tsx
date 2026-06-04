@@ -1,25 +1,26 @@
 import { actions } from 'astro:actions'
-import { useEffect, useState } from 'react'
-import { useForm } from '@tanstack/react-form'
-import { useStore } from '@tanstack/react-store'
-import { z } from 'zod'
 import { useFileDialog } from '@mantine/hooks'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Form, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-import { cn } from '@/lib/utils'
+import { useForm } from '@tanstack/react-form'
+
+import { useStore } from '@tanstack/react-store'
 import {
-  Save,
-  User,
   Briefcase,
-  Upload,
-  Github,
-  Mail,
+  GithubIcon,
   Globe,
   Link2,
+  Mail,
   PenLine,
+  Save,
+  Upload,
+  User,
 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { z } from 'zod'
+import { Button } from '@/components/ui/button'
+import { Form, FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { cn } from '@/lib/utils'
 
 /* -------------------------------------------------------------------------- */
 /*  Zod schema (mirrors the server action schema)                             */
@@ -68,10 +69,7 @@ function zodValidator<T>(schema: z.ZodSchema<T>) {
   }
 }
 
-export default function ProfileForm({
-  profile,
-  socialLinks,
-}: ProfileFormProps) {
+export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) {
   // --------------- social-link state (not in profile table) ---------------
   const [githubUsername, setGithubUsername] = useState(
     extractUsername(socialLinks.github ?? '', 'https://github.com/'),
@@ -89,9 +87,7 @@ export default function ProfileForm({
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [avatarError, setAvatarError] = useState<string | null>(null)
-  const [status, setStatus] = useState<
-    { type: 'success' | 'error'; message: string } | null
-  >(null)
+  const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   const avatarDialog = useFileDialog({
     accept: 'image/jpeg,image/png,image/gif,image/webp',
@@ -115,7 +111,8 @@ export default function ProfileForm({
         if (githubUsername) newSocialLinks.github = `https://github.com/${githubUsername}`
         if (email) newSocialLinks.email = email
         if (mediumUsername) newSocialLinks.medium = `https://medium.com/@${mediumUsername}`
-        if (linkedinUsername) newSocialLinks.linkedin = `https://www.linkedin.com/in/${linkedinUsername}`
+        if (linkedinUsername)
+          newSocialLinks.linkedin = `https://www.linkedin.com/in/${linkedinUsername}`
         if (website) newSocialLinks.website = website
 
         // Update profile (includes socials to keep both tables in sync)
@@ -205,7 +202,7 @@ export default function ProfileForm({
           setAvatarError(uploadError.message)
         } else if (data?.url) {
           setAvatarUrl(data.url)
-          // await actions.profiles.update({ avatar_url: data.url }) 
+          // await actions.profiles.update({ avatar_url: data.url })
         }
       } catch {
         setAvatarError('Failed to upload avatar')
@@ -219,7 +216,7 @@ export default function ProfileForm({
   }, [avatarDialog.files])
 
   // --------------- Reactive subscriptions ---------------
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: TanStack store type is complex
   const formValues = useStore(form.store, (s: any) => s.values) as ProfileFormValues
   const firstName = formValues.first_name ?? ''
   const lastName = formValues.last_name ?? ''
@@ -248,7 +245,8 @@ export default function ProfileForm({
 
         <div className="flex items-center gap-6">
           {/* Avatar preview + upload trigger */}
-          <div
+          <button
+            type="button"
             onClick={() => !uploadingAvatar && avatarDialog.open()}
             className={cn(
               'relative h-24 w-24 bg-muted flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity overflow-hidden rounded-md',
@@ -258,36 +256,24 @@ export default function ProfileForm({
             {uploadingAvatar ? (
               <div className="h-6 w-6 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
             ) : avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt="Avatar preview"
-                className="w-full h-full object-cover"
-              />
+              <img src={avatarUrl} alt="Avatar preview" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-2xl font-bold text-muted-foreground">
-                {initials}
-              </span>
+              <span className="text-2xl font-bold text-muted-foreground">{initials}</span>
             )}
             {/* Hover overlay */}
             <div className="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
               <Upload className="h-5 w-5 text-white" />
             </div>
-          </div>
+          </button>
 
           <div>
             <p className="text-sm font-medium text-foreground">Change Photo</p>
             <p className="text-xs text-muted-foreground mt-1">
               Click the avatar to upload a new photo
             </p>
-            <p className="text-xs text-muted-foreground">
-              JPG, PNG or WebP, max 5MB
-            </p>
-            {uploadingAvatar && (
-              <p className="text-xs text-muted-foreground mt-1">Uploading…</p>
-            )}
-            {avatarError && (
-              <p className="text-xs text-destructive mt-1">{avatarError}</p>
-            )}
+            <p className="text-xs text-muted-foreground">JPG, PNG or WebP, max 5MB</p>
+            {uploadingAvatar && <p className="text-xs text-muted-foreground mt-1">Uploading…</p>}
+            {avatarError && <p className="text-xs text-destructive mt-1">{avatarError}</p>}
           </div>
         </div>
       </section>
@@ -353,10 +339,7 @@ export default function ProfileForm({
           </form.Field>
         </div>
 
-        <form.Field
-          name="title"
-          validators={{ onChange: zodValidator(profileSchema.shape.title) }}
-        >
+        <form.Field name="title" validators={{ onChange: zodValidator(profileSchema.shape.title) }}>
           {(field) => (
             <FormItem>
               <FormLabel htmlFor={field.name} className="flex items-center gap-1.5">
@@ -418,14 +401,12 @@ export default function ProfileForm({
 
         <FormItem>
           <FormLabel htmlFor="github" className="flex items-center gap-1.5">
-            <Github className="h-3.5 w-3.5" />
+            <GithubIcon className="h-3.5 w-3.5" />
             GitHub Username
           </FormLabel>
           <FormControl>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground shrink-0">
-                github.com/
-              </span>
+              <span className="text-sm text-muted-foreground shrink-0">github.com/</span>
               <Input
                 id="github"
                 value={githubUsername}
@@ -472,9 +453,7 @@ export default function ProfileForm({
             </FormLabel>
             <FormControl>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground shrink-0">
-                  medium.com/@
-                </span>
+                <span className="text-sm text-muted-foreground shrink-0">medium.com/@</span>
                 <Input
                   id="medium"
                   value={mediumUsername}
@@ -493,9 +472,7 @@ export default function ProfileForm({
             </FormLabel>
             <FormControl>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground shrink-0">
-                  linkedin.com/in/
-                </span>
+                <span className="text-sm text-muted-foreground shrink-0">linkedin.com/in/</span>
                 <Input
                   id="linkedin"
                   value={linkedinUsername}
@@ -531,9 +508,9 @@ export default function ProfileForm({
       {/* ======================================================== */}
       <div className="flex items-center gap-3">
         <form.Subscribe
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // biome-ignore lint/suspicious/noExplicitAny: TanStack form subscribe state
           selector={(s: any) => ({
-            isSubmitting: s.isSubmitting,
+            isSubmitting: s.isSubmitting as boolean,
           })}
         >
           {(sub) => (

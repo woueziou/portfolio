@@ -67,8 +67,10 @@ const { data: articles } = await supabase
 // Extract techstacks from relation (fall back to legacy tech_stack)
 const techstacksFromRelation: TechstackInfo[] =
   typedProject.project_techstacks
-    ?.filter((pt: any) => pt.techstacks)
-    .map((pt: any) => pt.techstacks as TechstackInfo) || []
+    ?.filter((pt: Record<string, unknown>) => (pt as Record<string, unknown>).techstacks)
+    .map(
+      (pt: Record<string, unknown>) => (pt as Record<string, unknown>).techstacks as TechstackInfo,
+    ) || []
 
 // Combine relation techs with any legacy tech_stack values not yet in the relation
 const legacyTechs = (typedProject.tech_stack || []).filter(
@@ -240,6 +242,7 @@ const jsonLdProject = {
 
     <!-- JSON-LD Structured Data -->
     <script
+      is:inline
       type="application/ld+json"
       set:html={JSON.stringify(jsonLdProject)}
     />
@@ -247,6 +250,7 @@ const jsonLdProject = {
     <!-- Article JSON-LD -->
     {typedArticles.map((article) => (
       <script
+        is:inline
         type="application/ld+json"
         set:html={JSON.stringify({
           '@context': 'https://schema.org',
