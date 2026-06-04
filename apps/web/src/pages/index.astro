@@ -1,83 +1,16 @@
 ---
-import type { Database } from '@portfolio/shared'
+import HomeContent from '@/components/home/HomeContent'
 import Footer from '@/components/home/footer/footer.astro'
-import HeroStatic from '@/components/home/hero/hero-static.astro'
-import GitHubCalendarIsland from '@/components/home/hero/GitHubCalendarIsland'
-import ContentTabs from '@/components/home/content-tabs'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
 import { ToastContainer } from '@/components/ui/toast'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
-import { withTimeout } from '@/lib/supabase/with-timeout'
 import BaseLayout from '../layouts/BaseLayout.astro'
-
-type Project = Database['public']['Tables']['projects']['Row']
-type Article = Database['public']['Tables']['articles']['Row']
-
-const supabase = createSupabaseServerClient(Astro.cookies)
-
-// Fetch all data in parallel — none of these depends on the other.
-const [
-  { data: projects, error: projectsError },
-  { data: articles, error: articlesError },
-  { data: profiles },
-  { data: configs },
-] = await Promise.all([
-  withTimeout(
-    supabase.from('projects').select('id, title, description, main_image_url, url, access_link, state, project_date, type, tech_stack, slug, publication_status').order('project_date', { ascending: false }),
-    8000,
-    { data: null, error: { message: 'Projects query timed out' } } as any,
-  ),
-  withTimeout(
-    supabase
-      .from('articles')
-      .select('*')
-      .eq('status', 'published')
-      .order('published_at', { ascending: false }),
-    8000,
-    { data: null, error: { message: 'Articles query timed out' } } as any,
-  ),
-  withTimeout(
-    supabase
-      .from('profiles')
-      .select('first_name, last_name, title, description, avatar_url, username')
-      .limit(1),
-    8000,
-    { data: null, error: { message: 'Profile query timed out' } } as any,
-  ),
-  withTimeout(
-    supabase.from('site_config').select('social_links').limit(1),
-    8000,
-    { data: null, error: { message: 'Site config query timed out' } } as any,
-  ),
-])
-
-const typedProjects: Project[] = !projectsError && projects ? (projects as Project[]) : []
-const typedArticles: Article[] = !articlesError && articles ? (articles as Article[]) : []
-const profile = profiles?.[0]
-const socialLinks = (configs?.[0]?.social_links || {}) as Record<string, string>
-
-// Prepare profile data for Hero component
-const profileData = {
-  firstName: profile?.first_name || 'Taas',
-  lastName: profile?.last_name || 'Ekpaye',
-  title: profile?.title || 'Full Stack Engineer',
-  bio:
-    profile?.description ||
-    'From building my first Flutter app in 2019 to deploying AI-powered tools in 2026 — each project marks a step forward.',
-  avatarUrl: profile?.avatar_url || null,
-  initials:
-    `${(profile?.first_name || 'T').charAt(0)}${(profile?.last_name || 'E').charAt(0)}`.toUpperCase(),
-}
-
-const fullName = `${profileData.firstName} ${profileData.lastName}`
 ---
 
-<BaseLayout title={`${fullName} — ${profileData.title}`} profile={{ name: fullName, title: profileData.title, socialLinks }}>
+<BaseLayout title="Taas S. Ekpaye — Full Stack Engineer">
   <div class="antialiased bg-noise font-baufra min-h-screen flex flex-col justify-between">
-    <!-- Top bar: nav links + theme switcher -->
+    <!-- Top bar -->
     <div id="topbar" data-astro-transition-persist="topbar" class="fixed top-0 left-0 right-0 z-50 flex items-center justify-center px-4 py-3 transition-all duration-200">
-
-      <div class="absolute right-4 top-4 -translate-y-1/2 ">
+      <div class="absolute right-4 top-4 -translate-y-1/2">
         <ThemeSwitcher client:load />
       </div>
     </div>
@@ -85,7 +18,6 @@ const fullName = `${profileData.firstName} ${profileData.lastName}`
     <script>
       const topbar = document.getElementById('topbar')
       let ticking = false
-
       const onScroll = () => {
         if (!ticking) {
           requestAnimationFrame(() => {
@@ -97,23 +29,12 @@ const fullName = `${profileData.firstName} ${profileData.lastName}`
           ticking = true
         }
       }
-
       window.addEventListener('scroll', onScroll, { passive: true })
     </script>
 
     <div class="flex-grow">
       <div class="flex flex-col items-stretch min-h-screen">
-        <section id="hero">
-          <HeroStatic profile={profileData} socialLinks={socialLinks} />
-          <GitHubCalendarIsland client:visible />
-        </section>
-
-        <section
-          id="projects"
-          class="w-full px-4 sm:px-6 md:px-8 lg:px-12 mx-auto max-w-7xl pt-16 pb-8 scroll-mt-20"
-        >
-          <ContentTabs projects={typedProjects} articles={typedArticles} client:visible />
-        </section>
+        <HomeContent client:visible />
 
         <section class="w-full">
           <Footer />
