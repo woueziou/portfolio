@@ -2,6 +2,8 @@
 import type { Database } from '@portfolio/shared'
 import { ArrowLeft, Calendar, Clock, ExternalLink } from 'lucide-react'
 import ArticleRenderer from '@/components/projects/ArticleRenderer.astro'
+export const prerender = false
+
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { formatDate } from '@/utils/formater'
@@ -27,13 +29,12 @@ const [{ data: profile }, { data: project, error: projectError }] = await Promis
   supabase.from('profiles').select('first_name, last_name').limit(1).single(),
   supabase
     .from('projects')
-    .select(
-      `*,
+    .select(`
+      title, description, main_image_url, url, access_link, state, project_date, type, tech_stack, slug, publication_status, id, published_at,
     project_techstacks(
       techstack_id,
       techstacks(id, name, icon)
-    )`,
-    )
+    )`)
     .eq('slug', slug)
     .eq('publication_status', 'published')
     .single(),

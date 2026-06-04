@@ -11,7 +11,7 @@ const supabase = createSupabaseServerClient(Astro.cookies)
 
 const { data: articles, error } = await supabase
   .from('articles')
-  .select('*')
+  .select('id, title, slug, summary, published_at, reading_time_minutes, status')
   .eq('status', 'published')
   .order('published_at', { ascending: false })
 
