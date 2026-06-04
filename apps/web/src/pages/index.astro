@@ -2,23 +2,30 @@
 import type { Database } from '@portfolio/shared'
 import Footer from '@/components/home/footer/footer'
 import Hero from '@/components/home/hero/hero'
-import ProjectClient from '@/components/home/projects/project-client'
+import ContentTabs from '@/components/home/content-tabs'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
 import { ToastContainer } from '@/components/ui/toast'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import BaseLayout from '../layouts/BaseLayout.astro'
 
 type Project = Database['public']['Tables']['projects']['Row']
+type Article = Database['public']['Tables']['articles']['Row']
 
 const supabase = createSupabaseServerClient(Astro.cookies)
 
 // Fetch all data in parallel — none of these depends on the other.
 const [
-  { data: projects, error },
+  { data: projects, error: projectsError },
+  { data: articles, error: articlesError },
   { data: profiles },
   { data: configs },
 ] = await Promise.all([
   supabase.from('projects').select().order('project_date', { ascending: false }),
+  supabase
+    .from('articles')
+    .select('*')
+    .eq('status', 'published')
+    .order('published_at', { ascending: false }),
   supabase
     .from('profiles')
     .select('first_name, last_name, title, description, avatar_url, username')
@@ -26,8 +33,8 @@ const [
   supabase.from('site_config').select('social_links').limit(1),
 ])
 
-const typedProjects: Project[] = !error && projects ? (projects as Project[]) : []
-const fetchError = error?.message ?? null
+const typedProjects: Project[] = !projectsError && projects ? (projects as Project[]) : []
+const typedArticles: Article[] = !articlesError && articles ? (articles as Article[]) : []
 const profile = profiles?.[0]
 const socialLinks = (configs?.[0]?.social_links || {}) as Record<string, string>
 
@@ -86,18 +93,7 @@ const fullName = `${profileData.firstName} ${profileData.lastName}`
           id="projects"
           class="w-full px-4 sm:px-6 md:px-8 lg:px-12 mx-auto max-w-7xl pt-16 pb-8 scroll-mt-20"
         >
-          <h1 class="text-2xl font-bold uppercase underline underline-offset-8 mb-2 text-center">Projects</h1>
-          {
-            fetchError ? (
-              <p class="text-sm text-muted-foreground text-center px-4">
-                Projects are currently unavailable. Please check back later.
-              </p>
-            ) : typedProjects.length === 0 ? (
-              <p class="text-sm text-muted-foreground">No projects yet.</p>
-            ) : (
-              <ProjectClient data={typedProjects} client:visible />
-            )
-          }
+          <ContentTabs projects={typedProjects} articles={typedArticles} client:visible />
         </section>
 
         <section class="w-full">
