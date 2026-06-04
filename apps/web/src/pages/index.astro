@@ -64,8 +64,8 @@ const fullName = `${profileData.firstName} ${profileData.lastName}`
 <BaseLayout title={`${fullName} — ${profileData.title}`} profile={{ name: fullName, title: profileData.title, socialLinks }}>
   <div class="antialiased bg-noise font-baufra min-h-screen flex flex-col justify-between">
     <!-- Top bar: nav links + theme switcher -->
-    <div id="topbar" class="fixed top-0 left-0 right-0 z-50 flex items-center justify-center px-4 py-8 transition-all duration-200">
-      <nav class="flex items-center gap-6 text-sm font-medium">
+    <div id="topbar" class="fixed top-0 z-80 w-full flex items-center justify-center px-4 py-8 transition-all duration-200 ">
+      <!-- <nav class="flex items-center gap-6 text-sm font-medium">
         <a href="/#hero" class="text-muted-foreground hover:text-foreground transition-colors">
           Home
         </a>
@@ -75,7 +75,7 @@ const fullName = `${profileData.firstName} ${profileData.lastName}`
         <a href="/blogs" class="text-muted-foreground hover:text-foreground transition-colors">
           Blogs
         </a>
-      </nav>
+      </nav> -->
       <div class="absolute right-4 top-1/2 -translate-y-1/2">
         <ThemeSwitcher client:idle />
       </div>
