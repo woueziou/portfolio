@@ -1,10 +1,8 @@
 ---
-export const prerender = false
-
 import ProjectEditPage from '@/components/admin/ProjectEditPage'
 import AdminLayout from '@/layouts/AdminLayout.astro'
 ---
 
 <AdminLayout title="Edit Project" activeItem="projects">
-  <ProjectEditPage client:load projectId={Astro.params.id ? Number(Astro.params.id) : 0} />
+  <ProjectEditPage client:load />
 </AdminLayout>

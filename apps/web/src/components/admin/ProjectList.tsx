@@ -242,7 +242,7 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
           {filtered.map((project) => (
             <a
               key={project.id}
-              href={`/admin/projects/${project.id}/edit`}
+              href={`/admin/projects/edit?id=${project.id}`}
               className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors group -mx-4"
             >
               {project.main_image_url ? (

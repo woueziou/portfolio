@@ -3,17 +3,20 @@ import { useEffect, useState } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser'
 import EditorShell from './editor/EditorShell'
 
-interface Props {
-  articleId: number
-}
-
-export default function ArticleEditPage({ articleId }: Props) {
+export default function ArticleEditPage() {
   const [article, setArticle] = useState<Record<string, unknown> | null>(null)
   const [projects, setProjects] = useState<Array<{ id: number; title: string }>>([])
   const [loading, setLoading] = useState(true)
 
+  const articleId = Number(new URLSearchParams(window.location.search).get('id'))
+
   useEffect(() => {
     async function init() {
+      if (!articleId) {
+        navigate('/admin/articles')
+        return
+      }
+
       const supabase = createSupabaseBrowserClient()
 
       const { data: session } = await supabase.auth.getSession()

@@ -1,10 +1,8 @@
 ---
-export const prerender = false
-
 import ArticleEditPage from '@/components/admin/ArticleEditPage'
 import AdminLayout from '@/layouts/AdminLayout.astro'
 ---
 
 <AdminLayout title="Edit Article" activeItem="articles">
-  <ArticleEditPage client:load articleId={Astro.params.id ? Number(Astro.params.id) : 0} />
+  <ArticleEditPage client:load />
 </AdminLayout>
