@@ -1,5 +1,4 @@
 ---
-import type { Database } from '@portfolio/shared'
 import { ArrowLeft, Calendar, Clock } from 'lucide-react'
 import ArticleRenderer from '@/components/projects/ArticleRenderer.astro'
 export const prerender = false
@@ -9,8 +8,6 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { withTimeout } from '@/lib/supabase/with-timeout'
 import { formatDate } from '@/utils/formater'
 
-type Article = Database['public']['Tables']['articles']['Row']
-
 const { slug } = Astro.params
 
 if (!slug) {
@@ -19,7 +16,6 @@ if (!slug) {
 
 const supabase = createSupabaseServerClient(Astro.cookies)
 
-// Fetch article and profile in parallel
 const [{ data: profile }, { data: article, error: articleError }] = await Promise.all([
   withTimeout(
     supabase.from('profiles').select('first_name, last_name').limit(1).single(),
@@ -44,87 +40,58 @@ if (articleError || !article) {
   return Astro.redirect('/404')
 }
 
-const typedArticle = article as Article
+const pageTitle = `${article.title} — ${authorName}`
+const pageDescription = article.summary?.slice(0, 160) ?? article.title
+const ogImage = article.image_url ?? undefined
 
-const pageTitle = `${typedArticle.title} — ${authorName}`
-const pageDescription = typedArticle.summary?.slice(0, 160) ?? typedArticle.title
-const ogImage = typedArticle.image_url ?? undefined
-
-// Build JSON-LD schema
 const jsonLdArticle = {
   '@context': 'https://schema.org',
   '@type': 'Article',
-  headline: typedArticle.title,
-  description: typedArticle.summary,
-  datePublished: typedArticle.published_at || typedArticle.created_at,
-  author: {
-    '@type': 'Person',
-    name: authorName,
-  },
-  wordCount: typedArticle.content_html
-    ? typedArticle.content_html.split(/\s+/).length
-    : undefined,
-  timeRequired: typedArticle.reading_time_minutes
-    ? `PT${typedArticle.reading_time_minutes}M`
-    : undefined,
+  headline: article.title,
+  description: article.summary,
+  datePublished: article.published_at || article.created_at,
+  author: { '@type': 'Person', name: authorName },
+  wordCount: article.content_html ? article.content_html.split(/\s+/).length : undefined,
+  timeRequired: article.reading_time_minutes ? `PT${article.reading_time_minutes}M` : undefined,
 }
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription} ogImage={ogImage}>
   <div class="antialiased bg-noise font-baufra min-h-screen">
-    <!-- Navigation -->
     <nav class="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
       <div class="container mx-auto px-4 py-3 flex items-center">
-        <a
-          href="/blogs"
-          class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
+        <a href="/blogs" class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft class="h-4 w-4" />
           Back to Blogs
         </a>
       </div>
     </nav>
 
     <main class="container mx-auto px-4 py-12 max-w-3xl">
-      <!-- Article Header -->
       <header class="mb-10">
-        <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-          {typedArticle.title}
-        </h1>
-
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4">{article.title}</h1>
         <div class="flex items-center gap-4 text-sm text-muted-foreground">
-          {typedArticle.published_at && (
+          {article.published_at && (
             <span class="flex items-center gap-1.5">
-              <Calendar className="h-4 w-4" />
-              {formatDate(typedArticle.published_at, 'MMMM D, YYYY')}
+              <Calendar class="h-4 w-4" />
+              {formatDate(article.published_at, 'MMMM D, YYYY')}
             </span>
           )}
-          {typedArticle.reading_time_minutes && (
+          {article.reading_time_minutes && (
             <span class="flex items-center gap-1.5">
-              <Clock className="h-4 w-4" />
-              {typedArticle.reading_time_minutes} min read
+              <Clock class="h-4 w-4" />
+              {article.reading_time_minutes} min read
             </span>
           )}
         </div>
-
-        {typedArticle.summary && (
-          <p class="text-lg text-muted-foreground leading-relaxed mt-6">
-            {typedArticle.summary}
-          </p>
+        {article.summary && (
+          <p class="text-lg text-muted-foreground leading-relaxed mt-6">{article.summary}</p>
         )}
       </header>
 
-      <!-- Article Content -->
-      {typedArticle.content_html && (
-        <ArticleRenderer contentHtml={typedArticle.content_html} />
-      )}
+      {article.content_html && <ArticleRenderer contentHtml={article.content_html} />}
     </main>
   </div>
 
-  <!-- JSON-LD Structured Data -->
-  <script
-    is:inline
-    type="application/ld+json"
-    set:html={JSON.stringify(jsonLdArticle)}
-  />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLdArticle)} />
 </BaseLayout>

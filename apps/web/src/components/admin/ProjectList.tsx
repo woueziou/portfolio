@@ -1,4 +1,4 @@
-import { actions } from 'astro:actions'
+import { navigate } from 'astro:transitions/client'
 import {
   Calendar,
   ChevronLeft,
@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { createSupabaseBrowserClient } from '@/lib/supabase/browser'
 
 interface Project {
   id: number
@@ -80,37 +81,68 @@ function formatDate(date: string | null): string {
   })
 }
 
+const PER_PAGE = 12
+
 export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
   const [data, setData] = useState<PaginatedResult>(initialData)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [typeFilter, setTypeFilter] = useState('all')
-  const [page, setPage] = useState(initialData.page)
+  const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
-  const perPage = initialData.perPage
 
   const fetchProjects = useCallback(async () => {
+    const supabase = createSupabaseBrowserClient()
+
+    const { data: session } = await supabase.auth.getSession()
+    if (!session.session) {
+      navigate('/admin/login')
+      return
+    }
+
     setLoading(true)
     try {
-      const { error, data: result } = await actions.projects.list({
-        page,
-        perPage,
-        status:
-          statusFilter !== 'all' ? (statusFilter as 'draft' | 'published' | 'archived') : undefined,
-      })
-      if (!error && result) {
-        setData(result as PaginatedResult)
+      const offset = (page - 1) * PER_PAGE
+      let query = supabase
+        .from('projects')
+        .select(
+          `*,
+          project_techstacks(
+            techstack_id,
+            techstacks(id, name, icon)
+          )`,
+          { count: 'exact' },
+        )
+        .order('created_at', { ascending: false })
+        .range(offset, offset + PER_PAGE - 1)
+
+      if (statusFilter !== 'all') {
+        query = query.eq('publication_status', statusFilter)
       }
+
+      const { data: projects, count, error } = await query
+
+      if (error) {
+        console.error('Error fetching projects:', error)
+        return
+      }
+
+      setData({
+        projects: (projects as Project[]) || [],
+        total: count || 0,
+        page,
+        perPage: PER_PAGE,
+        totalPages: Math.ceil((count || 0) / PER_PAGE),
+      })
     } finally {
       setLoading(false)
     }
-  }, [page, perPage, statusFilter])
+  }, [page, statusFilter])
 
   useEffect(() => {
     fetchProjects()
   }, [fetchProjects])
 
-  // Client-side search filter (on top of server-side)
   const filtered = data.projects
     .filter((p) => {
       if (!search) return true
@@ -128,7 +160,6 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
 
   return (
     <div className="space-y-6">
-      {/* Search + Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -182,18 +213,12 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
         </Select>
       </div>
 
-      {/* Loading indicator */}
       {loading && (
-        <div
-          role="status"
-          aria-label="Loading"
-          className="text-center text-sm text-muted-foreground py-8"
-        >
+        <div role="status" aria-label="Loading" className="text-center text-sm text-muted-foreground py-8">
           Loading...
         </div>
       )}
 
-      {/* Project List */}
       {!loading && filtered.length === 0 ? (
         <div className="text-center py-16">
           <FolderOpen className="mx-auto h-12 w-12 text-muted-foreground/40" />
@@ -220,7 +245,6 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
               href={`/admin/projects/${project.id}/edit`}
               className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors group -mx-4"
             >
-              {/* Thumbnail or icon */}
               {project.main_image_url ? (
                 <div className="h-12 w-12 shrink-0 overflow-hidden bg-muted">
                   <img src={project.main_image_url} alt="" className="h-full w-full object-cover" />
@@ -230,8 +254,6 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
                   <FolderOpen className="h-5 w-5 text-muted-foreground/60" />
                 </div>
               )}
-
-              {/* Content */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <h3 className="text-sm font-medium text-foreground truncate group-hover:text-foreground/80 transition-colors">
@@ -256,21 +278,16 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
                   )}
                 </div>
               </div>
-
-              {/* Date */}
               <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground shrink-0">
                 <Calendar className="h-3 w-3" />
                 {formatDate(project.created_at)}
               </div>
-
-              {/* Arrow */}
               <ExternalLink className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors shrink-0" />
             </a>
           ))}
         </div>
       )}
 
-      {/* Pagination */}
       {data.totalPages > 1 && (
         <div className="flex items-center justify-between pt-4">
           <p className="text-sm text-muted-foreground">{data.total} projects</p>

@@ -1,26 +1,6 @@
 ---
-import ProfileForm from '@/components/admin/ProfileForm'
+import ProfilePage from '@/components/admin/ProfilePage'
 import AdminLayout from '@/layouts/AdminLayout.astro'
-
-export const prerender = false
-
-// Middleware has already authenticated the request and injected user + supabase client.
-const { user, supabase } = Astro.locals
-
-const [{ data: profile }, { data: config }] = await Promise.all([
-  supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user?.id || '')
-    .single(),
-  supabase
-    .from('site_config')
-    .select('social_links')
-    .eq('id', 1)
-    .single(),
-])
-
-const socialLinks = (config?.social_links || {}) as Record<string, string>
 ---
 
 <AdminLayout title="Profile" activeItem="me">
@@ -32,19 +12,6 @@ const socialLinks = (config?.social_links || {}) as Record<string, string>
       </p>
     </div>
 
-    <ProfileForm
-      client:load
-      profile={profile || {
-        id: user?.id || '',
-        first_name: '',
-        last_name: '',
-        title: '',
-        description: '',
-        avatar_url: '',
-        username: '',
-        socials: {},
-      }}
-      socialLinks={socialLinks}
-    />
+    <ProfilePage client:load />
   </div>
 </AdminLayout>

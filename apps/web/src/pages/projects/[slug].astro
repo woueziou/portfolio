@@ -25,7 +25,6 @@ if (!slug) {
 
 const supabase = createSupabaseServerClient(Astro.cookies)
 
-// Fetch profile and project in parallel — profile is independent of the slug lookup.
 const [{ data: profile }, { data: project, error: projectError }] = await Promise.all([
   withTimeout(
     supabase.from('profiles').select('first_name, last_name').limit(1).single(),
@@ -64,21 +63,15 @@ const typedProject = project as Project & {
 
 const projectId = typedProject.id
 
-// Extract techstacks from relation (fall back to legacy tech_stack)
-// Do this synchronously before the async article fetch — no reason to wait.
 const techstacksFromRelation: TechstackInfo[] =
   typedProject.project_techstacks
-    ?.filter((pt: Record<string, unknown>) => (pt as Record<string, unknown>).techstacks)
-    .map(
-      (pt: Record<string, unknown>) => (pt as Record<string, unknown>).techstacks as TechstackInfo,
-    ) || []
+    ?.filter((pt) => pt.techstacks)
+    .map((pt) => pt.techstacks as TechstackInfo) || []
 
-// Combine relation techs with any legacy tech_stack values not yet in the relation
 const legacyTechs = (typedProject.tech_stack || []).filter(
   (t: string) => !techstacksFromRelation.some((r) => r.name.toLowerCase() === t.toLowerCase()),
 )
 
-// Fetch published articles linked to this project
 const { data: articles } = await withTimeout(
   supabase
     .from('articles')
@@ -97,7 +90,6 @@ const pageTitle = `${projectTitle} — ${authorName}`
 const pageDescription = typedProject.description?.slice(0, 160) ?? projectTitle
 const ogImage = typedProject.main_image_url === null ? undefined : typedProject.main_image_url
 
-// Build JSON-LD schema
 const jsonLdProject = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
@@ -106,147 +98,90 @@ const jsonLdProject = {
   url: typedProject.url || undefined,
   applicationCategory: 'WebApplication',
   datePublished: typedProject.published_at || undefined,
-  author: {
-    '@type': 'Person',
-    name: authorName,
-  },
+  author: { '@type': 'Person', name: authorName },
 }
 ---
 
 <BaseLayout title={pageTitle} description={pageDescription} ogImage={ogImage}>
   <div class="antialiased bg-noise font-baufra min-h-screen">
-    <!-- Navigation -->
     <nav class="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
       <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-        <a
-          href="/"
-          class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
+        <a href="/" class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft class="h-4 w-4" />
           Back to Portfolio
         </a>
         {typedProject.url && (
-          <a
-            href={typedProject.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline underline-offset-4"
-          >
+          <a href={typedProject.url} target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline underline-offset-4">
             View Live
-            <ExternalLink className="h-3.5 w-3.5" />
+            <ExternalLink class="h-3.5 w-3.5" />
           </a>
         )}
       </div>
     </nav>
 
     <main class="container mx-auto px-4 py-12 max-w-4xl">
-      <!-- Project Header -->
       <header class="mb-12">
-        <!-- Project Image -->
         {typedProject.main_image_url && (
           <div class="mb-8 rounded-xl overflow-hidden shadow-lg">
-            <img
-              src={typedProject.main_image_url}
-              alt={typedProject.title}
-              class="w-full h-auto object-cover"
-              loading="eager"
-            />
+            <img src={typedProject.main_image_url} alt={typedProject.title} class="w-full h-auto object-cover" loading="eager" />
           </div>
         )}
-
-        <!-- Meta Info -->
         <div class="flex flex-wrap items-center gap-3 mb-4 text-sm text-muted-foreground">
           {typedProject.project_date && (
             <span class="flex items-center gap-1.5">
-              <Calendar className="h-4 w-4" />
+              <Calendar class="h-4 w-4" />
               {formatDate(typedProject.project_date, 'MMMM YYYY')}
             </span>
           )}
-          <span class="flex items-center gap-1.5 capitalize">
-            {typedProject.state}
-          </span>
+          <span class="flex items-center gap-1.5 capitalize">{typedProject.state}</span>
           {typedProject.type.map((t) => (
-            <span class="px-2 py-0.5 bg-secondary/30 rounded text-xs font-medium capitalize">
-              {t}
-            </span>
+            <span class="px-2 py-0.5 bg-secondary/30 rounded text-xs font-medium capitalize">{t}</span>
           ))}
         </div>
-
-        <!-- Title -->
-        <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-          {projectTitle}
-        </h1>
-
-        <!-- Description -->
-        <p class="text-lg text-muted-foreground leading-relaxed mb-6">
-          {typedProject.description}
-        </p>
-
-        <!-- Tech Stack (from relation + legacy fallback) -->
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4">{projectTitle}</h1>
+        <p class="text-lg text-muted-foreground leading-relaxed mb-6">{typedProject.description}</p>
         <div class="flex flex-wrap gap-2">
           {techstacksFromRelation.map((ts) => (
-            <span class="flex items-center gap-1.5 px-3 py-1.5 border border-secondary/30 text-sm hover:bg-primary hover:text-white transition-colors">
-              {ts.name}
-            </span>
+            <span class="flex items-center gap-1.5 px-3 py-1.5 border border-secondary/30 text-sm hover:bg-primary hover:text-white transition-colors">{ts.name}</span>
           ))}
           {legacyTechs.map((tech) => (
-            <span class="flex items-center gap-1.5 px-3 py-1.5 border border-secondary/30 text-sm hover:bg-primary hover:text-white transition-colors">
-              {tech}
-            </span>
+            <span class="flex items-center gap-1.5 px-3 py-1.5 border border-secondary/30 text-sm hover:bg-primary hover:text-white transition-colors">{tech}</span>
           ))}
         </div>
-
-        <!-- Access Link -->
         {typedProject.access_link && (
           <div class="mt-6">
-            <a
-              href={typedProject.access_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium"
-            >
+            <a href={typedProject.access_link} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium">
               Access Project
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink class="h-4 w-4" />
             </a>
           </div>
         )}
       </header>
 
-      <!-- Articles Section -->
       {typedArticles.length > 0 && (
         <section class="mt-16">
-          <h2 class="text-2xl font-bold mb-8 border-b border-border pb-4">
-            Articles
-          </h2>
-
+          <h2 class="text-2xl font-bold mb-8 border-b border-border pb-4">Articles</h2>
           <div class="space-y-16">
             {typedArticles.map((article) => (
               <article class="group">
-                <!-- Article Header -->
                 <div class="mb-6">
-                  <h3 class="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">
-                    {article.title}
-                  </h3>
+                  <h3 class="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">{article.title}</h3>
                   <div class="flex items-center gap-4 text-sm text-muted-foreground">
                     {article.published_at && (
                       <span class="flex items-center gap-1.5">
-                        <Calendar className="h-3.5 w-3.5" />
+                        <Calendar class="h-3.5 w-3.5" />
                         {formatDate(article.published_at, 'MMMM D, YYYY')}
                       </span>
                     )}
                     {article.reading_time_minutes && (
                       <span class="flex items-center gap-1.5">
-                        <Clock className="h-3.5 w-3.5" />
+                        <Clock class="h-3.5 w-3.5" />
                         {article.reading_time_minutes} min read
                       </span>
                     )}
                   </div>
                 </div>
-
-                <!-- Article Content -->
-                {article.content_html && (
-                  <ArticleRenderer contentHtml={article.content_html} />
-                )}
+                {article.content_html && <ArticleRenderer contentHtml={article.content_html} />}
               </article>
             ))}
           </div>
@@ -254,37 +189,18 @@ const jsonLdProject = {
       )}
     </main>
 
-    <!-- JSON-LD Structured Data -->
-    <script
-      is:inline
-      type="application/ld+json"
-      set:html={JSON.stringify(jsonLdProject)}
-    />
-
-    <!-- Article JSON-LD -->
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLdProject)} />
     {typedArticles.map((article) => (
-      <script
-        is:inline
-        type="application/ld+json"
-        set:html={JSON.stringify({
-          '@context': 'https://schema.org',
-          '@type': 'TechArticle',
-          headline: article.title,
-          datePublished: article.published_at || article.created_at,
-          author: {
-            '@type': 'Person',
-            name: authorName,
-          },
-          isPartOf: {
-            '@type': 'SoftwareApplication',
-            name: projectTitle,
-          },
-          wordCount: article.content_html ? article.content_html.split(/\s+/).length : undefined,
-          timeRequired: article.reading_time_minutes
-            ? `PT${article.reading_time_minutes}M`
-            : undefined,
-        })}
-      />
+      <script is:inline type="application/ld+json" set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'TechArticle',
+        headline: article.title,
+        datePublished: article.published_at || article.created_at,
+        author: { '@type': 'Person', name: authorName },
+        isPartOf: { '@type': 'SoftwareApplication', name: projectTitle },
+        wordCount: article.content_html ? article.content_html.split(/\s+/).length : undefined,
+        timeRequired: article.reading_time_minutes ? `PT${article.reading_time_minutes}M` : undefined,
+      })} />
     ))}
   </div>
 </BaseLayout>
