@@ -811,7 +811,7 @@ export default function ProjectForm({
               {articles.map((article) => (
                 <a
                   key={article.id}
-                  href={`/admin/articles/${article.id}/edit`}
+                  href={`/admin/articles/edit?id=${article.id}`}
                   className="flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors group -mx-3"
                 >
                   <FileCode className="h-4 w-4 text-muted-foreground/60 shrink-0" />

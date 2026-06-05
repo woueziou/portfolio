@@ -24,17 +24,22 @@ interface ArticleSummary {
   status: string
 }
 
-interface Props {
-  projectId: number
-}
-
-export default function ProjectEditPage({ projectId }: Props) {
+export default function ProjectEditPage() {
   const [project, setProject] = useState<ProjectData | null>(null)
   const [articles, setArticles] = useState<ArticleSummary[]>([])
   const [loading, setLoading] = useState(true)
 
+  const projectId = typeof window !== 'undefined'
+    ? Number(new URLSearchParams(window.location.search).get('id'))
+    : 0
+
   useEffect(() => {
     async function init() {
+      if (!projectId) {
+        navigate('/admin/projects')
+        return
+      }
+
       const supabase = createSupabaseBrowserClient()
 
       const { data: session } = await supabase.auth.getSession()

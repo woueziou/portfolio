@@ -194,7 +194,7 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
           {filtered.map((article) => (
             <a
               key={article.id}
-              href={`/admin/articles/${article.id}/edit`}
+              href={`/admin/articles/edit?id=${article.id}`}
               className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors group -mx-4"
             >
               <div className="h-10 w-10 shrink-0 bg-muted flex items-center justify-center">
