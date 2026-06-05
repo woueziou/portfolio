@@ -1,0 +1,8 @@
+---
+import ProjectEditPage from '@/components/admin/ProjectEditPage'
+import AdminLayout from '@/layouts/AdminLayout.astro'
+---
+
+<AdminLayout title="Edit Project" activeItem="projects">
+  <ProjectEditPage client:load />
+</AdminLayout>

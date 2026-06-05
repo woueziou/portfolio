@@ -3,40 +3,6 @@ import { Plus } from 'lucide-react'
 import { ProjectList } from '@/components/admin/ProjectList'
 import { Button } from '@/components/ui/button'
 import AdminLayout from '@/layouts/AdminLayout.astro'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
-
-export const prerender = false
-
-const supabase = createSupabaseServerClient(Astro.cookies)
-
-const {
-  data: projects,
-  error,
-  count,
-} = await supabase
-  .from('projects')
-  .select(
-    `*,
-    project_techstacks(
-      techstack_id,
-      techstacks(id, name, icon)
-    )`,
-    { count: 'exact' },
-  )
-  .order('created_at', { ascending: false })
-  .range(0, 11)
-
-if (error) {
-  console.error('Error fetching projects:', error)
-}
-
-const initialData = {
-  projects: projects || [],
-  total: count || 0,
-  page: 1,
-  perPage: 12,
-  totalPages: Math.ceil((count || 0) / 12),
-}
 ---
 
 <AdminLayout title="Projects" activeItem="projects">
@@ -48,25 +14,23 @@ const initialData = {
           Manage your portfolio projects
         </p>
       </div>
-      <Button id="new-project-btn" className="" variant={"ghost"}>
+      <Button id="new-project-btn" variant="ghost">
         <span class="flex items-center">
-          <Plus className="h-4 w-4" />
+          <Plus class="h-4 w-4" />
           <span>Add</span>
         </span>
       </Button>
     </div>
 
-    <ProjectList client:load initialData={initialData} />
+    <ProjectList client:load initialData={{ projects: [], total: 0, page: 1, perPage: 12, totalPages: 0 }} />
   </div>
 </AdminLayout>
 
 <script>
   import { navigate } from 'astro:transitions/client'
 
-  const newProjectBtn = document.getElementById('new-project-btn')
-  if (newProjectBtn) {
-    newProjectBtn.addEventListener('click', () => {
-      navigate('/admin/projects/new')
-    })
+  const btn = document.getElementById('new-project-btn')
+  if (btn) {
+    btn.addEventListener('click', () => navigate('/admin/projects/new'))
   }
 </script>

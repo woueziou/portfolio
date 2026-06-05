@@ -1,7 +1,7 @@
-import { actions } from 'astro:actions'
 import { navigate } from 'astro:transitions/client'
 import { useEffect, useState } from 'react'
 import { generateSlug } from '@/lib/slug'
+import { createSupabaseBrowserClient } from '@/lib/supabase/browser'
 
 interface ArticleFormProps {
   article?: {
@@ -46,25 +46,24 @@ export default function ArticleForm({
   const [error, setError] = useState<string | null>(null)
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(!!article?.slug)
 
-  // Fetch projects for the dropdown
   useEffect(() => {
     async function fetchProjects() {
+      const supabase = createSupabaseBrowserClient()
       try {
-        const result = await actions.projects.list({ page: 1, perPage: 100 })
-        if (result.data) {
-          setProjects(result.data.projects)
-        }
+        const { data } = await supabase
+          .from('projects')
+          .select('id, title')
+          .order('title')
+        setProjects((data as Array<{ id: number; title: string }>) || [])
       } catch (err) {
         console.error('Failed to fetch projects:', err)
       } finally {
         setLoadingProjects(false)
       }
     }
-
     fetchProjects()
   }, [])
 
-  // Auto-generate slug from title
   useEffect(() => {
     if (!slugManuallyEdited && formData.title) {
       setFormData((prev) => ({
@@ -80,10 +79,17 @@ export default function ArticleForm({
     setLoading(true)
 
     try {
-      // biome-ignore lint/suspicious/noExplicitAny: server action return types are complex
-      let result: any
+      const supabase = createSupabaseBrowserClient()
 
-      const submitData = {
+      const { data: session } = await supabase.auth.getSession()
+      if (!session.session) {
+        navigate('/admin/login')
+        return
+      }
+
+      let result: Record<string, unknown>
+
+      const payload = {
         title: formData.title,
         slug: formData.slug || undefined,
         project_id: formData.project_id ? parseInt(formData.project_id, 10) : null,
@@ -91,21 +97,39 @@ export default function ArticleForm({
       }
 
       if (isEditing && article) {
-        result = await actions.articles.update({
-          id: article.id,
-          ...submitData,
-        })
+        const { data, error: updateError } = await supabase
+          .from('articles')
+          .update(payload)
+          .eq('id', article.id)
+          .select()
+          .single()
+
+        if (updateError) {
+          setError(updateError.message)
+          return
+        }
+        result = data as Record<string, unknown>
       } else {
-        result = await actions.articles.create(submitData)
+        const { data, error: insertError } = await supabase
+          .from('articles')
+          .insert({
+            ...payload,
+            slug: (payload.slug as string) || generateSlug(formData.title || 'untitled'),
+            user_id: session.session.user.id,
+          })
+          .select()
+          .single()
+
+        if (insertError) {
+          setError(insertError.message)
+          return
+        }
+        result = data as Record<string, unknown>
       }
 
-      if (result.error) {
-        setError(result.error.message)
-      } else {
-        onSuccess?.(result.data.article)
-        if (!onSuccess && onSuccessPath) {
-          await navigate(onSuccessPath)
-        }
+      onSuccess?.(result)
+      if (!onSuccess && onSuccessPath) {
+        await navigate(onSuccessPath)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -119,7 +143,6 @@ export default function ArticleForm({
       onCancel()
       return
     }
-
     if (onCancelPath) {
       await navigate(onCancelPath)
     }
@@ -133,7 +156,6 @@ export default function ArticleForm({
         </div>
       )}
 
-      {/* Title */}
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-foreground mb-2">
           Title *
@@ -150,7 +172,6 @@ export default function ArticleForm({
         />
       </div>
 
-      {/* Slug */}
       <div>
         <label htmlFor="slug" className="block text-sm font-medium text-foreground mb-2">
           Slug *
@@ -176,7 +197,6 @@ export default function ArticleForm({
         </p>
       </div>
 
-      {/* Project Link */}
       <div>
         <label htmlFor="project_id" className="block text-sm font-medium text-foreground mb-2">
           Linked Project (Optional)
@@ -200,7 +220,6 @@ export default function ArticleForm({
         </p>
       </div>
 
-      {/* Status */}
       <div>
         <label htmlFor="status" className="block text-sm font-medium text-foreground mb-2">
           Status
@@ -222,14 +241,11 @@ export default function ArticleForm({
         </select>
       </div>
 
-      {/* Actions */}
       <div className="flex items-center justify-end gap-4 pt-4 border-t border-border">
         {(onCancel || onCancelPath) && (
           <button
             type="button"
-            onClick={() => {
-              void handleCancel()
-            }}
+            onClick={() => { void handleCancel() }}
             className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
           >
             Cancel

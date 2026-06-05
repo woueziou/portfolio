@@ -1,0 +1,8 @@
+---
+import ArticleEditPage from '@/components/admin/ArticleEditPage'
+import AdminLayout from '@/layouts/AdminLayout.astro'
+---
+
+<AdminLayout title="Edit Article" activeItem="articles">
+  <ArticleEditPage client:load />
+</AdminLayout>

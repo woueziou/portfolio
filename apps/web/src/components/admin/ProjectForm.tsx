@@ -1,6 +1,4 @@
-import { actions } from 'astro:actions'
 import { navigate } from 'astro:transitions/client'
-
 import { format } from 'date-fns'
 import {
   ArrowLeft,
@@ -47,6 +45,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { generateSlug } from '@/lib/slug'
 import { cn } from '@/lib/utils'
+import { createSupabaseBrowserClient } from '@/lib/supabase/browser'
 
 interface ProjectFormProps {
   project?: {
@@ -107,7 +106,6 @@ interface ProjectFormData {
   slug: string
 }
 
-// Word count helper
 function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length
 }
@@ -149,7 +147,6 @@ export default function ProjectForm({
 
   const wordCount = countWords(formData.description)
 
-  // Auto-generate slug from title
   useEffect(() => {
     if (!slugManuallyEdited && formData.title) {
       setFormData((prev) => ({
@@ -167,21 +164,26 @@ export default function ProjectForm({
     setError(null)
 
     try {
-      const formData = new FormData()
-      formData.append('file', file)
+      const supabase = createSupabaseBrowserClient()
 
-      const { data, error: uploadError } = await actions.projects.uploadImage(formData)
+      const ext = file.name.split('.').pop()
+      const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
+
+      const { data, error: uploadError } = await supabase.storage
+        .from('content-images')
+        .upload(filename, file, { upsert: false })
 
       if (uploadError) {
         setError(uploadError.message)
-      } else if (data?.url) {
-        setFormData((prev) => ({ ...prev, main_image_url: data.url }))
+        return
       }
-    } catch (_err) {
+
+      const { data: urlData } = supabase.storage.from('content-images').getPublicUrl(data.path)
+      setFormData((prev) => ({ ...prev, main_image_url: urlData.publicUrl }))
+    } catch {
       setError('Failed to upload image')
     } finally {
       setUploadingImage(false)
-      // Reset so the same file can be re-selected
       if (e.target) e.target.value = ''
     }
   }, [])
@@ -239,13 +241,11 @@ export default function ProjectForm({
     e.preventDefault()
     setError(null)
 
-    // Validate tech_stack has at least one item
     if (formData.tech_stack.length === 0) {
       setError('Please add at least one technology to the tech stack')
       return
     }
 
-    // Validate type has at least one item
     if (formData.type.length === 0) {
       setError('Please select at least one project type')
       return
@@ -254,49 +254,96 @@ export default function ProjectForm({
     setLoading(true)
 
     try {
-      // biome-ignore lint/suspicious/noExplicitAny: server action return types are complex
-      let result: any
+      const supabase = createSupabaseBrowserClient()
 
-      const submitData = {
-        ...formData,
-        main_image_url: formData.main_image_url || undefined,
-        url: formData.url || undefined,
-        access_link: formData.access_link || undefined,
-        project_date: formData.project_date || undefined,
-        state: formData.state as 'ongoing' | 'finished' | 'production',
-        type: formData.type as ('web' | 'mobile' | 'desktop' | 'api' | 'library' | 'other')[],
+      const { data: session } = await supabase.auth.getSession()
+      if (!session.session) {
+        navigate('/admin/login')
+        return
       }
+
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        main_image_url: formData.main_image_url || null,
+        url: formData.url || null,
+        access_link: formData.access_link || null,
+        state: formData.state,
+        project_date: formData.project_date || null,
+        type: formData.type,
+        tech_stack: formData.tech_stack,
+        slug: formData.slug,
+      }
+
+      let savedProject: Record<string, unknown>
 
       if (isEditing && project) {
-        result = await actions.projects.update({
-          id: project.id,
-          ...submitData,
-        })
+        const { data, error: updateError } = await supabase
+          .from('projects')
+          .update(payload)
+          .eq('id', project.id)
+          .select()
+          .single()
+
+        if (updateError) {
+          setError(updateError.message)
+          return
+        }
+        savedProject = data as Record<string, unknown>
       } else {
-        result = await actions.projects.create(submitData)
+        const { data, error: insertError } = await supabase
+          .from('projects')
+          .insert({ ...payload, user_id: session.session.user.id, publication_status: 'draft' })
+          .select()
+          .single()
+
+        if (insertError) {
+          setError(insertError.message)
+          return
+        }
+        savedProject = data as Record<string, unknown>
       }
 
-      if (result.error) {
-        setError(result.error.message)
-      } else {
-        const savedProject = result.data.project
+      // Sync project_techstacks
+      const { data: matchingStacks } = await supabase
+        .from('techstacks')
+        .select('id')
+        .in('id', formData.tech_stack.map((t) => t.toLowerCase()))
 
-        // Handle publish/draft status separately
-        if (!asDraft) {
-          const publishResult = await actions.projects.publish({
-            id: savedProject.id,
-            publish: true,
+      if (matchingStacks && matchingStacks.length > 0) {
+        const techstackIds = matchingStacks.map((ts: { id: string }) => ts.id)
+
+        // Remove existing
+        await supabase.from('project_techstacks').delete().eq('project_id', savedProject.id)
+
+        // Insert new
+        await supabase.from('project_techstacks').insert(
+          techstackIds.map((techstackId: string) => ({
+            project_id: savedProject.id,
+            techstack_id: techstackId,
+          })),
+        )
+      }
+
+      // Handle publish status
+      if (!asDraft) {
+        await supabase
+          .from('projects')
+          .update({
+            publication_status: 'published',
+            published_at: new Date().toISOString(),
           })
-          if (publishResult.error) {
-            setError(publishResult.error.message)
-            return
-          }
-        }
+          .eq('id', savedProject.id)
+      } else {
+        await supabase
+          .from('projects')
+          .update({ publication_status: 'draft' })
+          .eq('id', savedProject.id)
+      }
 
-        onSuccess?.(savedProject)
-        if (!onSuccess && onSuccessPath) {
-          await navigate(onSuccessPath)
-        }
+      onSuccess?.(savedProject)
+      if (!onSuccess && onSuccessPath) {
+        await navigate(onSuccessPath)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -317,7 +364,6 @@ export default function ProjectForm({
 
   return (
     <div className="space-y-6">
-      {/* Top Actions */}
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={() => void handleCancel()}>
           <ArrowLeft className="h-4 w-4 mr-1.5" />
@@ -347,15 +393,12 @@ export default function ProjectForm({
       )}
 
       <form onSubmit={(e) => void handleSubmit(e)} className="space-y-8">
-        {/* Status & Date Section */}
         <section className="space-y-4">
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
             <FileText className="h-4 w-4" />
             Status & Schedule
           </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* State */}
             <div className="space-y-2">
               <Label htmlFor="state">Project State</Label>
               <Select
@@ -374,8 +417,6 @@ export default function ProjectForm({
                 </SelectContent>
               </Select>
             </div>
-
-            {/* Date Picker */}
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5">
                 <CalendarIcon className="h-3.5 w-3.5" />
@@ -416,14 +457,11 @@ export default function ProjectForm({
           </div>
         </section>
 
-        {/* Basic Info Section */}
         <section className="space-y-4">
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
             <Type className="h-4 w-4" />
             Basic Information
           </div>
-
-          {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
             <Input
@@ -437,8 +475,6 @@ export default function ProjectForm({
               className="border-0 bg-muted/50 text-lg font-medium"
             />
           </div>
-
-          {/* Slug */}
           <div className="space-y-2">
             <Label htmlFor="slug">Slug</Label>
             <div className="flex items-center gap-2">
@@ -458,8 +494,6 @@ export default function ProjectForm({
               />
             </div>
           </div>
-
-          {/* Description */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="description">Description</Label>
@@ -493,14 +527,11 @@ export default function ProjectForm({
           </div>
         </section>
 
-        {/* Media Section */}
         <section className="space-y-4">
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
             <ImageIcon className="h-4 w-4" />
             Media
           </div>
-
-          {/* Image Picker */}
           <div className="space-y-2">
             <Label>Cover Image</Label>
             <button
@@ -547,8 +578,6 @@ export default function ProjectForm({
               onChange={handleFileSelected}
             />
           </div>
-
-          {/* URLs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="url" className="flex items-center gap-1.5">
@@ -586,17 +615,13 @@ export default function ProjectForm({
           </div>
         </section>
 
-        {/* Classification Section */}
         <section className="space-y-4">
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
             <Tag className="h-4 w-4" />
             Classification
           </div>
-
-          {/* Project Type - Autocomplete Input */}
           <div className="space-y-2">
             <Label>Project Types</Label>
-            {/* Selected types */}
             {formData.type.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {formData.type.map((t) => {
@@ -616,7 +641,6 @@ export default function ProjectForm({
                 })}
               </div>
             )}
-            {/* Autocomplete input */}
             <Popover open={typePopoverOpen} onOpenChange={setTypePopoverOpen}>
               <PopoverTrigger asChild>
                 <div className="relative">
@@ -665,7 +689,6 @@ export default function ProjectForm({
             </Popover>
           </div>
 
-          {/* Tech Stack - Select Component */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label className="flex items-center gap-1.5">
@@ -711,7 +734,6 @@ export default function ProjectForm({
               </Sheet>
             </div>
 
-            {/* Selected techs */}
             {formData.tech_stack.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {formData.tech_stack.map((tech) => (
@@ -729,41 +751,17 @@ export default function ProjectForm({
               </div>
             )}
 
-            {/* Tech select */}
             <Select onValueChange={handleAddTech}>
               <SelectTrigger className="border-0 bg-muted/50">
                 <SelectValue placeholder="Select technologies..." />
               </SelectTrigger>
               <SelectContent>
-                {/* Show common tech options - in real app, fetch from server */}
                 {[
-                  'React',
-                  'Vue',
-                  'Angular',
-                  'Next.js',
-                  'Nuxt.js',
-                  'Svelte',
-                  'Node.js',
-                  'Express',
-                  'NestJS',
-                  'Python',
-                  'Django',
-                  'Flask',
-                  'TypeScript',
-                  'JavaScript',
-                  'Go',
-                  'Rust',
-                  'Java',
-                  'Spring',
-                  'PostgreSQL',
-                  'MongoDB',
-                  'Redis',
-                  'Docker',
-                  'Kubernetes',
-                  'AWS',
-                  'Tailwind CSS',
-                  'GraphQL',
-                  'REST API',
+                  'React', 'Vue', 'Angular', 'Next.js', 'Nuxt.js', 'Svelte',
+                  'Node.js', 'Express', 'NestJS', 'Python', 'Django', 'Flask',
+                  'TypeScript', 'JavaScript', 'Go', 'Rust', 'Java', 'Spring',
+                  'PostgreSQL', 'MongoDB', 'Redis', 'Docker', 'Kubernetes',
+                  'AWS', 'Tailwind CSS', 'GraphQL', 'REST API',
                 ]
                   .filter((tech) => !formData.tech_stack.includes(tech))
                   .map((tech) => (
@@ -776,7 +774,6 @@ export default function ProjectForm({
           </div>
         </section>
 
-        {/* Bottom Actions */}
         <div className="flex items-center justify-end gap-3 pt-4">
           <Button
             type="button"
@@ -794,7 +791,6 @@ export default function ProjectForm({
         </div>
       </form>
 
-      {/* Linked Articles Section */}
       {isEditing && project && (
         <section className="space-y-4">
           <div className="flex items-center justify-between">
@@ -815,7 +811,7 @@ export default function ProjectForm({
               {articles.map((article) => (
                 <a
                   key={article.id}
-                  href={`/admin/articles/${article.id}/edit`}
+                  href={`/admin/articles/edit?id=${article.id}`}
                   className="flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors group -mx-3"
                 >
                   <FileCode className="h-4 w-4 text-muted-foreground/60 shrink-0" />
@@ -851,7 +847,6 @@ export default function ProjectForm({
         </section>
       )}
 
-      {/* Invite to write article card for new projects */}
       {!isEditing && (
         <div className="bg-muted/50 p-6">
           <div className="flex items-start gap-4">

@@ -1,6 +1,4 @@
-import { actions } from 'astro:actions'
 import { useForm } from '@tanstack/react-form'
-
 import { useStore } from '@tanstack/react-store'
 import {
   Briefcase,
@@ -20,10 +18,7 @@ import { Form, FormControl, FormItem, FormLabel, FormMessage } from '@/component
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
-
-/* -------------------------------------------------------------------------- */
-/*  Zod schema (mirrors the server action schema)                             */
-/* -------------------------------------------------------------------------- */
+import { createSupabaseBrowserClient } from '@/lib/supabase/browser'
 
 const profileSchema = z.object({
   first_name: z.string().min(1, 'First name is required').max(100),
@@ -33,10 +28,6 @@ const profileSchema = z.object({
 })
 
 type ProfileFormValues = z.infer<typeof profileSchema>
-
-/* -------------------------------------------------------------------------- */
-/*  Props                                                                     */
-/* -------------------------------------------------------------------------- */
 
 interface ProfileFormProps {
   profile: {
@@ -52,15 +43,10 @@ interface ProfileFormProps {
   socialLinks: Record<string, string>
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Helpers                                                                   */
-/* -------------------------------------------------------------------------- */
-
 function extractUsername(url: string, prefix: string): string {
   return url.replace(prefix, '').replace(/\/$/, '') || ''
 }
 
-/** Run a Zod schema as a TanStack Form field validator */
 function zodValidator<T>(schema: z.ZodSchema<T>) {
   return ({ value }: { value: unknown }) => {
     const result = schema.safeParse(value)
@@ -69,7 +55,6 @@ function zodValidator<T>(schema: z.ZodSchema<T>) {
 }
 
 export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) {
-  // --------------- social-link state (not in profile table) ---------------
   const [githubUsername, setGithubUsername] = useState(
     extractUsername(socialLinks.github ?? '', 'https://github.com/'),
   )
@@ -82,7 +67,6 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
   )
   const [website, setWebsite] = useState(socialLinks.website ?? '')
 
-  // --------------- UI state ---------------
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [avatarError, setAvatarError] = useState<string | null>(null)
@@ -90,7 +74,6 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // --------------- TanStack Form ---------------
   const form = useForm({
     defaultValues: {
       first_name: profile.first_name ?? '',
@@ -102,43 +85,60 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
       setStatus(null)
 
       try {
-        // Build social links map
+        const supabase = createSupabaseBrowserClient()
+
         const newSocialLinks: Record<string, string> = {}
         if (githubUsername) newSocialLinks.github = `https://github.com/${githubUsername}`
         if (email) newSocialLinks.email = email
         if (mediumUsername) newSocialLinks.medium = `https://medium.com/@${mediumUsername}`
-        if (linkedinUsername)
-          newSocialLinks.linkedin = `https://www.linkedin.com/in/${linkedinUsername}`
+        if (linkedinUsername) newSocialLinks.linkedin = `https://www.linkedin.com/in/${linkedinUsername}`
         if (website) newSocialLinks.website = website
 
-        // Update profile (includes socials to keep both tables in sync)
-        const { error: profileError } = await actions.profiles.update({
-          first_name: value.first_name,
-          last_name: value.last_name,
-          title: value.title,
-          description: value.description,
-          socials: newSocialLinks,
-        })
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            first_name: value.first_name,
+            last_name: value.last_name,
+            title: value.title || '',
+            description: value.description || null,
+            socials: newSocialLinks,
+          })
+          .eq('id', profile.id)
 
         if (profileError) {
           setStatus({ type: 'error', message: profileError.message })
           return
         }
 
-        // Update social links in site_config
-        const { error: configError } = await actions.siteConfig.update({
-          social_links: newSocialLinks,
-        })
+        // Check if site_config row exists
+        const { data: existingConfig } = await supabase
+          .from('site_config')
+          .select('id')
+          .eq('id', 1)
+          .single()
 
-        if (configError) {
-          setStatus({ type: 'error', message: configError.message })
-          return
+        if (existingConfig) {
+          const { error: configError } = await supabase
+            .from('site_config')
+            .update({ social_links: newSocialLinks })
+            .eq('id', 1)
+
+          if (configError) {
+            setStatus({ type: 'error', message: configError.message })
+            return
+          }
+        } else {
+          const { error: insertError } = await supabase
+            .from('site_config')
+            .insert({ id: 1, site_title: 'Portfolio', social_links: newSocialLinks, seo_description: null, seo_og_image: null })
+
+          if (insertError) {
+            setStatus({ type: 'error', message: insertError.message })
+            return
+          }
         }
 
         setStatus({ type: 'success', message: 'Profile saved successfully!' })
-
-        // Refresh with latest data from server
-        await refreshData()
       } catch (err) {
         setStatus({
           type: 'error',
@@ -148,37 +148,6 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
     },
   })
 
-  // --------------- Refetch after save ---------------
-  const refreshData = async () => {
-    try {
-      const [profileResult, configResult] = await Promise.all([
-        actions.profiles.get(),
-        actions.siteConfig.get(),
-      ])
-
-      if (profileResult.data?.profile) {
-        const p = profileResult.data.profile
-        form.setFieldValue('first_name', p.first_name ?? '')
-        form.setFieldValue('last_name', p.last_name ?? '')
-        form.setFieldValue('title', p.title ?? '')
-        form.setFieldValue('description', p.description ?? '')
-        // avatar_url is managed independently — no form field to sync
-      }
-
-      if (configResult.data?.config?.social_links) {
-        const sl = configResult.data.config.social_links as Record<string, string>
-        setGithubUsername(extractUsername(sl.github ?? '', 'https://github.com/'))
-        setEmail(sl.email ?? '')
-        setMediumUsername(extractUsername(sl.medium ?? '', 'https://medium.com/@'))
-        setLinkedinUsername(extractUsername(sl.linkedin ?? '', 'https://www.linkedin.com/in/'))
-        setWebsite(sl.website ?? '')
-      }
-    } catch {
-      // silent — user can refresh manually
-    }
-  }
-
-  // --------------- Avatar upload ---------------
   const handleAvatarSelected = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -187,37 +156,40 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
     setAvatarError(null)
 
     try {
-      const fd = new FormData()
-      fd.append('file', file)
+      const supabase = createSupabaseBrowserClient()
 
-      // Uploads, cleans up old avatar, and persists URL to profile in one call
-      const { data, error: uploadError } = await actions.profiles.uploadAvatar(fd)
+      const ext = file.name.split('.').pop()
+      const filename = `avatars/${profile.id}/${Date.now()}.${ext}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filename, file, { upsert: true })
 
       if (uploadError) {
         setAvatarError(uploadError.message)
-      } else if (data?.url) {
-        setAvatarUrl(data.url)
+        return
       }
+
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filename)
+
+      // Persist URL to profile
+      await supabase.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('id', profile.id)
+
+      setAvatarUrl(urlData.publicUrl)
     } catch {
       setAvatarError('Failed to upload avatar')
     } finally {
       setUploadingAvatar(false)
-      // Reset so the same file can be re-selected
       if (e.target) e.target.value = ''
     }
-  }, [])
+  }, [profile.id])
 
-  // --------------- Reactive subscriptions ---------------
-  // biome-ignore lint/suspicious/noExplicitAny: TanStack store type is complex
   const formValues = useStore(form.store, (s: any) => s.values) as ProfileFormValues
   const firstName = formValues.first_name ?? ''
   const lastName = formValues.last_name ?? ''
 
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'U'
 
-  /* ================================================================ */
-  /*  Render                                                          */
-  /* ================================================================ */
   return (
     <Form
       onSubmit={(e) => {
@@ -226,17 +198,12 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
         void form.handleSubmit()
       }}
     >
-      {/* ======================================================== */}
-      {/* Avatar Section                                           */}
-      {/* ======================================================== */}
       <section className="space-y-4">
         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
           <User className="h-4 w-4" />
           Profile Photo
         </div>
-
         <div className="flex items-center gap-6">
-          {/* Avatar preview + upload trigger */}
           <button
             type="button"
             onClick={() => !uploadingAvatar && fileInputRef.current?.click()}
@@ -252,17 +219,13 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
             ) : (
               <span className="text-2xl font-bold text-muted-foreground">{initials}</span>
             )}
-            {/* Hover overlay */}
             <div className="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
               <Upload className="h-5 w-5 text-white" />
             </div>
           </button>
-
           <div>
             <p className="text-sm font-medium text-foreground">Change Photo</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Click the avatar to upload a new photo
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Click the avatar to upload a new photo</p>
             <p className="text-xs text-muted-foreground">JPG, PNG or WebP, max 5MB</p>
             {uploadingAvatar && <p className="text-xs text-muted-foreground mt-1">Uploading…</p>}
             {avatarError && <p className="text-xs text-destructive mt-1">{avatarError}</p>}
@@ -277,15 +240,11 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
         </div>
       </section>
 
-      {/* ======================================================== */}
-      {/* Personal Information                                     */}
-      {/* ======================================================== */}
       <section className="space-y-4">
         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
           <User className="h-4 w-4" />
           Personal Information
         </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <form.Field
             name="first_name"
@@ -293,9 +252,7 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
           >
             {(field) => (
               <FormItem>
-                <FormLabel htmlFor={field.name} required>
-                  First Name
-                </FormLabel>
+                <FormLabel htmlFor={field.name} required>First Name</FormLabel>
                 <FormControl>
                   <Input
                     id={field.name}
@@ -311,16 +268,13 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
               </FormItem>
             )}
           </form.Field>
-
           <form.Field
             name="last_name"
             validators={{ onChange: zodValidator(profileSchema.shape.last_name) }}
           >
             {(field) => (
               <FormItem>
-                <FormLabel htmlFor={field.name} required>
-                  Last Name
-                </FormLabel>
+                <FormLabel htmlFor={field.name} required>Last Name</FormLabel>
                 <FormControl>
                   <Input
                     id={field.name}
@@ -337,7 +291,6 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
             )}
           </form.Field>
         </div>
-
         <form.Field name="title" validators={{ onChange: zodValidator(profileSchema.shape.title) }}>
           {(field) => (
             <FormItem>
@@ -360,7 +313,6 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
             </FormItem>
           )}
         </form.Field>
-
         <form.Field
           name="description"
           validators={{ onChange: zodValidator(profileSchema.shape.description) }}
@@ -379,7 +331,7 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
                   rows={3}
-                  placeholder="From building my first Flutter app in 2019 to deploying AI-powered tools in 2026 — each project marks a step forward."
+                  placeholder="From building my first Flutter app in 2019 to deploying AI-powered tools in 2026..."
                   className="border-0 bg-muted/50 resize-none"
                 />
               </FormControl>
@@ -389,15 +341,11 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
         </form.Field>
       </section>
 
-      {/* ======================================================== */}
-      {/* Account                                                  */}
-      {/* ======================================================== */}
       <section className="space-y-4">
         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
           <Mail className="h-4 w-4" />
           Account
         </div>
-
         <FormItem>
           <FormLabel htmlFor="github" className="flex items-center gap-1.5">
             <GithubIcon className="h-3.5 w-3.5" />
@@ -416,7 +364,6 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
             </div>
           </FormControl>
         </FormItem>
-
         <FormItem>
           <FormLabel htmlFor="email" className="flex items-center gap-1.5">
             <Mail className="h-3.5 w-3.5" />
@@ -435,15 +382,11 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
         </FormItem>
       </section>
 
-      {/* ======================================================== */}
-      {/* Social Links                                             */}
-      {/* ======================================================== */}
       <section className="space-y-4">
         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
           <Link2 className="h-4 w-4" />
           Social Links
         </div>
-
         <div className="space-y-4">
           <FormItem>
             <FormLabel htmlFor="medium" className="flex items-center gap-1.5">
@@ -463,7 +406,6 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
               </div>
             </FormControl>
           </FormItem>
-
           <FormItem>
             <FormLabel htmlFor="linkedin" className="flex items-center gap-1.5">
               <Globe className="h-3.5 w-3.5" />
@@ -482,7 +424,6 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
               </div>
             </FormControl>
           </FormItem>
-
           <FormItem>
             <FormLabel htmlFor="website" className="flex items-center gap-1.5">
               <Globe className="h-3.5 w-3.5" />
@@ -502,12 +443,8 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
         </div>
       </section>
 
-      {/* ======================================================== */}
-      {/* Actions                                                  */}
-      {/* ======================================================== */}
       <div className="flex items-center gap-3">
         <form.Subscribe
-          // biome-ignore lint/suspicious/noExplicitAny: TanStack form subscribe state
           selector={(s: any) => ({
             isSubmitting: s.isSubmitting as boolean,
           })}
@@ -519,14 +456,8 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
             </Button>
           )}
         </form.Subscribe>
-
         {status && (
-          <span
-            className={cn(
-              'text-sm',
-              status.type === 'success' ? 'text-green-600' : 'text-destructive',
-            )}
-          >
+          <span className={cn('text-sm', status.type === 'success' ? 'text-green-600' : 'text-destructive')}>
             {status.message}
           </span>
         )}

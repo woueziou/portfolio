@@ -1,22 +1,15 @@
-import { actions } from 'astro:actions'
 import { useState } from 'react'
+import { createSupabaseBrowserClient } from '@/lib/supabase/browser'
 import type { PublicationStatus } from '@/lib/schemas/project'
 import StatusBadge from './StatusBadge'
 
 interface PublishDialogProps {
-  /** 'project' or 'article' — determines which action to call */
   type: 'project' | 'article'
-  /** Current item ID */
   id: number
-  /** Current publication status */
   currentStatus: PublicationStatus | string
-  /** Item title for display */
   title: string
-  /** Callback after successful status change */
   onStatusChange?: (newStatus: PublicationStatus) => void
-  /** Whether the dialog is open */
   isOpen: boolean
-  /** Callback to close the dialog */
   onClose: () => void
 }
 
@@ -145,15 +138,29 @@ export default function PublishDialog({
     setError(null)
 
     try {
+      const supabase = createSupabaseBrowserClient()
+
+      const now = new Date().toISOString()
       const shouldPublish = config.targetStatus === 'published'
 
-      const result =
-        type === 'project'
-          ? await actions.projects.publish({ id, publish: shouldPublish })
-          : await actions.articles.publish({ id, publish: shouldPublish })
+      const table = type === 'project' ? 'projects' : 'articles'
+      const statusField = type === 'project' ? 'publication_status' : 'status'
 
-      if (result.error) {
-        setError(result.error.message)
+      const { data: current } = await supabase
+        .from(table)
+        .select('published_at')
+        .eq('id', id)
+        .single()
+
+      const publishedAt = shouldPublish && !current?.published_at ? now : current?.published_at
+
+      const { error: updateError } = await supabase
+        .from(table)
+        .update({ [statusField]: config.targetStatus, published_at: publishedAt })
+        .eq('id', id)
+
+      if (updateError) {
+        setError(updateError.message)
       } else {
         onStatusChange?.(config.targetStatus)
         onClose()
@@ -169,33 +176,24 @@ export default function PublishDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      {/* biome-ignore lint/a11y/useKeyWithClickEvents: backdrop click handler */}
-      {/* biome-ignore lint/a11y/noStaticElementInteractions: overlay div */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-
-      {/* Dialog */}
       <div className="relative w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl">
-        {/* Header */}
         <div className="mb-4">
           <h2 className="text-lg font-semibold text-foreground">Publication Settings</h2>
           <p className="mt-1 text-sm text-muted-foreground truncate">{title}</p>
         </div>
 
-        {/* Current Status */}
         <div className="mb-6 flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Current status:</span>
           <StatusBadge status={currentStatus} size="md" />
         </div>
 
-        {/* Error */}
         {error && (
           <div className="mb-4 rounded-lg bg-destructive/10 border border-destructive/20 p-3">
             <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
 
-        {/* Actions */}
         <div className="space-y-3">
           {availableActions.map((action) => {
             const config = transitions[currentStatus as PublicationStatus]?.[action]
@@ -222,7 +220,6 @@ export default function PublishDialog({
           })}
         </div>
 
-        {/* Cancel */}
         <button
           type="button"
           onClick={onClose}

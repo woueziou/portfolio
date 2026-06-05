@@ -1,6 +1,6 @@
-import { actions } from 'astro:actions'
 import { Loader2, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { createSupabaseBrowserClient } from '@/lib/supabase/browser'
 import StatusBadge from '@/components/admin/StatusBadge'
 
 type ArticleStatus = 'draft' | 'published' | 'archived'
@@ -44,10 +44,7 @@ export default function PublishDrawer({
   const excerptLength = summary.length
   const isValidExcerpt = excerptLength <= 280
 
-  const canSubmit = useMemo(() => {
-    if (!isValidExcerpt) return false
-    return true
-  }, [isValidExcerpt])
+  const canSubmit = useMemo(() => isValidExcerpt, [isValidExcerpt])
 
   const saveMetadata = async () => {
     if (!canSubmit) return
@@ -56,25 +53,32 @@ export default function PublishDrawer({
     setError(null)
 
     try {
-      const result = await actions.articles.update({
-        id: articleId,
-        summary: summary.trim() || null,
-        image_url: imageUrl.trim() || null,
-        url: canonicalUrl.trim() || null,
-      })
+      const supabase = createSupabaseBrowserClient()
 
-      if (result.error) {
-        setError(result.error.message)
+      const { data, error: updateError } = await supabase
+        .from('articles')
+        .update({
+          summary: summary.trim() || null,
+          image_url: imageUrl.trim() || null,
+          url: canonicalUrl.trim() || null,
+        })
+        .eq('id', articleId)
+        .select()
+        .single()
+
+      if (updateError) {
+        setError(updateError.message)
         return
       }
 
+      const a = data as Record<string, unknown>
       onSaved({
-        status: result.data.article.status,
-        summary: result.data.article.summary,
-        image_url: result.data.article.image_url,
-        url: result.data.article.url,
-        updated_at: result.data.article.updated_at,
-        published_at: result.data.article.published_at,
+        status: a.status as ArticleStatus,
+        summary: a.summary as string | null,
+        image_url: a.image_url as string | null,
+        url: a.url as string | null,
+        updated_at: a.updated_at as string,
+        published_at: a.published_at as string | null,
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save metadata')
@@ -88,22 +92,46 @@ export default function PublishDrawer({
     setError(null)
 
     try {
-      const result = await actions.articles.publish({ id: articleId, publish })
+      const supabase = createSupabaseBrowserClient()
 
-      if (result.error) {
-        setError(result.error.message)
+      const now = new Date().toISOString()
+
+      const { data: current, error: fetchError } = await supabase
+        .from('articles')
+        .select('published_at')
+        .eq('id', articleId)
+        .single()
+
+      if (fetchError) {
+        setError(fetchError.message)
         return
       }
 
-      const nextStatus = result.data.article.status as ArticleStatus
+      const newStatus = publish ? 'published' : 'draft'
+      const publishedAt = publish && !current?.published_at ? now : current?.published_at
+
+      const { data, error: updateError } = await supabase
+        .from('articles')
+        .update({ status: newStatus, published_at: publishedAt })
+        .eq('id', articleId)
+        .select()
+        .single()
+
+      if (updateError) {
+        setError(updateError.message)
+        return
+      }
+
+      const a = data as Record<string, unknown>
+      const nextStatus = a.status as ArticleStatus
       setStatus(nextStatus)
       onSaved({
         status: nextStatus,
         summary,
         image_url: imageUrl || null,
         url: canonicalUrl || null,
-        updated_at: result.data.article.updated_at,
-        published_at: result.data.article.published_at,
+        updated_at: a.updated_at as string,
+        published_at: a.published_at as string | null,
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update publication status')
@@ -112,18 +140,14 @@ export default function PublishDrawer({
     }
   }
 
-  if (!isOpen) {
-    return null
-  }
+  if (!isOpen) return null
 
   return (
     <>
       <div
         className="fixed inset-0 z-40 bg-black/40"
         onClick={onClose}
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') onClose()
-        }}
+        onKeyDown={(e) => { if (e.key === 'Escape') onClose() }}
         role="presentation"
         aria-hidden="true"
       />
@@ -147,10 +171,7 @@ export default function PublishDrawer({
           </div>
 
           <div>
-            <label
-              htmlFor="article-excerpt"
-              className="mb-1 block text-sm font-medium text-foreground"
-            >
+            <label htmlFor="article-excerpt" className="mb-1 block text-sm font-medium text-foreground">
               Excerpt
             </label>
             <textarea
@@ -161,19 +182,13 @@ export default function PublishDrawer({
               className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20"
               placeholder="Short summary shown on article previews"
             />
-            <p
-              className={`mt-1 text-xs ${isValidExcerpt ? 'text-muted-foreground' : 'text-destructive'}`}
-              aria-live="polite"
-            >
+            <p className={`mt-1 text-xs ${isValidExcerpt ? 'text-muted-foreground' : 'text-destructive'}`} aria-live="polite">
               {excerptLength}/280
             </p>
           </div>
 
           <div>
-            <label
-              htmlFor="article-cover-url"
-              className="mb-1 block text-sm font-medium text-foreground"
-            >
+            <label htmlFor="article-cover-url" className="mb-1 block text-sm font-medium text-foreground">
               Cover image URL
             </label>
             <input
@@ -187,10 +202,7 @@ export default function PublishDrawer({
           </div>
 
           <div>
-            <label
-              htmlFor="article-canonical-url"
-              className="mb-1 block text-sm font-medium text-foreground"
-            >
+            <label htmlFor="article-canonical-url" className="mb-1 block text-sm font-medium text-foreground">
               Canonical URL
             </label>
             <input
@@ -213,9 +225,7 @@ export default function PublishDrawer({
             <button
               type="button"
               disabled={!canSubmit || savingMeta}
-              onClick={() => {
-                void saveMetadata()
-              }}
+              onClick={() => { void saveMetadata() }}
               className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {savingMeta && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -227,9 +237,7 @@ export default function PublishDrawer({
                 <button
                   type="button"
                   disabled={publishing}
-                  onClick={() => {
-                    void updateStatus(true)
-                  }}
+                  onClick={() => { void updateStatus(true) }}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {publishing && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -238,9 +246,7 @@ export default function PublishDrawer({
                 <button
                   type="button"
                   disabled={publishing}
-                  onClick={() => {
-                    void updateStatus(false)
-                  }}
+                  onClick={() => { void updateStatus(false) }}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Move to draft
@@ -250,9 +256,7 @@ export default function PublishDrawer({
               <button
                 type="button"
                 disabled={publishing || !canSubmit}
-                onClick={() => {
-                  void updateStatus(true)
-                }}
+                onClick={() => { void updateStatus(true) }}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {publishing && <Loader2 className="h-4 w-4 animate-spin" />}
