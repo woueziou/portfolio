@@ -10,20 +10,22 @@ import StarterKit from '@tiptap/starter-kit'
 import { common, createLowlight } from 'lowlight'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser'
-import FloatingToolbar from './FloatingToolbar'
+import { renderTiptapToHtml } from '@/lib/html-renderer'
+import BubbleMenuToolbar from './BubbleMenuToolbar'
 import SlashCommandMenu from './SlashCommandMenu'
 
 const lowlight = createLowlight(common)
 
+type SaveStatus = 'saved' | 'saving' | 'unsaved' | 'error'
+
 interface ArticleEditorProps {
-  articleId: number
+  articleId?: number
   initialContent?: JSONContent
   onContentChange?: (content: JSONContent) => void
   onSave?: (article: Record<string, unknown>) => void
   onSaveStateChange?: (status: SaveStatus) => void
+  onCreateArticle?: (content: JSONContent) => void
 }
-
-type SaveStatus = 'saved' | 'saving' | 'unsaved' | 'error'
 
 export default function ArticleEditor({
   articleId,
@@ -31,8 +33,9 @@ export default function ArticleEditor({
   onContentChange,
   onSave,
   onSaveStateChange,
+  onCreateArticle,
 }: ArticleEditorProps) {
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved')
+  const [, setSaveStatus] = useState<SaveStatus>('saved')
   const [showSlashMenu, setShowSlashMenu] = useState(false)
   const [slashMenuPosition, setSlashMenuPosition] = useState({ top: 0, left: 0 })
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -40,6 +43,7 @@ export default function ArticleEditor({
 
   const autoSave = useCallback(
     async (content: JSONContent) => {
+      if (!articleId) return
       const contentString = JSON.stringify(content)
       if (contentString === lastSavedContentRef.current) return
 
@@ -48,10 +52,10 @@ export default function ArticleEditor({
 
       try {
         const supabase = createSupabaseBrowserClient()
-
+        const contentHtml = renderTiptapToHtml(content as Parameters<typeof renderTiptapToHtml>[0])
         const { data, error } = await supabase
           .from('articles')
-          .update({ content })
+          .update({ content, content_html: contentHtml || null })
           .eq('id', articleId)
           .select()
           .single()
@@ -113,7 +117,7 @@ export default function ArticleEditor({
     content: initialContent || { type: 'doc', content: [{ type: 'paragraph', content: [] }] },
     editorProps: {
       attributes: {
-        class: 'prose prose-zinc dark:prose-invert max-w-none focus:outline-none min-h-[500px] px-4 py-2',
+        class: 'prose prose-zinc dark:prose-invert max-w-none focus:outline-none min-h-[70vh] px-0 py-4',
       },
       handleKeyDown: (view, event) => {
         if (event.key === '/' && !showSlashMenu) {
@@ -133,10 +137,13 @@ export default function ArticleEditor({
           setShowSlashMenu(false)
           return true
         }
-        const isMeta = event.metaKey || event.ctrlKey
-        if (isMeta && event.key.toLowerCase() === 's') {
+        if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
           event.preventDefault()
-          void autoSave(view.state.doc.toJSON())
+          if (articleId) {
+            void autoSave(view.state.doc.toJSON())
+          } else {
+            onCreateArticle?.(view.state.doc.toJSON())
+          }
           return true
         }
         return false
@@ -145,7 +152,9 @@ export default function ArticleEditor({
     onUpdate: ({ editor }) => {
       const content = editor.getJSON()
       onContentChange?.(content)
-      debouncedSave(content)
+      if (articleId) {
+        debouncedSave(content)
+      }
     },
   })
 
@@ -163,10 +172,8 @@ export default function ArticleEditor({
 
       try {
         const supabase = createSupabaseBrowserClient()
-
         const ext = file.name.split('.').pop()
         const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
-
         const { data, error: uploadError } = await supabase.storage
           .from('content-images')
           .upload(filename, file, { upsert: false })
@@ -177,7 +184,6 @@ export default function ArticleEditor({
         }
 
         const { data: urlData } = supabase.storage.from('content-images').getPublicUrl(data.path)
-
         editor.chain().focus().setImage({ src: urlData.publicUrl, alt: file.name }).run()
       } catch (err) {
         console.error('Image upload error:', err)
@@ -186,6 +192,7 @@ export default function ArticleEditor({
     [editor],
   )
 
+  // Paste handler for images
   useEffect(() => {
     if (!editor) return
 
@@ -206,6 +213,7 @@ export default function ArticleEditor({
     return () => editorElement.removeEventListener('paste', handlePaste)
   }, [editor, handleImageUpload])
 
+  // Drag & drop handler for images
   useEffect(() => {
     if (!editor) return
 
@@ -231,63 +239,26 @@ export default function ArticleEditor({
   }, [editor, handleImageUpload])
 
   if (!editor) {
-    return <div className="animate-pulse bg-muted rounded-lg h-[500px]" />
+    return <div className="animate-pulse h-[70vh] rounded-lg bg-muted/30" />
   }
 
   return (
     <div className="relative">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div
-            className={`h-2 w-2 rounded-full ${
-              saveStatus === 'saved' ? 'bg-green-500'
-                : saveStatus === 'saving' ? 'bg-yellow-500 animate-pulse'
-                  : saveStatus === 'unsaved' ? 'bg-orange-500'
-                    : 'bg-red-500'
-            }`}
-          />
-          <span className="text-sm text-muted-foreground">
-            {saveStatus === 'saved' ? 'All changes saved'
-              : saveStatus === 'saving' ? 'Saving...'
-                : saveStatus === 'unsaved' ? 'Unsaved changes'
-                  : 'Save failed'}
-          </span>
-        </div>
-        <button
-          type="button"
-          onClick={() => autoSave(editor.getJSON())}
-          disabled={saveStatus === 'saving' || saveStatus === 'saved'}
-          className="text-sm text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          Save now
-        </button>
-      </div>
+      {/* Bubble menu on text selection */}
+      <BubbleMenuToolbar editor={editor} onImageUpload={handleImageUpload} />
 
-      <div className="sticky top-20 z-30 bg-card border border-border rounded-lg p-2 mb-4">
-        <FloatingToolbar editor={editor} onImageUpload={handleImageUpload} />
-      </div>
+      {/* Slash command menu */}
+      {showSlashMenu && (
+        <SlashCommandMenu
+          editor={editor}
+          position={slashMenuPosition}
+          onClose={() => setShowSlashMenu(false)}
+          onImageUpload={handleImageUpload}
+        />
+      )}
 
-      <div className="relative border border-border rounded-lg bg-card min-h-[500px]">
-        <EditorContent editor={editor} />
-        {showSlashMenu && (
-          <SlashCommandMenu
-            editor={editor}
-            position={slashMenuPosition}
-            onClose={() => setShowSlashMenu(false)}
-            onImageUpload={handleImageUpload}
-          />
-        )}
-      </div>
-
-      <div className="mt-4 text-xs text-muted-foreground">
-        <p>
-          <strong>Shortcuts:</strong> <kbd className="px-1 py-0.5 bg-muted rounded">Ctrl+B</kbd> Bold ·{' '}
-          <kbd className="px-1 py-0.5 bg-muted rounded">Ctrl+I</kbd> Italic ·{' '}
-          <kbd className="px-1 py-0.5 bg-muted rounded">Ctrl+U</kbd> Underline ·{' '}
-          <kbd className="px-1 py-0.5 bg-muted rounded">Ctrl+K</kbd> Link · Type{' '}
-          <kbd className="px-1 py-0.5 bg-muted rounded">/</kbd> for commands
-        </p>
-      </div>
+      {/* Editor content — clean paper-like surface */}
+      <EditorContent editor={editor} />
     </div>
   )
 }

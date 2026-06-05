@@ -271,7 +271,7 @@ export default function SlashCommandMenu({
       label: 'Link',
       description: 'Add a hyperlink',
       action: () => {
-        // This will be handled by the FloatingToolbar
+        // Links are handled via the bubble menu on text selection
         onClose()
       },
     },
