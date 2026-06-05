@@ -160,7 +160,7 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex items-center gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -211,6 +211,15 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
             ))}
           </SelectContent>
         </Select>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/admin/projects/new')}
+          className="shrink-0"
+        >
+          <Plus className="h-4 w-4 mr-1" />
+          Add
+        </Button>
       </div>
 
       {loading && (

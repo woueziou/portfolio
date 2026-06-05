@@ -7,6 +7,6 @@
     "typecheck": "bunx tsc --noEmit"
   },
   "dependencies": {
-    "@supabase/supabase-js": "latest"
+    "@supabase/supabase-js": "^2.49.4"
   }
 }

@@ -57,12 +57,13 @@ const tabIcons: Record<string, string> = {
       </div>
 
       <nav class="border-t border-border/40" aria-label="Admin navigation">
-        <div class="max-w-5xl mx-auto flex justify-center px-4 sm:px-6 gap-1 overflow-x-auto">
+        <div id="admin-tabs" class="max-w-5xl mx-auto flex justify-center px-4 sm:px-6 gap-1 overflow-x-auto">
           {tabItems.map((item) => (
             <a
               href={item.href}
+              data-tab-key={item.key}
+              class="admin-tab flex items-center gap-1.5 px-3 sm:px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
               class:list={[
-                'flex items-center gap-1.5 px-3 sm:px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
                 activeItem === item.key
                   ? 'border-foreground text-foreground'
                   : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border/60',
@@ -75,6 +76,38 @@ const tabIcons: Record<string, string> = {
           ))}
         </div>
       </nav>
+
+      <script>
+        function updateActiveTab() {
+          const path = window.location.pathname
+          const tabs = document.querySelectorAll('.admin-tab')
+          let found = false
+
+          tabs.forEach((tab) => {
+            const href = tab.getAttribute('href') || ''
+            const isActive = path === href || (path.startsWith(href) && (path.length === href.length || path[href.length] === '/'))
+
+            if (isActive) {
+              tab.classList.remove('border-transparent', 'text-muted-foreground')
+              tab.classList.add('border-foreground', 'text-foreground')
+              tab.setAttribute('aria-current', 'page')
+              found = true
+            } else {
+              tab.classList.remove('border-foreground', 'text-foreground')
+              tab.classList.add('border-transparent', 'text-muted-foreground')
+              tab.removeAttribute('aria-current')
+            }
+          })
+        }
+
+        document.addEventListener('astro:after-swap', updateActiveTab)
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', updateActiveTab)
+        } else {
+          updateActiveTab()
+        }
+      </script>
     </header>
 
     <main class="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">

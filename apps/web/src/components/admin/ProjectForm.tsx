@@ -14,6 +14,7 @@ import {
   PenLine,
   Plus,
   Save,
+  Search,
   Send,
   Tag,
   Type,
@@ -24,6 +25,14 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -73,25 +82,29 @@ interface ProjectFormProps {
   onCancelPath?: string
 }
 
-const PROJECT_TYPES = [
-  { value: 'web', label: 'Web' },
-  { value: 'mobile', label: 'Mobile' },
-  { value: 'script', label: 'Script' },
-  { value: 'backend', label: 'Backend' },
-  { value: 'infra', label: 'Infrastructure' },
-  { value: 'llm', label: 'LLM' },
-  { value: 'ai', label: 'AI' },
-  { value: 'desktop', label: 'Desktop' },
-  { value: 'api', label: 'API' },
-  { value: 'library', label: 'Library' },
-  { value: 'other', label: 'Other' },
-]
+interface ProjectTypeItem {
+  value: string
+  label: string | null
+}
+
+// Known PG enum values — anything outside this set is a custom type
+const PRESET_ENUM_VALUES = new Set([
+  'web', 'mobile', 'script', 'backend', 'infra',
+  'llm', 'ai', 'desktop', 'api', 'library', 'other',
+])
 
 const PROJECT_STATES = [
   { value: 'ongoing', label: 'Ongoing' },
   { value: 'finished', label: 'Finished' },
   { value: 'production', label: 'Production' },
 ]
+
+interface TechStackItem {
+  id: string
+  name: string
+  icon: string
+  description: string | null
+}
 
 interface ProjectFormData {
   title: string
@@ -137,15 +150,51 @@ export default function ProjectForm({
   const [uploadingImage, setUploadingImage] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(!!project?.slug)
+
+  // ——— Type (classification) state ———
+  const [projectTypes, setProjectTypes] = useState<ProjectTypeItem[]>([])
   const [typeSearch, setTypeSearch] = useState('')
   const [typePopoverOpen, setTypePopoverOpen] = useState(false)
+  const [newTypeName, setNewTypeName] = useState('')
+  const [newTypeDrawerOpen, setNewTypeDrawerOpen] = useState(false)
+
+  // ——— Tech stack state ———
+  const [techStacks, setTechStacks] = useState<TechStackItem[]>([])
+  const [techSearch, setTechSearch] = useState('')
+  const [techPopoverOpen, setTechPopoverOpen] = useState(false)
   const [newTechName, setNewTechName] = useState('')
-  const [drawerOpened, setDrawerOpened] = useState(false)
-  const closeDrawer = () => setDrawerOpened(false)
+  const [newTechDrawerOpen, setNewTechDrawerOpen] = useState(false)
+
+  const closeDrawer = () => setNewTechDrawerOpen(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [datePickerOpen, setDatePickerOpen] = useState(false)
 
   const wordCount = countWords(formData.description)
+
+  // —— Fetch project types from DB view + tech stacks from server ———
+  useEffect(() => {
+    async function init() {
+      const supabase = createSupabaseBrowserClient()
+
+      // Fetch project types from the database view
+      const { data: typeData } = await supabase
+        .from('project_types_view')
+        .select('value, label')
+      if (typeData) {
+        setProjectTypes(typeData as ProjectTypeItem[])
+      }
+
+      // Fetch tech stacks
+      const { data: techData } = await supabase
+        .from('techstacks')
+        .select('id, name, icon, description')
+        .order('name', { ascending: true })
+      if (techData) {
+        setTechStacks(techData as TechStackItem[])
+      }
+    }
+    init()
+  }, [])
 
   useEffect(() => {
     if (!slugManuallyEdited && formData.title) {
@@ -188,6 +237,7 @@ export default function ProjectForm({
     }
   }, [])
 
+  // ——— Type handlers ———
   const handleTypeToggle = useCallback((type: string) => {
     setFormData((prev) => ({
       ...prev,
@@ -204,13 +254,49 @@ export default function ProjectForm({
     }))
   }, [])
 
+  const handleCreateType = useCallback(() => {
+    const trimmed = newTypeName.trim()
+    if (!trimmed) return
+
+    // Determine the value to store: if it matches a known enum use it, otherwise "other"
+    const matched = projectTypes.find(
+      (t) =>
+        (t.label && t.label.toLowerCase() === trimmed.toLowerCase()) ||
+        t.value.toLowerCase() === trimmed.toLowerCase(),
+    )
+    const valueToStore = matched ? matched.value : 'other'
+
+    setFormData((prev) => ({
+      ...prev,
+      type: prev.type.includes(valueToStore) ? prev.type : [...prev.type, valueToStore],
+    }))
+    setNewTypeName('')
+    setNewTypeDrawerOpen(false)
+  }, [newTypeName, projectTypes])
+
+  const filteredTypes = projectTypes.filter(
+    (t) =>
+      t.label &&
+      !formData.type.includes(t.value) &&
+      t.label.toLowerCase().includes(typeSearch.toLowerCase()),
+  )
+
+  // Whether the current search text is a custom type (not in the predefined list)
+  const isCustomType =
+    typeSearch.trim().length > 0 &&
+    !projectTypes.some(
+      (t) =>
+        (t.label && t.label.toLowerCase() === typeSearch.trim().toLowerCase()) ||
+        t.value.toLowerCase() === typeSearch.trim().toLowerCase(),
+    )
+
+  // ——— Tech stack handlers ———
   const handleAddTech = useCallback(
-    (tech: string) => {
-      const trimmed = tech.trim()
-      if (trimmed && !formData.tech_stack.includes(trimmed)) {
+    (techId: string) => {
+      if (techId && !formData.tech_stack.includes(techId)) {
         setFormData((prev) => ({
           ...prev,
-          tech_stack: [...prev.tech_stack, trimmed],
+          tech_stack: [...prev.tech_stack, techId],
         }))
       }
     },
@@ -224,17 +310,75 @@ export default function ProjectForm({
     }))
   }, [])
 
-  const handleCreateTech = useCallback(() => {
-    if (newTechName.trim()) {
-      handleAddTech(newTechName.trim())
-      setNewTechName('')
-      closeDrawer()
+  const handleCreateTech = useCallback(async () => {
+    const trimmed = newTechName.trim()
+    if (!trimmed) {
+      setError('Technology name is required')
+      return
     }
-  }, [newTechName, handleAddTech, closeDrawer])
 
-  const filteredTypes = PROJECT_TYPES.filter(
-    (t) =>
-      !formData.type.includes(t.value) && t.label.toLowerCase().includes(typeSearch.toLowerCase()),
+    const supabase = createSupabaseBrowserClient()
+    const id = trimmed.toLowerCase().replace(/\s+/g, '-')
+
+    // Check for duplicates
+    if (techStacks.some((ts) => ts.id === id || ts.name.toLowerCase() === trimmed.toLowerCase())) {
+      setError(`"${trimmed}" already exists in the tech stack list`)
+      return
+    }
+
+    // Insert into techstacks table
+    const { error: insertError } = await supabase.from('techstacks').insert({
+      id,
+      name: trimmed,
+      icon: '',
+      description: null,
+    })
+
+    if (insertError) {
+      setError(insertError.message)
+      return
+    }
+
+    // Add to local form state
+    handleAddTech(id)
+    setNewTechName('')
+    setError(null)
+    closeDrawer()
+
+    // Refetch tech stacks to update the list
+    const { data } = await supabase
+      .from('techstacks')
+      .select('id, name, icon, description')
+      .order('name', { ascending: true })
+    if (data) {
+      setTechStacks(data as TechStackItem[])
+    }
+  }, [newTechName, techStacks, handleAddTech, closeDrawer])
+
+  // Filter tech stacks by search
+  const filteredTechStacks = techStacks.filter(
+    (ts) =>
+      !formData.tech_stack.includes(ts.id) &&
+      (ts.name.toLowerCase().includes(techSearch.toLowerCase()) ||
+        ts.id.toLowerCase().includes(techSearch.toLowerCase())),
+  )
+
+  // Get display name for a tech id
+  const getTechName = useCallback(
+    (id: string) => {
+      const match = techStacks.find((ts) => ts.id === id)
+      return match?.name || id
+    },
+    [techStacks],
+  )
+
+  // Get display label for a type value
+  const getTypeLabel = useCallback(
+    (value: string) => {
+      const match = projectTypes.find((t) => t.value === value)
+      return match?.label || value
+    },
+    [projectTypes],
   )
 
   const handleSubmit = async (e: React.FormEvent, asDraft = false) => {
@@ -262,6 +406,9 @@ export default function ProjectForm({
         return
       }
 
+      // Map custom types (non-enum) to "other" for DB persistence
+      const dbTypes = formData.type.map((t) => (PRESET_ENUM_VALUES.has(t) ? t : 'other'))
+
       const payload = {
         title: formData.title,
         description: formData.description,
@@ -270,7 +417,7 @@ export default function ProjectForm({
         access_link: formData.access_link || null,
         state: formData.state,
         project_date: formData.project_date || null,
-        type: formData.type,
+        type: dbTypes,
         tech_stack: formData.tech_stack,
         slug: formData.slug,
       }
@@ -573,7 +720,7 @@ export default function ProjectForm({
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
+              accept="image/jpeg,image/png,image/gif,image/webp,image/heif,image/heic"
               hidden
               onChange={handleFileSelected}
             />
@@ -621,14 +768,66 @@ export default function ProjectForm({
             Classification
           </div>
           <div className="space-y-2">
-            <Label>Project Types</Label>
+            <div className="flex items-center justify-between">
+              <Label>Project Types</Label>
+              <Sheet open={newTypeDrawerOpen} onOpenChange={setNewTypeDrawerOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-7 text-xs">
+                    <Plus className="h-3 w-3 mr-1" />
+                    Create New
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="sm:max-w-md">
+                  <SheetHeader className="px-6 pt-6 pb-2">
+                    <SheetTitle>Create Project Type</SheetTitle>
+                    <SheetDescription>
+                      Add a new project classification to categorize your work.
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="px-6 space-y-5 pb-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="new-type">Type Name</Label>
+                      <Input
+                        id="new-type"
+                        value={newTypeName}
+                        onChange={(e) => setNewTypeName(e.target.value)}
+                        placeholder="e.g., CLI, Game, Blockchain..."
+                        className="border-0 bg-muted/50"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault()
+                            handleCreateType()
+                          }
+                        }}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Custom types are mapped to &quot;Other&quot; in the database but displayed
+                        with their original name in the form.
+                      </p>
+                    </div>
+                    <Button onClick={handleCreateType} className="w-full">
+                      <Plus className="h-4 w-4 mr-1.5" />
+                      Add Type
+                    </Button>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
             {formData.type.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {formData.type.map((t) => {
-                  const type = PROJECT_TYPES.find((pt) => pt.value === t)
+                  const isEnum = PRESET_ENUM_VALUES.has(t)
+                  const label = isEnum ? getTypeLabel(t) : t
                   return (
-                    <Badge key={t} variant="secondary" className="gap-1 pr-1 font-normal">
-                      {type?.label || t}
+                    <Badge
+                      key={t}
+                      variant={isEnum ? 'secondary' : 'outline'}
+                      className={cn('gap-1 pr-1 font-normal', !isEnum && 'border-dashed')}
+                    >
+                      {label}
+                      {!isEnum && (
+                        <span className="text-[10px] text-muted-foreground ml-0.5">(custom)</span>
+                      )}
                       <button
                         type="button"
                         onClick={() => handleRemoveType(t)}
@@ -664,25 +863,37 @@ export default function ProjectForm({
                 onOpenAutoFocus={(e) => e.preventDefault()}
               >
                 <div className="max-h-60 overflow-auto">
-                  {filteredTypes.length === 0 ? (
+                  {filteredTypes.length === 0 && !isCustomType ? (
                     <div className="px-3 py-2 text-sm text-muted-foreground">No types found</div>
                   ) : (
-                    filteredTypes.map((type) => (
-                      <button
-                        key={type.value}
-                        type="button"
-                        onClick={() => handleTypeToggle(type.value)}
-                        className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors"
-                      >
-                        <Check
-                          className={cn(
-                            'mr-2 h-4 w-4',
-                            formData.type.includes(type.value) ? 'opacity-100' : 'opacity-0',
-                          )}
-                        />
-                        {type.label}
-                      </button>
-                    ))
+                    <>
+                      {filteredTypes.map((type) => (
+                        <button
+                          key={type.value}
+                          type="button"
+                          onClick={() => handleTypeToggle(type.value)}
+                          className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors"
+                        >
+                          <Check
+                            className={cn(
+                              'mr-2 h-4 w-4',
+                              formData.type.includes(type.value) ? 'opacity-100' : 'opacity-0',
+                            )}
+                          />
+                          {type.label}
+                        </button>
+                      ))}
+                      {isCustomType && (
+                        <button
+                          type="button"
+                          onClick={() => handleTypeToggle(typeSearch.trim())}
+                          className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted/50 transition-colors border-t border-border"
+                        >
+                          <Plus className="mr-2 h-4 w-4" />
+                          Add &quot;{typeSearch.trim()}&quot; as custom type
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               </PopoverContent>
@@ -695,21 +906,22 @@ export default function ProjectForm({
                 <Layers className="h-3.5 w-3.5" />
                 Tech Stack
               </Label>
-              <Sheet open={drawerOpened} onOpenChange={setDrawerOpened}>
+              <Sheet open={newTechDrawerOpen} onOpenChange={setNewTechDrawerOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="sm" className="h-7 text-xs">
                     <Plus className="h-3 w-3 mr-1" />
                     Create New
                   </Button>
                 </SheetTrigger>
-                <SheetContent>
-                  <SheetHeader>
+                <SheetContent side="right" className="sm:max-w-md">
+                  <SheetHeader className="px-6 pt-6 pb-2">
                     <SheetTitle>Create Tech Stack</SheetTitle>
                     <SheetDescription>
-                      Add a new technology to your tech stack list.
+                      Add a new technology to your tech stack list. It will be saved to the server
+                      and available for all projects.
                     </SheetDescription>
                   </SheetHeader>
-                  <div className="mt-6 space-y-4">
+                  <div className="px-6 space-y-5 pb-6">
                     <div className="space-y-2">
                       <Label htmlFor="new-tech">Technology Name</Label>
                       <Input
@@ -721,12 +933,13 @@ export default function ProjectForm({
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             e.preventDefault()
-                            handleCreateTech()
+                            void handleCreateTech()
                           }
                         }}
                       />
                     </div>
-                    <Button onClick={handleCreateTech} className="w-full">
+                    <Button onClick={() => void handleCreateTech()} className="w-full">
+                      <Plus className="h-4 w-4 mr-1.5" />
                       Create & Add
                     </Button>
                   </div>
@@ -736,12 +949,12 @@ export default function ProjectForm({
 
             {formData.tech_stack.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-2">
-                {formData.tech_stack.map((tech) => (
-                  <Badge key={tech} variant="outline" className="gap-1 pr-1 font-normal">
-                    {tech}
+                {formData.tech_stack.map((techId) => (
+                  <Badge key={techId} variant="outline" className="gap-1 pr-1 font-normal">
+                    {getTechName(techId)}
                     <button
                       type="button"
-                      onClick={() => handleRemoveTech(tech)}
+                      onClick={() => handleRemoveTech(techId)}
                       className="ml-0.5 hover:text-destructive transition-colors"
                     >
                       <X className="h-3 w-3" />
@@ -751,26 +964,73 @@ export default function ProjectForm({
               </div>
             )}
 
-            <Select onValueChange={handleAddTech}>
-              <SelectTrigger className="border-0 bg-muted/50">
-                <SelectValue placeholder="Select technologies..." />
-              </SelectTrigger>
-              <SelectContent>
-                {[
-                  'React', 'Vue', 'Angular', 'Next.js', 'Nuxt.js', 'Svelte',
-                  'Node.js', 'Express', 'NestJS', 'Python', 'Django', 'Flask',
-                  'TypeScript', 'JavaScript', 'Go', 'Rust', 'Java', 'Spring',
-                  'PostgreSQL', 'MongoDB', 'Redis', 'Docker', 'Kubernetes',
-                  'AWS', 'Tailwind CSS', 'GraphQL', 'REST API',
-                ]
-                  .filter((tech) => !formData.tech_stack.includes(tech))
-                  .map((tech) => (
-                    <SelectItem key={tech} value={tech}>
-                      {tech}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
+            <Popover open={techPopoverOpen} onOpenChange={setTechPopoverOpen}>
+              <PopoverTrigger asChild>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    type="text"
+                    value={techSearch}
+                    onChange={(e) => {
+                      setTechSearch(e.target.value)
+                      if (!techPopoverOpen) setTechPopoverOpen(true)
+                    }}
+                    onFocus={() => setTechPopoverOpen(true)}
+                    placeholder="Search technologies..."
+                    className="border-0 bg-muted/50 pl-9"
+                  />
+                </div>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-[var(--radix-popover-trigger-width)] p-0"
+                align="start"
+                onOpenAutoFocus={(e) => e.preventDefault()}
+              >
+                <Command>
+                  <CommandInput
+                    placeholder="Search technologies..."
+                    value={techSearch}
+                    onValueChange={setTechSearch}
+                    className="border-0"
+                  />
+                  <CommandList>
+                    <CommandEmpty>
+                      {techSearch.trim() ? (
+                        <div className="py-4 text-center text-sm text-muted-foreground">
+                          No technology found. Use the &quot;Create New&quot; button to add it.
+                        </div>
+                      ) : (
+                        <div className="py-4 text-center text-sm text-muted-foreground">
+                          Type to search technologies
+                        </div>
+                      )}
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {filteredTechStacks.length > 0 &&
+                        filteredTechStacks.map((ts) => (
+                          <CommandItem
+                            key={ts.id}
+                            value={ts.id}
+                            onSelect={() => {
+                              handleAddTech(ts.id)
+                              setTechSearch('')
+                              setTechPopoverOpen(false)
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                'mr-2 h-4 w-4',
+                                formData.tech_stack.includes(ts.id) ? 'opacity-100' : 'opacity-0',
+                              )}
+                            />
+                            <span>{ts.name}</span>
+                          </CommandItem>
+                        ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </section>
 

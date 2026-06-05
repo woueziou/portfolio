@@ -22,7 +22,5 @@
     "turbo": "^2.9.16",
     "vitest": "^4.1.8"
   },
-  "dependencies": {
-    "@tiptap/extension-bubble-menu": "^3.25.0"
-  }
+  "dependencies": {}
 }

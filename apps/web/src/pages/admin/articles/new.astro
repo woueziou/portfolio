@@ -1,23 +1,25 @@
 ---
-import ArticleForm from '@/components/admin/ArticleForm'
+import ArticleEditorIsland from '@/components/admin/editor/ArticleEditorIsland'
 import AdminLayout from '@/layouts/AdminLayout.astro'
 ---
 
 <AdminLayout title="New Article" activeItem="articles">
   <div class="space-y-6">
-    <div>
-      <h1 class="text-2xl font-bold text-foreground">Create New Article</h1>
-      <p class="mt-1 text-sm text-muted-foreground">
-        Write and publish a new article
-      </p>
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-semibold text-foreground">New Article</h1>
+        <p class="mt-0.5 text-sm text-muted-foreground">
+          Start writing — save to set a title and slug
+        </p>
+      </div>
+      <a
+        href="/admin/articles"
+        class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
+      >
+        Back to Articles
+      </a>
     </div>
 
-    <div class="rounded-xl border border-border bg-card p-6">
-      <ArticleForm
-        client:load
-        onSuccessPath="/admin/articles"
-        onCancelPath="/admin/articles"
-      />
-    </div>
+    <ArticleEditorIsland client:load />
   </div>
 </AdminLayout>

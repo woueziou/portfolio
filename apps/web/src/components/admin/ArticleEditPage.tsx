@@ -89,54 +89,24 @@ export default function ArticleEditPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-6">
-        <EditorShell
-          article={{
-            id: a.id,
-            title: a.title,
-            slug: a.slug,
-            status: a.status,
-            published_at: a.published_at,
-            updated_at: a.updated_at,
-            content: a.content,
-            summary: a.summary,
-            image_url: a.image_url,
-            url: a.url,
-          }}
-        />
-      </div>
-
-      <div className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Article Info</h2>
-        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <dt className="text-sm text-muted-foreground">Created</dt>
-            <dd className="text-sm text-foreground">{new Date(a.created_at).toLocaleString()}</dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted-foreground">Last Updated</dt>
-            <dd className="text-sm text-foreground">{new Date(a.updated_at).toLocaleString()}</dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted-foreground">Published At</dt>
-            <dd className="text-sm text-foreground">
-              {a.published_at ? new Date(a.published_at).toLocaleString() : 'Not published'}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted-foreground">Reading Time</dt>
-            <dd className="text-sm text-foreground">
-              {a.reading_time_minutes ? `${a.reading_time_minutes} min` : '—'}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted-foreground">Linked Project</dt>
-            <dd className="text-sm text-foreground">
-              {a.project_id ? (projects.find(p => p.id === a.project_id)?.title || '—') : 'Standalone'}
-            </dd>
-          </div>
-        </dl>
-      </div>
+      <EditorShell
+        article={{
+          id: a.id,
+          title: a.title,
+          slug: a.slug,
+          status: a.status,
+          published_at: a.published_at,
+          updated_at: a.updated_at,
+          content: a.content,
+          summary: a.summary,
+          image_url: a.image_url,
+          url: a.url,
+          created_at: a.created_at,
+          reading_time_minutes: a.reading_time_minutes,
+          project_id: a.project_id,
+        }}
+        projects={projects}
+      />
     </div>
   )
 }

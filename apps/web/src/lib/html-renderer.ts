@@ -76,16 +76,23 @@ function renderNode(node: TipTapNode): string {
   // Container node
   const children = node.content?.map(renderNode).join('') || ''
 
+  // Build style attribute from known node attrs
+  const styles: string[] = []
+  if (node.attrs?.textAlign && node.attrs.textAlign !== 'left') {
+    styles.push(`text-align:${node.attrs.textAlign}`)
+  }
+  const styleAttr = styles.length > 0 ? ` style="${styles.join(';')}"` : ''
+
   switch (node.type) {
     case 'doc':
       return children
 
     case 'paragraph':
-      return `<p>${children}</p>`
+      return `<p${styleAttr}>${children}</p>`
 
     case 'heading': {
       const level = node.attrs?.level || 2
-      return `<h${level}>${children}</h${level}>`
+      return `<h${level}${styleAttr}>${children}</h${level}>`
     }
 
     case 'bulletList':
