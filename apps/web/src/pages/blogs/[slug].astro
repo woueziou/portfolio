@@ -65,7 +65,7 @@ const jsonLdArticle = {
     <nav class="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
       <div class="container mx-auto px-4 py-3 flex items-center">
         <a href="/blogs" class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft class="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" />
           Back to Blogs
         </a>
       </div>
@@ -77,13 +77,13 @@ const jsonLdArticle = {
         <div class="flex items-center gap-4 text-sm text-muted-foreground">
           {article.published_at && (
             <span class="flex items-center gap-1.5">
-              <Calendar class="h-4 w-4" />
+              <Calendar className="h-4 w-4" />
               {formatDate(article.published_at, 'MMMM D, YYYY')}
             </span>
           )}
           {article.reading_time_minutes && (
             <span class="flex items-center gap-1.5">
-              <Clock class="h-4 w-4" />
+              <Clock className="h-4 w-4" />
               {article.reading_time_minutes} min read
             </span>
           )}

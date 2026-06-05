@@ -117,13 +117,13 @@ const jsonLdProject = {
     <nav class="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
       <div class="container mx-auto px-4 py-3 flex items-center justify-between">
         <a href="/" class="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft class="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" />
           Back to Portfolio
         </a>
         {typedProject.url && (
           <a href={typedProject.url} target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline underline-offset-4">
             View Live
-            <ExternalLink class="h-3.5 w-3.5" />
+            <ExternalLink className="h-3.5 w-3.5" />
           </a>
         )}
       </div>
@@ -139,7 +139,7 @@ const jsonLdProject = {
         <div class="flex flex-wrap items-center gap-3 mb-4 text-sm text-muted-foreground">
           {typedProject.project_date && (
             <span class="flex items-center gap-1.5">
-              <Calendar class="h-4 w-4" />
+              <Calendar className="h-4 w-4" />
               {formatDate(typedProject.project_date, 'MMMM YYYY')}
             </span>
           )}
@@ -162,7 +162,7 @@ const jsonLdProject = {
           <div class="mt-6">
             <a href={typedProject.access_link} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium">
               Access Project
-              <ExternalLink class="h-4 w-4" />
+              <ExternalLink className="h-4 w-4" />
             </a>
           </div>
         )}
@@ -179,13 +179,13 @@ const jsonLdProject = {
                   <div class="flex items-center gap-4 text-sm text-muted-foreground">
                     {article.published_at && (
                       <span class="flex items-center gap-1.5">
-                        <Calendar class="h-3.5 w-3.5" />
+                        <Calendar className="h-3.5 w-3.5" />
                         {formatDate(article.published_at, 'MMMM D, YYYY')}
                       </span>
                     )}
                     {article.reading_time_minutes && (
                       <span class="flex items-center gap-1.5">
-                        <Clock class="h-3.5 w-3.5" />
+                        <Clock className="h-3.5 w-3.5" />
                         {article.reading_time_minutes} min read
                       </span>
                     )}
