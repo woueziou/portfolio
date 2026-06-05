@@ -1,36 +1,17 @@
 ---
-import { Plus } from 'lucide-react'
 import { ProjectList } from '@/components/admin/ProjectList'
-import { Button } from '@/components/ui/button'
 import AdminLayout from '@/layouts/AdminLayout.astro'
 ---
 
 <AdminLayout title="Projects" activeItem="projects">
   <div class="space-y-6">
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-xl font-semibold text-foreground">Projects</h1>
-        <p class="mt-0.5 text-sm text-muted-foreground">
-          Manage your portfolio projects
-        </p>
-      </div>
-      <Button id="new-project-btn" variant="ghost">
-        <span class="flex items-center">
-          <Plus class="h-4 w-4" />
-          <span>Add</span>
-        </span>
-      </Button>
+    <div>
+      <h1 class="text-xl font-semibold text-foreground">Projects</h1>
+      <p class="mt-0.5 text-sm text-muted-foreground">
+        Manage your portfolio projects
+      </p>
     </div>
 
     <ProjectList client:load initialData={{ projects: [], total: 0, page: 1, perPage: 12, totalPages: 0 }} />
   </div>
 </AdminLayout>
-
-<script>
-  import { navigate } from 'astro:transitions/client'
-
-  const btn = document.getElementById('new-project-btn')
-  if (btn) {
-    btn.addEventListener('click', () => navigate('/admin/projects/new'))
-  }
-</script>
