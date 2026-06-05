@@ -8,7 +8,9 @@ export default function ArticleEditPage() {
   const [projects, setProjects] = useState<Array<{ id: number; title: string }>>([])
   const [loading, setLoading] = useState(true)
 
-  const articleId = Number(new URLSearchParams(window.location.search).get('id'))
+  const articleId = typeof window !== 'undefined'
+    ? Number(new URLSearchParams(window.location.search).get('id'))
+    : 0
 
   useEffect(() => {
     async function init() {

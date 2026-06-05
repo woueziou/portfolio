@@ -29,7 +29,9 @@ export default function ProjectEditPage() {
   const [articles, setArticles] = useState<ArticleSummary[]>([])
   const [loading, setLoading] = useState(true)
 
-  const projectId = Number(new URLSearchParams(window.location.search).get('id'))
+  const projectId = typeof window !== 'undefined'
+    ? Number(new URLSearchParams(window.location.search).get('id'))
+    : 0
 
   useEffect(() => {
     async function init() {
