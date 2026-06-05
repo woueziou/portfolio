@@ -10,9 +10,9 @@ import StarterKit from '@tiptap/starter-kit'
 import { common, createLowlight } from 'lowlight'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser'
-import { renderTiptapToHtml } from '@/lib/html-renderer'
 import BubbleMenuToolbar from './BubbleMenuToolbar'
 import SlashCommandMenu from './SlashCommandMenu'
+import ContextMenu from './ContextMenu'
 
 const lowlight = createLowlight(common)
 
@@ -38,6 +38,9 @@ export default function ArticleEditor({
   const [, setSaveStatus] = useState<SaveStatus>('saved')
   const [showSlashMenu, setShowSlashMenu] = useState(false)
   const [slashMenuPosition, setSlashMenuPosition] = useState({ top: 0, left: 0 })
+  const [showContextMenu, setShowContextMenu] = useState(false)
+  const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 })
+  const contextMenuFileInputRef = useRef<HTMLInputElement>(null)
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastSavedContentRef = useRef<string>('')
 
@@ -52,10 +55,9 @@ export default function ArticleEditor({
 
       try {
         const supabase = createSupabaseBrowserClient()
-        const contentHtml = renderTiptapToHtml(content as Parameters<typeof renderTiptapToHtml>[0])
         const { data, error } = await supabase
           .from('articles')
-          .update({ content, content_html: contentHtml || null })
+          .update({ content })
           .eq('id', articleId)
           .select()
           .single()
@@ -117,7 +119,7 @@ export default function ArticleEditor({
     content: initialContent || { type: 'doc', content: [{ type: 'paragraph', content: [] }] },
     editorProps: {
       attributes: {
-        class: 'prose prose-zinc dark:prose-invert max-w-none focus:outline-none min-h-[70vh] px-0 py-4',
+        class: 'focus:outline-none min-h-[70vh] px-0 py-4',
       },
       handleKeyDown: (view, event) => {
         if (event.key === '/' && !showSlashMenu) {
@@ -238,6 +240,41 @@ export default function ArticleEditor({
     }
   }, [editor, handleImageUpload])
 
+  // Right-click context menu
+  useEffect(() => {
+    if (!editor) return
+
+    const handleContextMenu = (event: MouseEvent) => {
+      event.preventDefault()
+      setShowSlashMenu(false)
+      setShowContextMenu(true)
+      setContextMenuPosition({ top: event.clientY, left: event.clientX })
+    }
+
+    const editorElement = editor.view.dom
+    editorElement.addEventListener('contextmenu', handleContextMenu)
+    return () => editorElement.removeEventListener('contextmenu', handleContextMenu)
+  }, [editor])
+
+  // Close context menu on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showContextMenu) {
+        setShowContextMenu(false)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [showContextMenu])
+
+  // File input for context menu image upload
+  const handleContextMenuImageUpload = useCallback(
+    (file: File) => {
+      handleImageUpload(file)
+    },
+    [handleImageUpload],
+  )
+
   if (!editor) {
     return <div className="animate-pulse h-[70vh] rounded-lg bg-muted/30" />
   }
@@ -254,6 +291,16 @@ export default function ArticleEditor({
           position={slashMenuPosition}
           onClose={() => setShowSlashMenu(false)}
           onImageUpload={handleImageUpload}
+        />
+      )}
+
+      {/* Right-click context menu */}
+      {showContextMenu && (
+        <ContextMenu
+          editor={editor}
+          position={contextMenuPosition}
+          onClose={() => setShowContextMenu(false)}
+          onImageUpload={handleContextMenuImageUpload}
         />
       )}
 

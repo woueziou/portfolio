@@ -21,5 +21,9 @@ export default defineConfig({
         '@': path.resolve('./src'),
       },
     },
+    optimizeDeps: {
+      // Force re-optimization when workspace deps change
+      include: ['@portfolio/shared'],
+    },
   },
 })

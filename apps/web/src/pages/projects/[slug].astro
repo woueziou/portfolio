@@ -7,6 +7,7 @@ export const prerender = false
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { withTimeout } from '@/lib/supabase/with-timeout'
+import { renderTiptapToHtml } from '@/lib/html-renderer'
 import { formatDate } from '@/utils/formater'
 
 type Project = Database['public']['Tables']['projects']['Row']
@@ -75,7 +76,7 @@ const legacyTechs = (typedProject.tech_stack || []).filter(
 const { data: articles } = await withTimeout(
   supabase
     .from('articles')
-    .select('id, title, slug, content_html, published_at, created_at, reading_time_minutes, status')
+    .select('id, title, slug, content, published_at, created_at, reading_time_minutes, status')
     .eq('project_id', projectId)
     .eq('status', 'published')
     .order('published_at', { ascending: false }),
@@ -84,6 +85,15 @@ const { data: articles } = await withTimeout(
 )
 
 const typedArticles = (articles || []) as Article[]
+
+// Convert TipTap JSON content to HTML for each article
+const articleContentHtml = new Map<number, string>()
+for (const a of typedArticles) {
+  if (a.content) {
+    const html = renderTiptapToHtml(a.content as any)
+    if (html) articleContentHtml.set(a.id, html)
+  }
+}
 
 const projectTitle = typedProject.title ?? 'Untitled Project'
 const pageTitle = `${projectTitle} — ${authorName}`
@@ -181,7 +191,7 @@ const jsonLdProject = {
                     )}
                   </div>
                 </div>
-                {article.content_html && <ArticleRenderer contentHtml={article.content_html} />}
+                {(() => { const h = articleContentHtml.get(article.id); return h ? <ArticleRenderer contentHtml={h} /> : null })()}
               </article>
             ))}
           </div>
@@ -198,7 +208,7 @@ const jsonLdProject = {
         datePublished: article.published_at || article.created_at,
         author: { '@type': 'Person', name: authorName },
         isPartOf: { '@type': 'SoftwareApplication', name: projectTitle },
-        wordCount: article.content_html ? article.content_html.split(/\s+/).length : undefined,
+        wordCount: (articleContentHtml.get(article.id) || '').split(/\s+/).filter(Boolean).length || undefined,
         timeRequired: article.reading_time_minutes ? `PT${article.reading_time_minutes}M` : undefined,
       })} />
     ))}

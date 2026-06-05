@@ -6,6 +6,7 @@ export const prerender = false
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { withTimeout } from '@/lib/supabase/with-timeout'
+import { renderTiptapToHtml } from '@/lib/html-renderer'
 import { formatDate } from '@/utils/formater'
 
 const { slug } = Astro.params
@@ -25,7 +26,7 @@ const [{ data: profile }, { data: article, error: articleError }] = await Promis
   withTimeout(
     supabase
       .from('articles')
-      .select('id, title, slug, summary, content_html, published_at, created_at, reading_time_minutes, image_url, status')
+      .select('id, title, slug, summary, content, published_at, created_at, reading_time_minutes, image_url, status')
       .eq('slug', slug)
       .eq('status', 'published')
       .single(),
@@ -40,6 +41,9 @@ if (articleError || !article) {
   return Astro.redirect('/404')
 }
 
+const contentHtml = article.content ? renderTiptapToHtml(article.content as any) : ''
+const wordCount = contentHtml ? contentHtml.split(/\s+/).length : undefined
+
 const pageTitle = `${article.title} — ${authorName}`
 const pageDescription = article.summary?.slice(0, 160) ?? article.title
 const ogImage = article.image_url ?? undefined
@@ -51,7 +55,7 @@ const jsonLdArticle = {
   description: article.summary,
   datePublished: article.published_at || article.created_at,
   author: { '@type': 'Person', name: authorName },
-  wordCount: article.content_html ? article.content_html.split(/\s+/).length : undefined,
+  wordCount,
   timeRequired: article.reading_time_minutes ? `PT${article.reading_time_minutes}M` : undefined,
 }
 ---
@@ -89,7 +93,7 @@ const jsonLdArticle = {
         )}
       </header>
 
-      {article.content_html && <ArticleRenderer contentHtml={article.content_html} />}
+      {contentHtml && <ArticleRenderer contentHtml={contentHtml} />}
     </main>
   </div>
 

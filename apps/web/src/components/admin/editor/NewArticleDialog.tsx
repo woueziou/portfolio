@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { navigate } from 'astro:transitions/client'
 import { generateSlug } from '@/lib/slug'
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser'
-import { renderTiptapToHtml } from '@/lib/html-renderer'
 import {
   Dialog,
   DialogContent,
@@ -54,14 +53,12 @@ export default function NewArticleDialog({
       }
 
       const finalSlug = slug.trim() || generateSlug(title)
-      const contentHtml = renderTiptapToHtml(content as Parameters<typeof renderTiptapToHtml>[0])
       const { data, error: insertError } = await supabase
         .from('articles')
         .insert({
           title: title.trim(),
           slug: finalSlug,
           content,
-          content_html: contentHtml || null,
           user_id: session.session.user.id,
           status: 'draft',
         })
