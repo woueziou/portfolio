@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser'
 
@@ -14,6 +15,8 @@ export default function SettingsPage() {
   const [savingSocial, setSavingSocial] = useState(false)
   const [siteStatus, setSiteStatus] = useState<string>('')
   const [socialStatus, setSocialStatus] = useState<string>('')
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [useAvatarAsOgImage, setUseAvatarAsOgImage] = useState(false)
 
   useEffect(() => {
     async function init() {
@@ -25,8 +28,13 @@ export default function SettingsPage() {
         return
       }
 
-      const { data } = await supabase.from('site_config').select('*').eq('id', 1).single()
+      const [{ data }, { data: profile }] = await Promise.all([
+        supabase.from('site_config').select('*').eq('id', 1).single(),
+        supabase.from('profiles').select('avatar_url').eq('id', session.session.user.id).maybeSingle(),
+      ])
       setConfig(data as Record<string, unknown>)
+      setUseAvatarAsOgImage(Boolean(data?.use_avatar_as_og_image))
+      setAvatarUrl(profile?.avatar_url ?? null)
       setLoading(false)
     }
     init()
@@ -47,6 +55,7 @@ export default function SettingsPage() {
     for (const key of ['site_tagline', 'seo_description', 'seo_og_image']) {
       if (!data[key]) data[key] = null
     }
+    data.use_avatar_as_og_image = useAvatarAsOgImage
 
     try {
       const { error } = await supabase.from('site_config').update(data).eq('id', 1)
@@ -151,6 +160,29 @@ export default function SettingsPage() {
               defaultValue={(config?.seo_og_image as string) || ''}
               placeholder="https://example.com/og-image.png"
               className="border-0 bg-muted/50"
+            />
+          </div>
+          <div className="flex items-center justify-between gap-4 rounded-md bg-muted/50 p-3">
+            <div className="flex items-center gap-3">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Profile avatar" className="h-10 w-10 rounded-full object-cover" />
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-muted" />
+              )}
+              <div className="space-y-0.5">
+                <Label htmlFor="use_avatar_as_og_image">Use avatar as share image</Label>
+                <p className="text-xs text-muted-foreground">
+                  {avatarUrl
+                    ? 'Your profile photo is shown when a link to the site is shared (pages with their own cover image keep it).'
+                    : 'Upload an avatar on your profile page to enable this option.'}
+                </p>
+              </div>
+            </div>
+            <Switch
+              id="use_avatar_as_og_image"
+              checked={useAvatarAsOgImage}
+              onCheckedChange={setUseAvatarAsOgImage}
+              disabled={!avatarUrl}
             />
           </div>
           <div className="flex items-center gap-3 pt-2">

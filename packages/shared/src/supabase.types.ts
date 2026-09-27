@@ -1249,6 +1249,7 @@ export type Database = {
           site_title: string
           social_links: Json
           updated_at: string
+          use_avatar_as_og_image: boolean
         }
         Insert: {
           created_at?: string
@@ -1259,6 +1260,7 @@ export type Database = {
           site_title?: string
           social_links?: Json
           updated_at?: string
+          use_avatar_as_og_image?: boolean
         }
         Update: {
           created_at?: string
@@ -1269,6 +1271,7 @@ export type Database = {
           site_title?: string
           social_links?: Json
           updated_at?: string
+          use_avatar_as_og_image?: boolean
         }
         Relationships: []
       }
