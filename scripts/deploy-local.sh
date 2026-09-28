@@ -139,8 +139,8 @@ if ! DIFF=$($SUPABASE_CLI db diff --linked --schema public 2>&1); then
 fi
 
 # Check if there are any schema changes (ignore noise like "Initialising login role")
-CHANGES=$(echo "$DIFF" | grep -cE '^(create|alter|drop|comment on)' 2>/dev/null || echo 0)
-MIGRATIONS_PENDING=$(echo "$DIFF" | grep -c "Would push these migrations" 2>/dev/null || echo 0)
+CHANGES=$(echo "$DIFF" | grep -cE '^(create|alter|drop|comment on)' || true)
+MIGRATIONS_PENDING=$(echo "$DIFF" | grep -c "Would push these migrations" || true)
 
 if [ "$CHANGES" -eq 0 ] && [ "$MIGRATIONS_PENDING" -eq 0 ]; then
   ok "No pending public-schema changes"
