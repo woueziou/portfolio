@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css'
 import { ClientRouter } from 'astro:transitions'
+import { fetchSiteOgImage, resolveOgImage } from '@/lib/og-image'
 
 interface Props {
   title: string
@@ -16,13 +17,15 @@ interface Props {
 const {
   title,
   description = 'Full Stack Engineer — 6+ years building web & mobile applications for airline enterprise.',
-  ogImage = '/og-default.svg',
+  ogImage: pageOgImage,
   profile,
 } = Astro.props
 
 const authorName = profile?.name || 'Taas S. Ekpaye'
 const authorTitle = profile?.title || 'Full Stack Engineer'
 const socialLinks = profile?.socialLinks || {}
+
+const ogImage = pageOgImage || resolveOgImage(await fetchSiteOgImage())
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site)
 ---

@@ -4,6 +4,11 @@ import Footer from '@/components/home/footer/footer.astro'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
 import { ToastContainer } from '@/components/ui/toast'
 import BaseLayout from '../layouts/BaseLayout.astro'
+
+// Rendered on demand so the share image (og:image) reflects the admin settings
+// without a rebuild; the CDN caches the page for 5 minutes.
+export const prerender = false
+Astro.response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400')
 ---
 
 <BaseLayout title="Taas S. Ekpaye — Full Stack Engineer">
