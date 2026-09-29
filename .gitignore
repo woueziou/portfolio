@@ -1,6 +1,5 @@
 node_modules
 .vercel
-bun.lock
 .env
 .env.*
 !.env.*.example

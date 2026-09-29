@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import { withTimeout } from '@/lib/supabase/with-timeout'
 
 export const DEFAULT_OG_IMAGE = '/og-default.svg'
+/** On-demand endpoint serving the site-wide share image (see pages/og-image.ts). */
+export const SITE_OG_IMAGE_ROUTE = '/og-image'
 
 interface OgImageSources {
   pageImage?: string | null
@@ -28,8 +30,8 @@ export function resolveOgImage({
 }
 
 /**
- * Fetch the site-wide share image settings. Uses a cookie-less client so it
- * works in both prerendered and on-demand pages.
+ * Fetch the site-wide share image settings. Uses a cookie-less client since
+ * the settings are public.
  */
 export async function fetchSiteOgImage(): Promise<Omit<OgImageSources, 'pageImage'>> {
   const url = import.meta.env.SUPABASE_URL

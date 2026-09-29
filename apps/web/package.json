@@ -19,7 +19,7 @@
     "@icons-pack/react-simple-icons": "^11.2.0",
     "@portfolio/shared": "workspace:*",
     "@supabase/ssr": "^0.10.3",
-    "@supabase/supabase-js": "latest",
+    "@supabase/supabase-js": "^2.107.0",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-form": "^1.33.0",
     "@tanstack/react-store": "^0.11.0",
