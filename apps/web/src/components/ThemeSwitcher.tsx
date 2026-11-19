@@ -66,12 +66,12 @@ export default function ThemeSwitcher() {
   return (
     <Button
       type="button"
-      variant="outline"
+      variant="ghost"
       size="icon-lg"
       onClick={cycle}
       aria-label={`${LABELS[preference]}. Click to change.`}
       title={LABELS[preference]}
-      className="size-11 cursor-pointer bg-background/70 backdrop-blur-sm"
+      className="size-11 cursor-pointer"
     >
       <Icon className="size-5" />
     </Button>

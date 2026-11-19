@@ -17,10 +17,8 @@ const { profile, socialLinks, projects, articles } = await getHomeData()
 <BaseLayout title="Taas S. Ekpaye — Full Stack Engineer">
   <div class="antialiased bg-noise font-baufra min-h-screen flex flex-col justify-between">
     <!-- Top bar -->
-    <div id="topbar" data-astro-transition-persist="topbar" class="fixed top-0 left-0 right-0 z-50 flex items-center justify-center px-4 py-3 transition-all duration-200">
-      <div class="absolute right-3 top-3 sm:right-4 sm:top-4">
-        <ThemeSwitcher client:load />
-      </div>
+    <div id="topbar" data-astro-transition-persist="topbar" class="fixed top-0 left-0 right-0 z-50 flex items-center justify-end px-3 sm:px-4 py-2 transition-all duration-200">
+      <ThemeSwitcher client:load />
     </div>
 
     <script>
