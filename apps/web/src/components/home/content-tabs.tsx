@@ -1,9 +1,11 @@
 import type { Database } from '@portfolio/shared'
 import { ChevronDown, FileText, FolderOpen, Star } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import type { ExperienceEntry } from '@/data/experience'
 import { cn } from '@/lib/utils'
 import { formatDate } from '@/utils/formater'
 import { ArticleItem } from './articles/article-item'
+import { ExperienceList } from './experience/experience-list'
 import type { HomeArticle, HomeProject } from './projects/model'
 import { ProjectItem } from './projects/project-item'
 
@@ -13,7 +15,7 @@ type Article = HomeArticle
 const ITEMS_PER_PAGE = 9
 
 /* ── Tab definitions ── */
-type TabId = 'projects' | 'articles'
+type TabId = 'projects' | 'experience' | 'articles'
 
 interface Tab {
   id: TabId
@@ -22,6 +24,7 @@ interface Tab {
 
 const TABS: Tab[] = [
   { id: 'projects', label: 'Projects' },
+  { id: 'experience', label: 'Experience' },
   { id: 'articles', label: 'Articles' },
 ]
 
@@ -288,9 +291,10 @@ function ArticlesContent({ data }: { data: Article[] }) {
 interface ContentTabsProps {
   projects: Project[]
   articles: Article[]
+  experience: ExperienceEntry[]
 }
 
-export default function ContentTabs({ projects, articles }: ContentTabsProps) {
+export default function ContentTabs({ projects, articles, experience }: ContentTabsProps) {
   const [activeTab, setActiveTab] = useState<TabId>('projects')
 
   return (
@@ -315,11 +319,9 @@ export default function ContentTabs({ projects, articles }: ContentTabsProps) {
       </div>
 
       {/* ── Tab content ── */}
-      {activeTab === 'projects' ? (
-        <ProjectsContent data={projects} />
-      ) : (
-        <ArticlesContent data={articles} />
-      )}
+      {activeTab === 'projects' && <ProjectsContent data={projects} />}
+      {activeTab === 'experience' && <ExperienceList data={experience} />}
+      {activeTab === 'articles' && <ArticlesContent data={articles} />}
     </div>
   )
 }
