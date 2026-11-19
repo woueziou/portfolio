@@ -1,59 +1,79 @@
-import { Moon, Sun } from 'lucide-react'
+import { Monitor, Moon, Sun } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import {
+  nextPreference,
+  parsePreference,
+  resolveTheme,
+  THEME_STORAGE_KEY,
+  type ThemePreference,
+} from '@/lib/theme'
 import { Button } from './ui/button'
 
-function getTheme(): 'dark' | 'light' {
-  if (typeof window === 'undefined') return 'light'
-  const stored = localStorage.getItem('theme')
-  if (stored === 'dark' || stored === 'light') return stored
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+const query = () => window.matchMedia('(prefers-color-scheme: dark)')
+
+function readPreference(): ThemePreference {
+  return parsePreference(localStorage.getItem(THEME_STORAGE_KEY))
 }
 
-function applyTheme(theme: 'dark' | 'light') {
-  document.documentElement.classList.toggle('dark', theme === 'dark')
+function applyPreference(preference: ThemePreference) {
+  const dark = resolveTheme(preference, query().matches) === 'dark'
+  document.documentElement.classList.toggle('dark', dark)
+}
+
+const LABELS: Record<ThemePreference, string> = {
+  system: 'Theme: follows your device',
+  light: 'Theme: light',
+  dark: 'Theme: dark',
 }
 
 export default function ThemeSwitcher() {
-  const [isDark, setIsDark] = useState(false)
+  const [preference, setPreference] = useState<ThemePreference>('system')
 
-  // Apply theme on mount and listen for Astro navigation events
   useEffect(() => {
-    const theme = getTheme()
-    setIsDark(theme === 'dark')
-    applyTheme(theme)
-
-    // Re-apply theme after each client-side navigation
-    const handlePageLoad = () => {
-      const currentTheme = getTheme()
-      setIsDark(currentTheme === 'dark')
-      applyTheme(currentTheme)
+    const sync = () => {
+      const current = readPreference()
+      setPreference(current)
+      applyPreference(current)
     }
+    sync()
 
-    document.addEventListener('astro:page-load', handlePageLoad)
-    document.addEventListener('astro:after-swap', handlePageLoad)
+    // Follow the device live while in "system" mode.
+    const media = query()
+    const onSystemChange = () => {
+      if (readPreference() === 'system') applyPreference('system')
+    }
+    media.addEventListener('change', onSystemChange)
+    document.addEventListener('astro:page-load', sync)
+    document.addEventListener('astro:after-swap', sync)
 
     return () => {
-      document.removeEventListener('astro:page-load', handlePageLoad)
-      document.removeEventListener('astro:after-swap', handlePageLoad)
+      media.removeEventListener('change', onSystemChange)
+      document.removeEventListener('astro:page-load', sync)
+      document.removeEventListener('astro:after-swap', sync)
     }
   }, [])
 
-  function toggle() {
-    const next = !isDark
-    setIsDark(next)
-    applyTheme(next ? 'dark' : 'light')
-    localStorage.setItem('theme', next ? 'dark' : 'light')
+  function cycle() {
+    const next = nextPreference(preference)
+    setPreference(next)
+    if (next === 'system') localStorage.removeItem(THEME_STORAGE_KEY)
+    else localStorage.setItem(THEME_STORAGE_KEY, next)
+    applyPreference(next)
   }
+
+  const Icon = preference === 'system' ? Monitor : preference === 'dark' ? Moon : Sun
 
   return (
     <Button
-    variant={"ghost"}
-     
-      onClick={toggle}
-      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="mt-4 inline-flex items-center justify-center size-9 rounded-md  transition-colors  cursor-pointer"
+      type="button"
+      variant="outline"
+      size="icon-lg"
+      onClick={cycle}
+      aria-label={`${LABELS[preference]}. Click to change.`}
+      title={LABELS[preference]}
+      className="size-11 cursor-pointer bg-background/70 backdrop-blur-sm"
     >
-      {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+      <Icon className="size-5" />
     </Button>
   )
 }
