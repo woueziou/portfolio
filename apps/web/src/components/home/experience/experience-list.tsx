@@ -12,35 +12,46 @@ export function ExperienceList({ data }: { data: ExperienceEntry[] }) {
   }
 
   return (
-    <ol className="w-full mx-auto space-y-10 border-l border-border pl-6 max-w-3xl">
+    <ol className="w-full">
       {data.map((entry) => (
-        <li key={`${entry.company}-${entry.start}`} className="relative">
-          <span className="absolute -left-[1.85rem] top-2 h-2.5 w-2.5 rounded-full bg-primary" />
-          <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
-            <h3 className="text-lg font-semibold">
-              {entry.role} · {entry.company}
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              <time dateTime={entry.start}>{formatPeriod(entry)}</time>
-              {entry.type ? ` · ${entry.type}` : ''}
-            </p>
+        <li
+          key={`${entry.company}-${entry.start}`}
+          className="grid grid-cols-1 gap-3 md:grid-cols-[16rem_1fr] md:gap-10 border-t border-border/60 py-8 first:border-t-0 first:pt-0"
+        >
+          {/* ── Period ── */}
+          <div className="flex items-start gap-3">
+            <span className="mt-2 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-background">
+              <span className="h-2 w-2 rounded-full bg-primary" />
+            </span>
+            <div>
+              <time dateTime={entry.start} className="block text-2xl font-bold tracking-tight text-foreground/80">
+                {formatPeriod(entry)}
+              </time>
+              {entry.type && <p className="mt-1 text-sm text-muted-foreground">{entry.type}</p>}
+            </div>
           </div>
-          {entry.summary && <p className="mt-1 text-sm text-muted-foreground">{entry.summary}</p>}
-          {entry.highlights && entry.highlights.length > 0 && (
-            <ul className="mt-2 list-disc pl-5 space-y-1 text-sm">
-              {entry.highlights.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          )}
-          {entry.link && (
-            <a
-              href={entry.link.href}
-              className="mt-2 inline-block text-sm underline underline-offset-4 hover:text-primary transition-colors"
-            >
-              {entry.link.label}
-            </a>
-          )}
+
+          {/* ── Position ── */}
+          <div className="space-y-2">
+            <h3 className="text-xl font-bold">{entry.company}</h3>
+            <p className="text-base font-medium text-muted-foreground">{entry.role}</p>
+            {entry.summary && <p className="text-sm leading-relaxed">{entry.summary}</p>}
+            {entry.highlights && entry.highlights.length > 0 && (
+              <ul className="list-disc pl-5 space-y-1 text-sm leading-relaxed">
+                {entry.highlights.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            )}
+            {entry.link && (
+              <a
+                href={entry.link.href}
+                className="inline-block text-sm font-medium underline underline-offset-4 hover:text-primary transition-colors"
+              >
+                {entry.link.label}
+              </a>
+            )}
+          </div>
         </li>
       ))}
     </ol>
