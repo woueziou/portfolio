@@ -69,6 +69,13 @@ interface ProjectFormProps {
     type: string[]
     tech_stack: string[]
     slug: string
+    problem?: string | null
+    role?: string | null
+    tech_choices?: string | null
+    outcome?: string | null
+    screenshots?: string[] | null
+    featured?: boolean
+    sort_order?: number
   }
   articles?: Array<{
     id: number
@@ -117,6 +124,13 @@ interface ProjectFormData {
   type: string[]
   tech_stack: string[]
   slug: string
+  problem: string
+  role: string
+  tech_choices: string
+  outcome: string
+  screenshots: string
+  featured: boolean
+  sort_order: number
 }
 
 function countWords(text: string): number {
@@ -144,6 +158,13 @@ export default function ProjectForm({
     type: project?.type || [],
     tech_stack: project?.tech_stack || [],
     slug: project?.slug || '',
+    problem: project?.problem || '',
+    role: project?.role || '',
+    tech_choices: project?.tech_choices || '',
+    outcome: project?.outcome || '',
+    screenshots: (project?.screenshots ?? []).join('\n'),
+    featured: project?.featured ?? false,
+    sort_order: project?.sort_order ?? 0,
   })
 
   const [loading, setLoading] = useState(false)
@@ -420,6 +441,16 @@ export default function ProjectForm({
         type: dbTypes,
         tech_stack: formData.tech_stack,
         slug: formData.slug,
+        problem: formData.problem.trim() || null,
+        role: formData.role.trim() || null,
+        tech_choices: formData.tech_choices.trim() || null,
+        outcome: formData.outcome.trim() || null,
+        screenshots: formData.screenshots
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean),
+        featured: formData.featured,
+        sort_order: formData.sort_order,
       }
 
       let savedProject: Record<string, unknown>
@@ -671,6 +702,66 @@ export default function ProjectForm({
               placeholder="A brief description of your project..."
               className="border-0 bg-muted/50 resize-none"
             />
+          </div>
+        </section>
+
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            Case study (optional)
+          </div>
+          {(
+            [
+              ['problem', 'The problem', 'What problem does the project solve, and for whom?'],
+              ['role', 'My role', 'What you owned and your scope.'],
+              ['tech_choices', 'Technical choices', 'Key choices and why.'],
+              ['outcome', 'Outcome', 'The result, with figures when possible.'],
+            ] as const
+          ).map(([field, label, placeholder]) => (
+            <div key={field} className="space-y-2">
+              <Label htmlFor={field}>{label}</Label>
+              <Textarea
+                id={field}
+                value={formData[field]}
+                onChange={(e) => setFormData((prev) => ({ ...prev, [field]: e.target.value }))}
+                rows={4}
+                placeholder={placeholder}
+                className="border-0 bg-muted/50 resize-y"
+              />
+            </div>
+          ))}
+          <div className="space-y-2">
+            <Label htmlFor="screenshots">Screenshots (one URL per line)</Label>
+            <Textarea
+              id="screenshots"
+              value={formData.screenshots}
+              onChange={(e) => setFormData((prev) => ({ ...prev, screenshots: e.target.value }))}
+              rows={3}
+              placeholder="https://…"
+              className="border-0 bg-muted/50 resize-y"
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-6">
+            <label htmlFor="featured" className="flex items-center gap-2 text-sm">
+              <input
+                id="featured"
+                type="checkbox"
+                checked={formData.featured}
+                onChange={(e) => setFormData((prev) => ({ ...prev, featured: e.target.checked }))}
+              />
+              Featured (pinned first on the home page)
+            </label>
+            <label htmlFor="sort_order" className="flex items-center gap-2 text-sm">
+              Order
+              <input
+                id="sort_order"
+                type="number"
+                value={formData.sort_order}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, sort_order: Number(e.target.value) || 0 }))
+                }
+                className="w-20 rounded bg-muted/50 px-2 py-1"
+              />
+            </label>
           </div>
         </section>
 

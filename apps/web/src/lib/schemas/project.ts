@@ -40,6 +40,13 @@ export const createProjectSchema = z.object({
     .min(1, 'Slug is required')
     .max(100, 'Slug must be less than 100 characters')
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase with hyphens (e.g., my-project)'),
+  problem: z.string().max(4000).optional().or(z.literal('')),
+  role: z.string().max(2000).optional().or(z.literal('')),
+  tech_choices: z.string().max(4000).optional().or(z.literal('')),
+  outcome: z.string().max(4000).optional().or(z.literal('')),
+  screenshots: z.array(z.string().url('Must be a valid URL')).optional(),
+  featured: z.boolean().optional(),
+  sort_order: z.number().int().optional(),
 })
 
 // Update project schema (all fields optional except id)
@@ -68,6 +75,13 @@ export const updateProjectSchema = z.object({
     .max(100, 'Slug must be less than 100 characters')
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase with hyphens')
     .optional(),
+  problem: z.string().max(4000).optional().or(z.literal('')),
+  role: z.string().max(2000).optional().or(z.literal('')),
+  tech_choices: z.string().max(4000).optional().or(z.literal('')),
+  outcome: z.string().max(4000).optional().or(z.literal('')),
+  screenshots: z.array(z.string().url('Must be a valid URL')).optional(),
+  featured: z.boolean().optional(),
+  sort_order: z.number().int().optional(),
 })
 
 // Publish/unpublish schema

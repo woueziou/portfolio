@@ -1,5 +1,5 @@
 import type { Database } from '@portfolio/shared'
-import { ChevronDown, FileText, FolderOpen } from 'lucide-react'
+import { ChevronDown, FileText, FolderOpen, Star } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { formatDate } from '@/utils/formater'
@@ -90,7 +90,11 @@ function ProjectsContent({ data }: { data: Project[] }) {
     )
   }, [data, activeType])
 
-  const grouped = groupByYear(filtered)
+  // Featured projects are pinned first (ordered by sort_order by the build query);
+  // the rest keep the year timeline.
+  const featured = useMemo(() => filtered.filter((p) => p.featured), [filtered])
+  const unfeatured = useMemo(() => filtered.filter((p) => !p.featured), [filtered])
+  const grouped = groupByYear(unfeatured)
   const years = Array.from(grouped.keys()).sort((a, b) => Number(b) - Number(a))
 
   // Flatten projects for pagination while preserving year grouping
@@ -143,7 +147,7 @@ function ProjectsContent({ data }: { data: Project[] }) {
       </div>
 
       {/* ── Project groups ── */}
-      {visibleYears.length === 0 ? (
+      {visibleYears.length === 0 && featured.length === 0 ? (
         <EmptyPlaceholder
           icon={FolderOpen}
           title={activeType ? `No ${activeType} projects` : 'No projects yet'}
@@ -155,6 +159,22 @@ function ProjectsContent({ data }: { data: Project[] }) {
         />
       ) : (
         <>
+          {featured.length > 0 && (
+            <section className={cn('relative', visibleYears.length > 0 && 'mb-12')}>
+              <div className="mb-8 flex items-center gap-4">
+                <div className="flex shrink-0 items-center gap-3">
+                  <Star className="h-5 w-5 fill-primary text-primary" />
+                  <span className="text-2xl font-bold tracking-tight text-foreground/80">Featured</span>
+                </div>
+                <div className="h-px flex-1 bg-border/60" />
+              </div>
+              <div className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 place-content-center gap-6">
+                {featured.map((item) => (
+                  <ProjectItem item={item} key={item.id} />
+                ))}
+              </div>
+            </section>
+          )}
           {visibleYears.map((year, yi) => {
             const projects = visibleGrouped.get(year)!
             return (

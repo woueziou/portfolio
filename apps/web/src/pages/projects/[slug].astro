@@ -32,6 +32,14 @@ for (const a of typedArticles) {
   }
 }
 
+const caseStudy = [
+  { heading: 'The problem', body: typedProject.problem },
+  { heading: 'My role', body: typedProject.role },
+  { heading: 'Technical choices', body: typedProject.tech_choices },
+  { heading: 'Outcome', body: typedProject.outcome },
+].filter((section): section is { heading: string; body: string } => Boolean(section.body?.trim()))
+const screenshots = (typedProject.screenshots ?? []).filter(Boolean)
+
 const projectTitle = typedProject.title ?? 'Untitled Project'
 const pageTitle = `${projectTitle} — ${authorName}`
 const pageDescription = typedProject.description?.slice(0, 160) ?? projectTitle
@@ -101,6 +109,30 @@ const jsonLdProject = {
           </div>
         )}
       </header>
+
+      {caseStudy.length > 0 && (
+        <div class="space-y-10 mb-16">
+          {caseStudy.map((section) => (
+            <section>
+              <h2 class="text-2xl font-bold mb-3">{section.heading}</h2>
+              <p class="text-base leading-relaxed whitespace-pre-line text-foreground/90">{section.body}</p>
+            </section>
+          ))}
+        </div>
+      )}
+
+      {screenshots.length > 0 && (
+        <section class="mb-16">
+          <h2 class="text-2xl font-bold mb-4">Screenshots</h2>
+          <div class="grid gap-4 sm:grid-cols-2">
+            {screenshots.map((src, i) => (
+              <a href={src} target="_blank" rel="noopener noreferrer" class="block overflow-hidden rounded-lg border border-border">
+                <img src={src} alt={`${projectTitle} screenshot ${i + 1}`} class="w-full h-auto object-cover" loading="lazy" />
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
       {typedArticles.length > 0 && (
         <section class="mt-16">

@@ -1177,6 +1177,13 @@ export type Database = {
       }
       projects: {
         Row: {
+          featured: boolean
+          outcome: string | null
+          problem: string | null
+          role: string | null
+          screenshots: string[]
+          sort_order: number
+          tech_choices: string | null
           access_link: string | null
           created_at: string
           description: string
@@ -1195,6 +1202,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          featured?: boolean
+          outcome?: string | null
+          problem?: string | null
+          role?: string | null
+          screenshots?: string[]
+          sort_order?: number
+          tech_choices?: string | null
           access_link?: string | null
           created_at?: string
           description: string
@@ -1213,6 +1227,13 @@ export type Database = {
           user_id: string
         }
         Update: {
+          featured?: boolean
+          outcome?: string | null
+          problem?: string | null
+          role?: string | null
+          screenshots?: string[]
+          sort_order?: number
+          tech_choices?: string | null
           access_link?: string | null
           created_at?: string
           description?: string
