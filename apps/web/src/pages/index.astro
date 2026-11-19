@@ -1,5 +1,6 @@
 ---
 import ContentTabs from '@/components/home/content-tabs'
+import Experience from '@/components/home/experience.astro'
 import Footer from '@/components/home/footer/footer.astro'
 import GitHubCalendarIsland from '@/components/home/hero/GitHubCalendarIsland'
 import HeroStatic from '@/components/home/hero/hero-static.astro'
@@ -45,6 +46,8 @@ const { profile, socialLinks, projects, articles } = await getHomeData()
           <HeroStatic profile={profile} socialLinks={socialLinks} />
           <GitHubCalendarIsland client:visible />
         </section>
+
+        <Experience />
 
         <section
           id="projects"
