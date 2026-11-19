@@ -90,6 +90,8 @@ bun run dev   # http://localhost:3000
 
 L'application est hébergée sur Vercel via `@astrojs/vercel`.
 
+Les migrations de `apps/supabase/supabase/migrations/` sont appliquées en production par l'intégration GitHub de Supabase lors d'un merge sur `main`. Un horodatage plus ancien que la dernière migration déjà appliquée est ignoré : donnez toujours à une nouvelle migration un horodatage plus récent que les existantes.
+
 ### Reconstruction automatique du site
 
 Le site est prérendu : une modification dans l'admin n'apparaît qu'après un nouveau build. Des triggers Postgres (`projects`, `articles`, `project_techstacks`, `techstacks`, `profiles`, `site_config`) marquent un rebuild en attente dans `rebuild_state`. Un job `pg_cron` tourne chaque minute et appelle le Deploy Hook Vercel via `pg_net` quand plus rien n'a changé depuis 60 s : une rafale d'éditions ne produit qu'un seul build. Les brouillons ne déclenchent rien. Un rebuild hebdomadaire (lundi 05:00 UTC) garde à jour les valeurs calculées au build.
