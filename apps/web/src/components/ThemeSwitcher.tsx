@@ -1,4 +1,4 @@
-import { Monitor, Moon, Sun } from 'lucide-react'
+import { Moon, Sun, SunMoon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import {
   nextPreference,
@@ -61,7 +61,7 @@ export default function ThemeSwitcher() {
     applyPreference(next)
   }
 
-  const Icon = preference === 'system' ? Monitor : preference === 'dark' ? Moon : Sun
+  const Icon = preference === 'system' ? SunMoon : preference === 'dark' ? Moon : Sun
 
   return (
     <Button

@@ -16,27 +16,10 @@ const { profile, socialLinks, projects, articles } = await getHomeData()
 
 <BaseLayout title="Taas S. Ekpaye — Full Stack Engineer">
   <div class="antialiased bg-noise font-baufra min-h-screen flex flex-col justify-between">
-    <!-- Top bar -->
-    <div id="topbar" data-astro-transition-persist="topbar" class="fixed top-0 left-0 right-0 z-50 flex items-center justify-end px-3 sm:px-4 py-2 transition-all duration-200">
+    <!-- Theme button: floats at the top right, no bar behind it -->
+    <div id="topbar" data-astro-transition-persist="topbar" class="fixed top-2 right-3 sm:right-4 z-50">
       <ThemeSwitcher client:load />
     </div>
-
-    <script>
-      const topbar = document.getElementById('topbar')
-      let ticking = false
-      const onScroll = () => {
-        if (!ticking) {
-          requestAnimationFrame(() => {
-            const scrolled = window.scrollY > 20
-            topbar?.classList.toggle('bg-background/60', scrolled)
-            topbar?.classList.toggle('backdrop-blur-sm', scrolled)
-            ticking = false
-          })
-          ticking = true
-        }
-      }
-      window.addEventListener('scroll', onScroll, { passive: true })
-    </script>
 
     <div class="flex-grow">
       <div class="flex flex-col items-stretch min-h-screen">
