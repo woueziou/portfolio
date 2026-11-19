@@ -1,13 +1,14 @@
 import type { Database } from '@portfolio/shared'
 import { ChevronDown, FileText, FolderOpen } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { ArticleItem } from './articles/article-item'
-import { ProjectItem } from './projects/project-item'
 import { cn } from '@/lib/utils'
 import { formatDate } from '@/utils/formater'
+import { ArticleItem } from './articles/article-item'
+import type { HomeArticle, HomeProject } from './projects/model'
+import { ProjectItem } from './projects/project-item'
 
-type Project = Database['public']['Tables']['projects']['Row']
-type Article = Database['public']['Tables']['articles']['Row']
+type Project = HomeProject
+type Article = HomeArticle
 
 const ITEMS_PER_PAGE = 9
 
@@ -146,14 +147,21 @@ function ProjectsContent({ data }: { data: Project[] }) {
         <EmptyPlaceholder
           icon={FolderOpen}
           title={activeType ? `No ${activeType} projects` : 'No projects yet'}
-          description={activeType ? `No projects of type "${activeType}" yet.` : 'Projects will appear here once created.'}
+          description={
+            activeType
+              ? `No projects of type "${activeType}" yet.`
+              : 'Projects will appear here once created.'
+          }
         />
       ) : (
         <>
           {visibleYears.map((year, yi) => {
             const projects = visibleGrouped.get(year)!
             return (
-              <section key={year} className={cn('relative', yi < visibleYears.length - 1 && 'mb-12')}>
+              <section
+                key={year}
+                className={cn('relative', yi < visibleYears.length - 1 && 'mb-12')}
+              >
                 {/* ── Year header ── */}
                 <div className="mb-8 flex items-center gap-4">
                   <div className="flex shrink-0 items-center gap-3">

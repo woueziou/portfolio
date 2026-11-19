@@ -1,9 +1,16 @@
 ---
-import HomeContent from '@/components/home/HomeContent'
+import ContentTabs from '@/components/home/content-tabs'
 import Footer from '@/components/home/footer/footer.astro'
+import GitHubCalendarIsland from '@/components/home/hero/GitHubCalendarIsland'
+import HeroStatic from '@/components/home/hero/hero-static.astro'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
 import { ToastContainer } from '@/components/ui/toast'
+import { getHomeData } from '@/lib/build-data'
 import BaseLayout from '../layouts/BaseLayout.astro'
+
+// Read at build time: the page ships as complete HTML. A rebuild is triggered
+// by the Supabase content triggers (see the README, "Reconstruction automatique").
+const { profile, socialLinks, projects, articles } = await getHomeData()
 ---
 
 <BaseLayout title="Taas S. Ekpaye — Full Stack Engineer">
@@ -34,13 +41,23 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 
     <div class="flex-grow">
       <div class="flex flex-col items-stretch min-h-screen">
-        <HomeContent client:visible />
+        <section id="hero">
+          <HeroStatic profile={profile} socialLinks={socialLinks} />
+          <GitHubCalendarIsland client:visible />
+        </section>
+
+        <section
+          id="projects"
+          class="w-full px-4 sm:px-6 md:px-8 lg:px-12 mx-auto max-w-7xl pt-16 pb-8 scroll-mt-20"
+        >
+          <ContentTabs client:load projects={projects} articles={articles} />
+        </section>
 
         <section class="w-full">
           <Footer />
         </section>
       </div>
     </div>
-    <ToastContainer client:load />
+    <ToastContainer client:idle />
   </div>
 </BaseLayout>
