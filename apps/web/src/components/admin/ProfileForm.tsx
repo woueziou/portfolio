@@ -66,6 +66,7 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
     extractUsername(socialLinks.linkedin ?? '', 'https://www.linkedin.com/in/'),
   )
   const [website, setWebsite] = useState(socialLinks.website ?? '')
+  const [resume, setResume] = useState(socialLinks.resume ?? '')
 
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
@@ -87,12 +88,17 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
       try {
         const supabase = createSupabaseBrowserClient()
 
-        const newSocialLinks: Record<string, string> = {}
+        // Keep keys this form does not manage; the managed ones are re-set below.
+        const newSocialLinks: Record<string, string> = { ...socialLinks }
+        for (const key of ['github', 'email', 'medium', 'linkedin', 'website', 'resume']) {
+          delete newSocialLinks[key]
+        }
         if (githubUsername) newSocialLinks.github = `https://github.com/${githubUsername}`
         if (email) newSocialLinks.email = email
         if (mediumUsername) newSocialLinks.medium = `https://medium.com/@${mediumUsername}`
         if (linkedinUsername) newSocialLinks.linkedin = `https://www.linkedin.com/in/${linkedinUsername}`
         if (website) newSocialLinks.website = website
+        if (resume) newSocialLinks.resume = resume
 
         const { error: profileError } = await supabase
           .from('profiles')
@@ -436,6 +442,21 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
                 placeholder="https://yoursite.com"
+                className="border-0 bg-muted/50"
+              />
+            </FormControl>
+          </FormItem>
+          <FormItem>
+            <FormLabel htmlFor="resume" className="flex items-center gap-1.5">
+              <Globe className="h-3.5 w-3.5" />
+              CV (PDF link)
+            </FormLabel>
+            <FormControl>
+              <Input
+                id="resume"
+                value={resume}
+                onChange={(e) => setResume(e.target.value)}
+                placeholder="/cv.pdf or https://…"
                 className="border-0 bg-muted/50"
               />
             </FormControl>

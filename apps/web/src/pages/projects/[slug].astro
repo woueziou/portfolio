@@ -4,6 +4,7 @@ import ArticleRenderer from '@/components/projects/ArticleRenderer.astro'
 import BaseLayout from '@/layouts/BaseLayout.astro'
 import { getProjectPages } from '@/lib/build-data'
 import { renderTiptapToHtml } from '@/lib/html-renderer'
+import { dedupeTechs } from '@/lib/techstack'
 import { formatDate } from '@/utils/formater'
 
 // Prerendered at build: one page per published project. A new or edited
@@ -19,6 +20,8 @@ const { project: typedProject, techstacks: techstacksFromRelation, articles: typ
 const legacyTechs = (typedProject.tech_stack || []).filter(
   (t: string) => !techstacksFromRelation.some((r) => r.name.toLowerCase() === t.toLowerCase()),
 )
+
+const techBadges = dedupeTechs([...techstacksFromRelation.map((t) => t.name), ...legacyTechs])
 
 // Convert TipTap JSON content to HTML for each article
 const articleContentHtml = new Map<number, string>()
@@ -85,11 +88,8 @@ const jsonLdProject = {
         <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4">{projectTitle}</h1>
         <p class="text-lg text-muted-foreground leading-relaxed mb-6">{typedProject.description}</p>
         <div class="flex flex-wrap gap-2">
-          {techstacksFromRelation.map((ts) => (
-            <span class="flex items-center gap-1.5 px-3 py-1.5 border border-secondary/30 text-sm hover:bg-primary hover:text-white transition-colors">{ts.name}</span>
-          ))}
-          {legacyTechs.map((tech) => (
-            <span class="flex items-center gap-1.5 px-3 py-1.5 border border-secondary/30 text-sm hover:bg-primary hover:text-white transition-colors">{tech}</span>
+          {techBadges.map((tech) => (
+            <span class="flex items-center gap-1.5 px-3 py-1.5 border border-secondary/30 text-sm hover:bg-primary hover:text-white transition-colors">{tech.label}</span>
           ))}
         </div>
         {typedProject.access_link && (

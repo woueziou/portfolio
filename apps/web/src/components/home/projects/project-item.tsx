@@ -21,6 +21,7 @@ import {
 } from '@icons-pack/react-simple-icons'
 import { DatabaseZap, ExternalLink } from 'lucide-react'
 import { Image } from '@/components/ui/image'
+import { dedupeTechs } from '@/lib/techstack'
 import { cn } from '@/lib/utils'
 import { formatDate } from '@/utils/formater'
 import type { HomeProject } from './model'
@@ -176,16 +177,16 @@ export const ProjectItem = ({ item }: { item: HomeProject }) => {
 
       {/* ── Tech stack (always shows icon + name) ── */}
       <div className="flex flex-wrap gap-2">
-        {item.tech_stack.map((tech) => (
+        {dedupeTechs(item.tech_stack).map(({ key, label }) => (
           <div
-            key={tech}
+            key={key}
             className={cn(
               'flex items-center gap-1.5 border border-secondary/30 px-2.5 py-1.5 text-sm',
               'hover:bg-accent hover:text-accent-foreground transition-colors',
             )}
           >
-            <span className="shrink-0">{getIcon(tech.toLowerCase())}</span>
-            <span>{tech}</span>
+            <span className="shrink-0">{getIcon(key)}</span>
+            <span>{label}</span>
           </div>
         ))}
       </div>
