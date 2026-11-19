@@ -38,7 +38,7 @@ export interface ProjectPage {
 }
 
 const PROJECT_CARD_COLUMNS =
-  'id, title, description, main_image_url, url, access_link, state, project_date, type, tech_stack, slug, publication_status'
+  'id, title, description, main_image_url, url, access_link, state, project_date, type, tech_stack, slug, publication_status, featured, sort_order'
 const ARTICLE_CARD_COLUMNS =
   'id, title, slug, summary, image_url, published_at, reading_time_minutes, status'
 
@@ -79,6 +79,8 @@ export async function getHomeData() {
       .from('projects')
       .select(PROJECT_CARD_COLUMNS)
       .eq('publication_status', 'published')
+      .order('featured', { ascending: false })
+      .order('sort_order', { ascending: true })
       .order('project_date', { ascending: false }),
     supabase
       .from('articles')

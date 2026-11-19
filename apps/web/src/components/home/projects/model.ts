@@ -20,6 +20,8 @@ export type HomeProject = Pick<
   | 'tech_stack'
   | 'slug'
   | 'publication_status'
+  | 'featured'
+  | 'sort_order'
 >
 
 /** Fields the home page needs for an article card (no article body). */
