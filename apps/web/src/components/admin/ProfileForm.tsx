@@ -100,7 +100,7 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
         if (website) newSocialLinks.website = website
         if (resume) newSocialLinks.resume = resume
 
-        const { error: profileError } = await supabase
+        const { data: updatedRows, error: profileError } = await supabase
           .from('profiles')
           .update({
             first_name: value.first_name,
@@ -110,9 +110,17 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
             socials: newSocialLinks,
           })
           .eq('id', profile.id)
+          .select('id')
 
         if (profileError) {
           setStatus({ type: 'error', message: profileError.message })
+          return
+        }
+        if (!updatedRows || updatedRows.length === 0) {
+          setStatus({
+            type: 'error',
+            message: 'Nothing was saved: this account does not own the profile. Sign in with the owner account.',
+          })
           return
         }
 
@@ -337,7 +345,7 @@ export default function ProfileForm({ profile, socialLinks }: ProfileFormProps) 
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
                   rows={3}
-                  placeholder="From building my first Flutter app in 2019 to deploying AI-powered tools in 2026..."
+                  placeholder="A short bio shown under your name on the home page"
                   className="border-0 bg-muted/50 resize-none"
                 />
               </FormControl>

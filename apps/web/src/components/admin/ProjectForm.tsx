@@ -464,7 +464,11 @@ export default function ProjectForm({
           .single()
 
         if (updateError) {
-          setError(updateError.message)
+          setError(
+            updateError.code === 'PGRST116'
+              ? 'Nothing was saved: this account does not own the project. Sign in with the owner account.'
+              : updateError.message,
+          )
           return
         }
         savedProject = data as Record<string, unknown>
@@ -504,19 +508,17 @@ export default function ProjectForm({
       }
 
       // Handle publish status
-      if (!asDraft) {
-        await supabase
-          .from('projects')
-          .update({
-            publication_status: 'published',
-            published_at: new Date().toISOString(),
-          })
-          .eq('id', savedProject.id)
-      } else {
-        await supabase
-          .from('projects')
-          .update({ publication_status: 'draft' })
-          .eq('id', savedProject.id)
+      const { error: statusError } = await supabase
+        .from('projects')
+        .update(
+          asDraft
+            ? { publication_status: 'draft' }
+            : { publication_status: 'published', published_at: new Date().toISOString() },
+        )
+        .eq('id', savedProject.id)
+      if (statusError) {
+        setError(statusError.message)
+        return
       }
 
       onSuccess?.(savedProject)
