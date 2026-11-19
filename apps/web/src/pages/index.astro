@@ -1,11 +1,11 @@
 ---
 import ContentTabs from '@/components/home/content-tabs'
-import Experience from '@/components/home/experience.astro'
 import Footer from '@/components/home/footer/footer.astro'
 import GitHubCalendarIsland from '@/components/home/hero/GitHubCalendarIsland'
 import HeroStatic from '@/components/home/hero/hero-static.astro'
 import ThemeSwitcher from '@/components/ThemeSwitcher'
 import { ToastContainer } from '@/components/ui/toast'
+import { experience } from '@/data/experience'
 import { getHomeData } from '@/lib/build-data'
 import BaseLayout from '../layouts/BaseLayout.astro'
 
@@ -47,13 +47,11 @@ const { profile, socialLinks, projects, articles } = await getHomeData()
           <GitHubCalendarIsland client:visible />
         </section>
 
-        <Experience />
-
         <section
           id="projects"
           class="w-full px-4 sm:px-6 md:px-8 lg:px-12 mx-auto max-w-7xl pt-16 pb-8 scroll-mt-20"
         >
-          <ContentTabs client:load projects={projects} articles={articles} />
+          <ContentTabs client:load projects={projects} articles={articles} experience={experience} />
         </section>
 
         <section class="w-full">
