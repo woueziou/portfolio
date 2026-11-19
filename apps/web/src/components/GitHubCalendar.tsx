@@ -19,6 +19,13 @@ export default function GitHubCalendar() {
   const [totalContributions, setTotalContributions] = useState<number | null>(null)
   const [error, setError] = useState(false)
   const [dark, setDark] = useState(false)
+  // react-github-calendar renders markup on the client that the server HTML does
+  // not contain (React error #418). Mount it only after hydration.
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -72,15 +79,19 @@ export default function GitHubCalendar() {
       </div>
 
       {/* Calendar */}
-      <div className="w-full max-w-full overflow-x-auto">
-        <ReactGitHubCalendar
-          username="woueziou"
-          theme={{ light: dark ? darkTheme : lightTheme }}
-          showColorLegend
-          labels={{
-            totalCount: '{{count}} contributions in the last year',
-          }}
-        />
+      <div className="w-full max-w-full min-h-[170px] overflow-x-auto">
+        {mounted ? (
+          <ReactGitHubCalendar
+            username="woueziou"
+            theme={{ light: dark ? darkTheme : lightTheme }}
+            showColorLegend
+            labels={{
+              totalCount: '{{count}} contributions in the last year',
+            }}
+          />
+        ) : (
+          <div className="h-[170px] w-full animate-pulse rounded bg-muted/50" />
+        )}
       </div>
 
       {/* Disclaimer */}
