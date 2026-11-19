@@ -1,13 +1,12 @@
-import type { Database } from '@portfolio/shared'
 import { Calendar, Clock, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatDate } from '@/utils/formater'
+import type { HomeArticle } from '../projects/model'
 
-type Article = Database['public']['Tables']['articles']['Row']
+type Article = HomeArticle
 
 export const ArticleItem = ({ item }: { item: Article }) => {
-  const articleUrl =
-    item.status === 'published' && item.slug ? `/blogs/${item.slug}` : null
+  const articleUrl = item.status === 'published' && item.slug ? `/blogs/${item.slug}` : null
 
   return (
     <div

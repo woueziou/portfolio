@@ -1,90 +1,24 @@
 ---
-import type { Database } from '@portfolio/shared'
 import { ArrowLeft, Calendar, Clock, ExternalLink } from 'lucide-react'
 import ArticleRenderer from '@/components/projects/ArticleRenderer.astro'
-export const prerender = false
-
 import BaseLayout from '@/layouts/BaseLayout.astro'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
-import { withTimeout } from '@/lib/supabase/with-timeout'
+import { getProjectPages } from '@/lib/build-data'
 import { renderTiptapToHtml } from '@/lib/html-renderer'
 import { formatDate } from '@/utils/formater'
 
-type Project = Database['public']['Tables']['projects']['Row']
-interface TechstackInfo {
-  id: string
-  name: string
-  icon: string
-}
-type Article = Database['public']['Tables']['articles']['Row']
-
-const { slug } = Astro.params
-
-if (!slug) {
-  return Astro.redirect('/404')
+// Prerendered at build: one page per published project. A new or edited
+// project goes live with the next rebuild (triggered by the Supabase triggers).
+export async function getStaticPaths() {
+  const pages = await getProjectPages()
+  return pages.map((page) => ({ params: { slug: page.project.slug }, props: page }))
 }
 
-const supabase = createSupabaseServerClient(Astro.cookies)
-
-const [{ data: profile }, { data: project, error: projectError }] = await Promise.all([
-  withTimeout(
-    supabase.from('profiles').select('first_name, last_name').limit(1).single(),
-    8000,
-    { data: null, error: { message: 'Profile query timed out' } } as any,
-  ),
-  withTimeout(
-    supabase
-      .from('projects')
-      .select(`
-        title, description, main_image_url, url, access_link, state, project_date, type, tech_stack, slug, publication_status, id, published_at,
-      project_techstacks(
-        techstack_id,
-        techstacks(id, name, icon)
-      )`)
-      .eq('slug', slug)
-      .eq('publication_status', 'published')
-      .single(),
-    8000,
-    { data: null, error: { message: 'Project query timed out' } } as any,
-  ),
-])
-
-const authorName = profile ? `${profile.first_name} ${profile.last_name}` : 'Taas S. Ekpaye'
-
-if (projectError || !project) {
-  return Astro.redirect('/404')
-}
-
-const typedProject = project as Project & {
-  project_techstacks?: Array<{
-    techstack_id: string
-    techstacks: TechstackInfo | null
-  }>
-}
-
-const projectId = typedProject.id
-
-const techstacksFromRelation: TechstackInfo[] =
-  typedProject.project_techstacks
-    ?.filter((pt) => pt.techstacks)
-    .map((pt) => pt.techstacks as TechstackInfo) || []
+const { project: typedProject, techstacks: techstacksFromRelation, articles: typedArticles, authorName } =
+  Astro.props
 
 const legacyTechs = (typedProject.tech_stack || []).filter(
   (t: string) => !techstacksFromRelation.some((r) => r.name.toLowerCase() === t.toLowerCase()),
 )
-
-const { data: articles } = await withTimeout(
-  supabase
-    .from('articles')
-    .select('id, title, slug, content, published_at, created_at, reading_time_minutes, status')
-    .eq('project_id', projectId)
-    .eq('status', 'published')
-    .order('published_at', { ascending: false }),
-  8000,
-  { data: null, error: { message: 'Articles query timed out' } } as any,
-)
-
-const typedArticles = (articles || []) as Article[]
 
 // Convert TipTap JSON content to HTML for each article
 const articleContentHtml = new Map<number, string>()

@@ -19,11 +19,11 @@ import {
   SiTelegram,
   SiTypescript,
 } from '@icons-pack/react-simple-icons'
-import type { Database } from '@portfolio/shared'
 import { DatabaseZap, ExternalLink } from 'lucide-react'
 import { Image } from '@/components/ui/image'
 import { cn } from '@/lib/utils'
 import { formatDate } from '@/utils/formater'
+import type { HomeProject } from './model'
 
 function getIcon(arg0: string): import('react').ReactNode {
   const iconClass = 'h-5 w-5 shrink-0'
@@ -100,11 +100,7 @@ function getInitials(title: string): string {
     .slice(0, 2)
 }
 
-export const ProjectItem = ({
-  item,
-}: {
-  item: Database['public']['Tables']['projects']['Row']
-}) => {
+export const ProjectItem = ({ item }: { item: HomeProject }) => {
   const projectUrl =
     item.publication_status === 'published' && item.slug
       ? `/projects/${item.slug}`
