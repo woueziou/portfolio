@@ -16,7 +16,7 @@ import { experience, formatPeriod } from '@/data/experience'
             {entry.role} · {entry.company}
           </h3>
           <p class="text-sm text-muted-foreground">
-            <time datetime={entry.start}>{formatPeriod(entry)}</time> · {entry.type}
+            <time datetime={entry.start}>{formatPeriod(entry)}</time>{entry.type && ` · ${entry.type}`}
           </p>
         </div>
         {entry.summary && <p class="mt-1 text-sm text-muted-foreground">{entry.summary}</p>}

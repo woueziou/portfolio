@@ -1,8 +1,8 @@
 export interface ExperienceEntry {
   company: string
   role: string
-  /** Employment type shown next to the role. */
-  type: string
+  /** Employment type shown next to the period. Hidden when omitted. */
+  type?: string
   /** "YYYY-MM", or "YYYY" when the month is unknown. */
   start: string
   /** Same format; omit while the position is ongoing. */
@@ -25,7 +25,6 @@ export const experience: ExperienceEntry[] = [
   {
     company: 'ASKY',
     role: 'Full-Stack Engineer',
-    type: 'Full-time',
     start: '2021-09',
     summary: 'Airline software.',
     link: { label: 'Travel Manager', href: '/projects/travel-manager' },
