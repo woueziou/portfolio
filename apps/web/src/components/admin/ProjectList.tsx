@@ -113,7 +113,7 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
           )`,
           { count: 'exact' },
         )
-        .order('created_at', { ascending: false })
+        .order('project_date', { ascending: false, nullsFirst: false })
         .range(offset, offset + PER_PAGE - 1)
 
       if (statusFilter !== 'all') {
@@ -289,7 +289,7 @@ export function ProjectList({ initialData }: { initialData: PaginatedResult }) {
               </div>
               <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground shrink-0">
                 <Calendar className="h-3 w-3" />
-                {formatDate(project.created_at)}
+                {formatDate(project.project_date ?? project.created_at)}
               </div>
               <ExternalLink className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors shrink-0" />
             </a>
