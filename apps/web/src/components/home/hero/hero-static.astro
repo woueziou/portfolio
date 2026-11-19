@@ -16,17 +16,17 @@ interface Props {
 const { profile, socialLinks } = Astro.props
 const fullName = `${profile.firstName} ${profile.lastName}`
 
-function getYearsSince2019(): number {
-  return new Date().getFullYear() - 2019
-}
+// Computed at build time; the weekly rebuild keeps it current.
+const yearsOfExperience = `${new Date().getFullYear() - 2019}+`
 
-const yearsSince2019 = `${getYearsSince2019()}+`
+const availability = 'Open to remote · UTC+1'
+const niche = { label: 'Building airline software — Travel Manager for ASKY', href: '/projects/travel-manager' }
 
 interface Contact {
   name: string
   value: string
   icon: string // inline SVG path
-  type: 'email' | 'url'
+  type: 'email' | 'url' | 'file'
 }
 
 const socialIcons: Record<string, string> = {
@@ -36,11 +36,14 @@ const socialIcons: Record<string, string> = {
     '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>',
   medium:
     '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13.54 12a6.8 6.8 0 0 1-6.77 6.82A6.8 6.8 0 0 1 0 12a6.8 6.8 0 0 1 6.77-6.82A6.8 6.8 0 0 1 13.54 12Zm7.42 0c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42c1.87 0 3.38 2.88 3.38 6.42ZM24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12Z"/></svg>',
+  download:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>',
   email:
     '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
 }
 
 const contacts: Contact[] = []
+if (socialLinks.resume) contacts.push({ name: 'Download CV', value: socialLinks.resume, icon: socialIcons.download, type: 'file' })
 if (socialLinks.github) contacts.push({ name: 'Github', value: socialLinks.github, icon: socialIcons.github, type: 'url' })
 if (socialLinks.email) contacts.push({ name: 'Email', value: socialLinks.email, icon: socialIcons.email, type: 'email' })
 if (socialLinks.medium) contacts.push({ name: 'Medium', value: socialLinks.medium, icon: socialIcons.medium, type: 'url' })
@@ -58,10 +61,13 @@ if (socialLinks.linkedin) contacts.push({ name: 'LinkedIn', value: socialLinks.l
   <div class="grid place-items-center md:gap-y-2 pt-4">
     <h1 class="text-3xl font-black lg:text-7xl font-audiowide">{fullName}</h1>
     <div class="row-span-1 flex flex-col items-center md:gap-8 gap-2">
-      <h3 class="text-balance text-muted-foreground px-8 py-2 rounded-full lg:text-xl font-semibold flex items-center space-x-2">
-        <div class="font-extrabold item flex h-8 w-8 justify-center rounded-sm items-center">{yearsSince2019}</div>
-        <div>{profile.title}</div>
+      <h3 class="text-balance text-muted-foreground px-8 py-2 lg:text-xl font-semibold text-center">
+        {profile.title} · {yearsOfExperience} years
       </h3>
+      <p class="text-sm font-medium text-muted-foreground -mt-2">{availability}</p>
+      <p class="text-sm font-medium">
+        <a href={niche.href} class="underline underline-offset-4 hover:text-primary transition-colors">{niche.label}</a>
+      </p>
       <p class="max-w-md text-center text-sm text-muted-foreground/ italic">{profile.bio}</p>
       <div class="md:flex md:space-x-4 grid gap-y-4">
         {contacts.map((contact) =>
@@ -78,7 +84,8 @@ if (socialLinks.linkedin) contacts.push({ name: 'LinkedIn', value: socialLinks.l
           ) : (
             <a
               href={contact.value}
-              target="_blank"
+              target={contact.type === 'file' ? undefined : '_blank'}
+              download={contact.type === 'file' ? '' : undefined}
               rel="noopener"
               class="h-10 flex space-x-2 items-center border border-secondary/30 px-4 hover:bg-accent hover:text-accent-foreground active:scale-95 transition-all duration-150 relative overflow-hidden"
             >

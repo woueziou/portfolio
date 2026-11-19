@@ -6,7 +6,7 @@ import vercel from '@astrojs/vercel'
 import path from 'path'
 
 export default defineConfig({
-  site: 'https://taas-s-ekpaye.vercel.app',
+  site: 'https://taasekpaye.com',
   output: 'static',
   prefetch: { defaultStrategy: 'hover' },
   adapter: vercel(),

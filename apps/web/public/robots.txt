@@ -2,4 +2,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://taas-s-ekpaye.vercel.app/sitemap-index.xml
+Sitemap: https://taasekpaye.com/sitemap-index.xml

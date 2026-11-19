@@ -14,9 +14,11 @@ interface Props {
   }
 }
 
+const yearsOfExperience = new Date().getFullYear() - 2019
+
 const {
   title,
-  description = 'Full Stack Engineer — 6+ years building web & mobile applications for airline enterprise.',
+  description = `Full-Stack Engineer — ${yearsOfExperience}+ years building web & mobile applications for the airline industry.`,
   ogImage: pageOgImage,
   profile,
 } = Astro.props
@@ -86,7 +88,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site)
         '@context': 'https://schema.org',
         '@type': 'Person',
         name: authorName,
-        url: 'https://taas-s-ekpaye.vercel.app',
+        url: Astro.site?.origin,
         sameAs: Object.values(socialLinks).filter(Boolean),
         jobTitle: authorTitle,
       })}

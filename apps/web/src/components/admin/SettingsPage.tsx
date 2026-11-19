@@ -78,11 +78,16 @@ export default function SettingsPage() {
     setSocialStatus('Saving...')
 
     const supabase = createSupabaseBrowserClient()
-    const socials: Record<string, string> = {}
+    // Start from the stored links so keys this form does not edit (email, medium,
+    // resume) are kept instead of being wiped on save.
+    const socials: Record<string, string> = {
+      ...((config?.social_links as Record<string, string>) || {}),
+    }
     const fields = ['github', 'twitter', 'linkedin', 'website']
     for (const field of fields) {
       const val = (document.getElementById(`social_${field}`) as HTMLInputElement)?.value.trim()
       if (val) socials[field] = val
+      else delete socials[field]
     }
 
     try {
