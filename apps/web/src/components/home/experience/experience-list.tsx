@@ -12,7 +12,7 @@ export function ExperienceList({ data }: { data: ExperienceEntry[] }) {
   }
 
   return (
-    <ol className="w-full">
+    <ol className="w-full pt-6 md:pt-10">
       {data.map((entry) => (
         <li
           key={`${entry.company}-${entry.start}`}

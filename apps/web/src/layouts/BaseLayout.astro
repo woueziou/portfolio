@@ -96,21 +96,18 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site)
 
     <!-- Theme initializer (runs before first paint — no FOUC) -->
     <script is:inline>
-      function getTheme() {
-        const stored = localStorage.getItem('theme')
-        if (stored === 'dark' || stored === 'light') return stored
-        return window.matchMedia('(prefers-color-scheme: dark)').matches
-          ? 'dark'
-          : 'light'
+      // Keep in sync with src/lib/theme.ts. No stored choice = follow the device.
+      var THEME_KEY = 'theme-preference'
+      var darkQuery = window.matchMedia('(prefers-color-scheme: dark)')
+      function applyTheme() {
+        var stored = localStorage.getItem(THEME_KEY)
+        var dark = stored === 'dark' || (stored !== 'light' && darkQuery.matches)
+        document.documentElement.classList.toggle('dark', dark)
       }
 
-      // Apply theme immediately
-      document.documentElement.classList.toggle('dark', getTheme() === 'dark')
-
-      // Re-apply theme after Astro view transitions
-      document.addEventListener('astro:after-swap', () => {
-        document.documentElement.classList.toggle('dark', getTheme() === 'dark')
-      })
+      applyTheme()
+      darkQuery.addEventListener('change', applyTheme)
+      document.addEventListener('astro:after-swap', applyTheme)
     </script>
 
     <ClientRouter />
