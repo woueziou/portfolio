@@ -15,6 +15,12 @@ if (!slug) {
   return Astro.redirect('/404')
 }
 
+// Rendered on demand, but cached at the edge so repeat and prefetched visits are instant.
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, s-maxage=300, stale-while-revalidate=86400',
+)
+
 const supabase = createSupabaseServerClient(Astro.cookies)
 
 const [{ data: profile }, { data: article, error: articleError }] = await Promise.all([

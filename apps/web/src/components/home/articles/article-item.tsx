@@ -55,6 +55,7 @@ export const ArticleItem = ({ item }: { item: Article }) => {
         {articleUrl ? (
           <a
             href={articleUrl}
+            data-astro-prefetch="viewport"
             className={cn(
               'text-xl font-bold border-b-2 border-transparent',
               'hover:border-foreground transition-colors',
