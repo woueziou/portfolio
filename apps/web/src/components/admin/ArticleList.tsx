@@ -71,7 +71,8 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [page, setPage] = useState(1)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   const fetchArticles = useCallback(async () => {
     const supabase = createSupabaseBrowserClient()
@@ -99,8 +100,10 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
 
       if (error) {
         console.error('Error fetching articles:', error)
+        setLoadError(error.message)
         return
       }
+      setLoadError(null)
 
       setData({
         articles: (articles as Article[]) || [],
@@ -171,7 +174,13 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
         </div>
       )}
 
-      {!loading && filtered.length === 0 ? (
+      {!loading && loadError && (
+        <div role="alert" className="text-center text-sm text-red-500 py-8">
+          Could not load articles: {loadError}
+        </div>
+      )}
+
+      {!loading && !loadError && filtered.length === 0 ? (
         <div className="text-center py-16">
           <FileText className="mx-auto h-12 w-12 text-muted-foreground/40" />
           <h3 className="mt-4 text-lg font-medium text-foreground">No articles found</h3>
@@ -189,7 +198,7 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
             </Button>
           )}
         </div>
-      ) : (
+      ) : !loading && !loadError ? (
         <div className="space-y-1">
           {filtered.map((article) => (
             <a
@@ -234,7 +243,7 @@ export function ArticleList({ initialData }: { initialData: PaginatedResult }) {
             </a>
           ))}
         </div>
-      )}
+      ) : null}
 
       {data.totalPages > 1 && (
         <div className="flex items-center justify-between pt-4">

@@ -1,5 +1,5 @@
 import { navigate } from 'astro:transitions/client'
-import { Github, Globe, Link2, LinkedinIcon, Save, X } from 'lucide-react'
+import { Github, Globe, Link2, LinkedinIcon, Mail, Save, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -85,7 +85,7 @@ export default function SettingsPage() {
     const socials: Record<string, string> = {
       ...((config?.social_links as Record<string, string>) || {}),
     }
-    const fields = ['github', 'twitter', 'linkedin', 'website']
+    const fields = ['github', 'twitter', 'linkedin', 'website', 'medium', 'email']
     for (const field of fields) {
       const val = (document.getElementById(`social_${field}`) as HTMLInputElement)?.value.trim()
       if (val) socials[field] = val
@@ -260,6 +260,32 @@ export default function SettingsPage() {
                 type="url"
                 defaultValue={socialLinks.website || ''}
                 placeholder="https://example.com"
+                className="border-0 bg-muted/50"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="social_medium" className="flex items-center gap-1.5">
+                <Link2 className="h-3.5 w-3.5" />
+                Medium
+              </Label>
+              <Input
+                id="social_medium"
+                type="url"
+                defaultValue={socialLinks.medium || ''}
+                placeholder="https://medium.com/@username"
+                className="border-0 bg-muted/50"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="social_email" className="flex items-center gap-1.5">
+                <Mail className="h-3.5 w-3.5" />
+                Email
+              </Label>
+              <Input
+                id="social_email"
+                type="email"
+                defaultValue={socialLinks.email || ''}
+                placeholder="you@example.com"
                 className="border-0 bg-muted/50"
               />
             </div>

@@ -25,7 +25,7 @@ export default function AdminNav() {
     navigate('/admin/login')
   }
 
-  const initial = userName?.charAt(0).toUpperCase() || 'A'
+  const initial = userName?.charAt(0).toUpperCase() ?? ''
 
   return (
     <div className="flex items-center gap-2 pl-2">
