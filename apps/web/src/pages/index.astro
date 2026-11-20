@@ -16,8 +16,8 @@ const { profile, socialLinks, projects, articles } = await getHomeData()
 
 <BaseLayout title="Taas S. Ekpaye — Full Stack Engineer">
   <div class="antialiased bg-noise font-baufra min-h-screen flex flex-col justify-between">
-    <!-- Theme button: floats at the top right, no bar behind it -->
-    <div id="topbar" data-astro-transition-persist="topbar" class="fixed top-2 right-3 sm:right-4 z-50">
+    <!-- Theme button: top right of the page, scrolls away with it -->
+    <div id="topbar" data-astro-transition-persist="topbar" class="absolute top-2 right-3 sm:right-4 z-50">
       <ThemeSwitcher client:load />
     </div>
 
