@@ -58,9 +58,11 @@ export default function SettingsPage() {
     data.use_avatar_as_og_image = useAvatarAsOgImage
 
     try {
-      const { error } = await supabase.from('site_config').update(data).eq('id', 1)
+      const { data: rows, error } = await supabase.from('site_config').update(data).eq('id', 1).select('id')
       if (error) {
         setSiteStatus(`Error: ${error.message}`)
+      } else if (!rows || rows.length === 0) {
+        setSiteStatus('Error: nothing was saved, this account cannot edit the site settings.')
       } else {
         setSiteStatus('Saved successfully!')
       }
@@ -91,9 +93,11 @@ export default function SettingsPage() {
     }
 
     try {
-      const { error } = await supabase.from('site_config').update({ social_links: socials }).eq('id', 1)
+      const { data: rows, error } = await supabase.from('site_config').update({ social_links: socials }).eq('id', 1).select('id')
       if (error) {
         setSocialStatus(`Error: ${error.message}`)
+      } else if (!rows || rows.length === 0) {
+        setSocialStatus('Error: nothing was saved, this account cannot edit the site settings.')
       } else {
         setSocialStatus('Saved successfully!')
       }
