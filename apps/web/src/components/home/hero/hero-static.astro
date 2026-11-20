@@ -61,9 +61,9 @@ if (socialLinks.linkedin) contacts.push({ name: 'LinkedIn', value: socialLinks.l
   <div class="grid place-items-center md:gap-y-2 pt-4">
     <h1 class="text-3xl font-black lg:text-7xl font-audiowide">{fullName}</h1>
     <div class="row-span-1 flex flex-col items-center md:gap-8 gap-2">
-      <h3 class="text-balance text-muted-foreground px-8 py-2 lg:text-xl font-semibold text-center">
+      <p class="text-balance text-muted-foreground px-8 py-2 lg:text-xl font-semibold text-center">
         {profile.title} · {yearsOfExperience} years
-      </h3>
+      </p>
       <p class="text-sm font-medium text-muted-foreground -mt-2">{availability}</p>
       <p class="text-sm font-medium">
         <a href={niche.href} class="underline underline-offset-4 hover:text-primary transition-colors">{niche.label}</a>
@@ -76,7 +76,7 @@ if (socialLinks.linkedin) contacts.push({ name: 'LinkedIn', value: socialLinks.l
               type="button"
               data-email={contact.value}
               class="h-10 flex space-x-2 items-center border border-secondary/30 px-4 hover:bg-accent hover:text-accent-foreground active:scale-95 transition-all duration-150 relative overflow-hidden"
-              aria-label="Copy email"
+              aria-label={`Copy email ${contact.value}`}
             >
               <span set:html={contact.icon} />
               <span>{contact.value}</span>
