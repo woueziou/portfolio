@@ -1057,30 +1057,6 @@ export type Database = {
           },
         ]
       }
-      contact_providers: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: number
-          name: string
-          url: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: number
-          name: string
-          url: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: number
-          name?: string
-          url?: string
-        }
-        Relationships: []
-      }
       page_views: {
         Row: {
           count: number
