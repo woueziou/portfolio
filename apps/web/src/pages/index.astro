@@ -21,7 +21,7 @@ const { profile, socialLinks, projects, articles } = await getHomeData()
       <ThemeSwitcher client:load />
     </div>
 
-    <div class="flex-grow">
+    <main class="flex-grow">
       <div class="flex flex-col items-stretch min-h-screen">
         <section id="hero">
           <HeroStatic profile={profile} socialLinks={socialLinks} />
@@ -39,7 +39,7 @@ const { profile, socialLinks, projects, articles } = await getHomeData()
           <Footer />
         </section>
       </div>
-    </div>
+    </main>
     <ToastContainer client:idle />
   </div>
 </BaseLayout>

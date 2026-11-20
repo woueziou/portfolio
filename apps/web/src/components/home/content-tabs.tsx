@@ -310,7 +310,7 @@ export default function ContentTabs({ projects, articles, experience }: ContentT
               'text-2xl font-bold uppercase transition-colors',
               activeTab === tab.id
                 ? 'underline underline-offset-8 text-foreground'
-                : 'no-underline text-muted-foreground/50 hover:text-muted-foreground',
+                : 'no-underline text-muted-foreground hover:text-foreground',
             )}
           >
             {tab.label}
