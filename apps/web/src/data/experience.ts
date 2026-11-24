@@ -18,13 +18,13 @@ export interface ExperienceEntry {
 export const experience: ExperienceEntry[] = [
   {
     company: 'Trida',
-    role: 'Consultant',
+    role: 'Consultant · Lead Developer',
     type: 'Consulting',
     start: '2026',
   },
   {
     company: 'ASKY',
-    role: 'Full-Stack Engineer',
+    role: 'Senior Operational Software Engineer',
     start: '2021-09',
     summary: 'Airline software.',
     link: { label: 'Travel Manager', href: '/projects/travel-manager' },
